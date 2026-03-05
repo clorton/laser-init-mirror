@@ -7,9 +7,9 @@ https://geodata.ucdavis.edu/gadm/gadm4.1/shp/gadm41_NGA_shp.zip
 
 import zipfile
 from pathlib import Path
-from venv import logger
 
 from ..config import configuration as config
+from ..logger import logger
 from ..utils import download_file
 
 

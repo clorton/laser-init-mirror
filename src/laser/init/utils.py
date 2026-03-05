@@ -139,16 +139,36 @@ def level_from_string(input_string: str) -> int | None:
 
 
 def download_file(
-    url: str, dest_dir: Path, local_name: str = None, show_progress: bool = True
-) -> str:
+    url: str,
+    dest_dir: Path,
+    local_name: str = None,
+    show_progress: bool = True,
+    force: bool = False,
+) -> Path:
     """
-    Download a file from a URL and save it locally, displaying a progress bar.
+    Download a file from a URL and save it to the specified directory.
 
-    Returns the local file path.
+    The function streams the file in chunks, displays a progress bar if enabled.
+    If the file already exists and force is False, the existing file is returned without downloading.
+
+    Args:
+        url (str): The URL of the file to download.
+        dest_dir (Path): The directory where the file will be saved.
+        local_name (str, optional): The name to use for the saved file. If None, uses the filename from the URL.
+        show_progress (bool, optional): If True, display a progress bar during download (default: True).
+        force (bool, optional): If True, download even if the file already exists (default: False).
+
+    Returns:
+        Path: The path to the downloaded file.
     """
 
     local_name = local_name or url.split("/")[-1]
     local_path = dest_dir / local_name
+
+    if local_path.exists() and not force:
+        logger.info(f"File already exists and force is not set: {local_path}")
+        return local_path
+
     logger.info(f"Downloading file from {url} to {local_path}...")
     response = requests.get(url, stream=True)
     response.raise_for_status()
@@ -158,7 +178,7 @@ def download_file(
     if total > 0 and show_progress:
         progress = tqdm(total=total, unit="B", unit_scale=True, desc=local_name)
 
-    with open(local_path, "wb") as f:
+    with local_path.open("wb") as f:
         for chunk in response.iter_content(chunk_size=chunk_size):
             if chunk:
                 f.write(chunk)
@@ -170,4 +190,4 @@ def download_file(
 
     logger.info(f"File downloaded successfully: {local_path}")
 
-    return str(local_path)
+    return local_path
