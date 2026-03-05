@@ -17,142 +17,6 @@ from laser.init.utils import iso_from_country_string
 
 
 class TestUtils(unittest.TestCase):
-    def test_iso_from_country_string_exact_ISO(self):
-        """
-        Test that ISO 3166-1 alpha-3 codes are correctly recognized and returned unchanged.
-
-        This verifies that the function can handle direct ISO code input (e.g., "USA", "BFA")
-        and return them as-is. Failure indicates the function cannot recognize valid ISO codes.
-        """
-        # Africa : Burkina Faso, Eswatini, Democratic Republic of the Congo, Kenya, Madagascar, Mozambique, Nigeria, Senegal, South Africa, Sudan, Zambia  # noqa: E501
-        self.assertEqual(iso_from_country_string("BFA"), "BFA")  # Burkina Faso
-        self.assertEqual(iso_from_country_string("SWZ"), "SWZ")  # Eswatini
-        self.assertEqual(iso_from_country_string("COD"), "COD")  # Democratic Republic of the Congo
-        self.assertEqual(iso_from_country_string("KEN"), "KEN")  # Kenya
-        self.assertEqual(iso_from_country_string("MDG"), "MDG")  # Madagascar
-        self.assertEqual(iso_from_country_string("MOZ"), "MOZ")  # Mozambique
-        self.assertEqual(iso_from_country_string("NGA"), "NGA")  # Nigeria
-        self.assertEqual(iso_from_country_string("SEN"), "SEN")  # Senegal
-        self.assertEqual(iso_from_country_string("ZAF"), "ZAF")  # South Africa
-        self.assertEqual(iso_from_country_string("SDN"), "SDN")  # Sudan
-        self.assertEqual(iso_from_country_string("ZMB"), "ZMB")  # Zambia
-
-        # Asia : Afghanistan, Cambodia, China, India, Japan, Pakistan, Vietnam
-        self.assertEqual(iso_from_country_string("AFG"), "AFG")  # Afghanistan
-        self.assertEqual(iso_from_country_string("KHM"), "KHM")  # Cambodia
-        self.assertEqual(iso_from_country_string("CHN"), "CHN")  # China
-        self.assertEqual(iso_from_country_string("IND"), "IND")  # India
-        self.assertEqual(iso_from_country_string("JPN"), "JPN")  # Japan
-        self.assertEqual(iso_from_country_string("PAK"), "PAK")  # Pakistan
-        self.assertEqual(iso_from_country_string("VNM"), "VNM")  # Vietnam
-
-        # Australia : Australia, New Zealand, Samoa, Papua New Guinea
-        self.assertEqual(iso_from_country_string("AUS"), "AUS")  # Australia
-        self.assertEqual(iso_from_country_string("NZL"), "NZL")  # New Zealand
-        self.assertEqual(iso_from_country_string("WSM"), "WSM")  # Samoa
-        self.assertEqual(iso_from_country_string("PNG"), "PNG")  # Papua New Guinea
-
-        # Europe : Azerbaijan, Bosnia and Herzegovina, Cyprus, Denmark, Estonia, Finland, Greece, Liechtenstein, Moldova, Portugal, San Marino, United Kingdom  # noqa: E501
-        self.assertEqual(iso_from_country_string("AZE"), "AZE")  # Azerbaijan
-        self.assertEqual(iso_from_country_string("BIH"), "BIH")  # Bosnia and Herzegovina
-        self.assertEqual(iso_from_country_string("CYP"), "CYP")  # Cyprus
-        self.assertEqual(iso_from_country_string("DNK"), "DNK")  # Denmark
-        self.assertEqual(iso_from_country_string("EST"), "EST")  # Estonia
-        self.assertEqual(iso_from_country_string("FIN"), "FIN")  # Finland
-        self.assertEqual(iso_from_country_string("GRC"), "GRC")  # Greece
-        self.assertEqual(iso_from_country_string("LIE"), "LIE")  # Liechtenstein
-        self.assertEqual(iso_from_country_string("MDA"), "MDA")  # Moldova
-        self.assertEqual(iso_from_country_string("PRT"), "PRT")  # Portugal
-        self.assertEqual(iso_from_country_string("SMR"), "SMR")  # San Marino
-        self.assertEqual(iso_from_country_string("GBR"), "GBR")  # United Kingdom
-
-        # North America : Aruba, Belize, Canada, Dominican Republic, Guatemala, Saint Lucia, United States  # noqa: E501
-        self.assertEqual(iso_from_country_string("ABW"), "ABW")  # Aruba
-        self.assertEqual(iso_from_country_string("BLZ"), "BLZ")  # Belize
-        self.assertEqual(iso_from_country_string("CAN"), "CAN")  # Canada
-        self.assertEqual(iso_from_country_string("DOM"), "DOM")  # Dominican Republic
-        self.assertEqual(iso_from_country_string("GTM"), "GTM")  # Guatemala
-        self.assertEqual(iso_from_country_string("LCA"), "LCA")  # Saint Lucia
-        self.assertEqual(iso_from_country_string("USA"), "USA")  # United States
-
-        # South America : Argentina, Brazil, Chile, Colombia, Ecuador, Peru, Uruguay, Venezuela
-        self.assertEqual(iso_from_country_string("ARG"), "ARG")  # Argentina
-        self.assertEqual(iso_from_country_string("BRA"), "BRA")  # Brazil
-        self.assertEqual(iso_from_country_string("CHL"), "CHL")  # Chile
-        self.assertEqual(iso_from_country_string("COL"), "COL")  # Colombia
-        self.assertEqual(iso_from_country_string("ECU"), "ECU")  # Ecuador
-        self.assertEqual(iso_from_country_string("PER"), "PER")  # Peru
-        self.assertEqual(iso_from_country_string("URY"), "URY")  # Uruguay
-        self.assertEqual(iso_from_country_string("VEN"), "VEN")  # Venezuela
-
-    def test_iso_from_country_string_exact_country_names(self):
-        """
-        Test that exact country names are correctly mapped to their ISO 3166-1 alpha-3 codes.
-
-        This verifies that the function can look up country names in the mapping dictionary
-        and return the correct ISO code. Failure indicates incorrect or missing mappings.
-        """
-        # Africa : Burkina Faso, Eswatini, Democratic Republic of the Congo, Kenya, Madagascar, Mozambique, Nigeria, Senegal, South Africa, Sudan, Zambia  # noqa: E501
-        self.assertEqual(iso_from_country_string("Burkina Faso"), "BFA")
-        self.assertEqual(iso_from_country_string("Eswatini"), "SWZ")
-        self.assertEqual(iso_from_country_string("Congo, The Democratic Republic of the"), "COD")
-        self.assertEqual(iso_from_country_string("Kenya"), "KEN")
-        self.assertEqual(iso_from_country_string("Madagascar"), "MDG")
-        self.assertEqual(iso_from_country_string("Mozambique"), "MOZ")
-        self.assertEqual(iso_from_country_string("Nigeria"), "NGA")
-        self.assertEqual(iso_from_country_string("Senegal"), "SEN")
-        self.assertEqual(iso_from_country_string("South Africa"), "ZAF")
-        self.assertEqual(iso_from_country_string("Sudan"), "SDN")
-        self.assertEqual(iso_from_country_string("Zambia"), "ZMB")
-
-        # Asia : Afghanistan, Cambodia, China, India, Japan, Pakistan, Vietnam
-        self.assertEqual(iso_from_country_string("Afghanistan"), "AFG")
-        self.assertEqual(iso_from_country_string("Cambodia"), "KHM")
-        self.assertEqual(iso_from_country_string("China"), "CHN")
-        self.assertEqual(iso_from_country_string("India"), "IND")
-        self.assertEqual(iso_from_country_string("Japan"), "JPN")
-        self.assertEqual(iso_from_country_string("Pakistan"), "PAK")
-        self.assertEqual(iso_from_country_string("Viet Nam"), "VNM")
-
-        # Australia : Australia, New Zealand, Samoa, Papua New Guinea
-        self.assertEqual(iso_from_country_string("Australia"), "AUS")
-        self.assertEqual(iso_from_country_string("New Zealand"), "NZL")
-        self.assertEqual(iso_from_country_string("Samoa"), "WSM")
-        self.assertEqual(iso_from_country_string("Papua New Guinea"), "PNG")
-
-        # Europe : Azerbaijan, Bosnia and Herzegovina, Cyprus, Denmark, Estonia, Finland, Greece, Liechtenstein, Moldova, Portugal, San Marino, United Kingdom  # noqa: E501
-        self.assertEqual(iso_from_country_string("Azerbaijan"), "AZE")
-        self.assertEqual(iso_from_country_string("Bosnia and Herzegovina"), "BIH")
-        self.assertEqual(iso_from_country_string("Cyprus"), "CYP")
-        self.assertEqual(iso_from_country_string("Denmark"), "DNK")
-        self.assertEqual(iso_from_country_string("Estonia"), "EST")
-        self.assertEqual(iso_from_country_string("Finland"), "FIN")
-        self.assertEqual(iso_from_country_string("Greece"), "GRC")
-        self.assertEqual(iso_from_country_string("Liechtenstein"), "LIE")
-        self.assertEqual(iso_from_country_string("Moldova"), "MDA")
-        self.assertEqual(iso_from_country_string("Portugal"), "PRT")
-        self.assertEqual(iso_from_country_string("San Marino"), "SMR")
-        self.assertEqual(iso_from_country_string("United Kingdom"), "GBR")
-
-        # North America : Aruba, Belize, Canada, Dominican Republic, Guatemala, Saint Lucia, United States  # noqa: E501
-        self.assertEqual(iso_from_country_string("Aruba"), "ABW")
-        self.assertEqual(iso_from_country_string("Belize"), "BLZ")
-        self.assertEqual(iso_from_country_string("Canada"), "CAN")
-        self.assertEqual(iso_from_country_string("Dominican Republic"), "DOM")
-        self.assertEqual(iso_from_country_string("Guatemala"), "GTM")
-        self.assertEqual(iso_from_country_string("Saint Lucia"), "LCA")
-        self.assertEqual(iso_from_country_string("United States of America"), "USA")
-
-        # South America : Argentina, Brazil, Chile, Colombia, Ecuador, Peru, Uruguay, Venezuela
-        self.assertEqual(iso_from_country_string("Argentina"), "ARG")
-        self.assertEqual(iso_from_country_string("Brazil"), "BRA")
-        self.assertEqual(iso_from_country_string("Chile"), "CHL")
-        self.assertEqual(iso_from_country_string("Colombia"), "COL")
-        self.assertEqual(iso_from_country_string("Ecuador"), "ECU")
-        self.assertEqual(iso_from_country_string("Peru"), "PER")
-        self.assertEqual(iso_from_country_string("Uruguay"), "URY")
-        self.assertEqual(iso_from_country_string("Venezuela, Bolivarian Republic of"), "VEN")
-
     @pytest.mark.skip(reason="Fuzzy matching tests are currently disabled.")
     def test_iso_from_country_string_fuzzy_match(self):
         """
@@ -223,80 +87,191 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(iso_from_country_string("Uraguay"), "URY")  # Typo
         self.assertEqual(iso_from_country_string("Venezuala"), "VEN")  # Typo
 
-    def test_random_strings(self):
-        """
-        Test that random/invalid strings correctly return None.
 
-        This verifies that the function properly rejects inputs that don't match any
-        known country names or ISO codes, even with fuzzy matching. Failure indicates
-        the function is incorrectly matching invalid inputs to real countries.
-        """
-        # Test 20 different random strings of length 3 to 20 characters
-        with pytest.warns(
-            UserWarning,
-            match="No exact match found for input string 'xyz'. Looking for potential matches.",
-        ):
-            with pytest.warns(
-                UserWarning,
-                match="Input string is too short for reliable matching. Returning None.",
-            ):
-                self.assertIsNone(iso_from_country_string("xyz"))
-        with pytest.warns(UserWarning, match="No fuzzy matches found. Returning None"):
-            self.assertIsNone(iso_from_country_string("asdfgh"))
-        with pytest.warns(UserWarning, match="No fuzzy matches found. Returning None"):
-            self.assertIsNone(iso_from_country_string("qwerty"))
-        with pytest.warns(UserWarning, match="No fuzzy matches found. Returning None"):
-            self.assertIsNone(iso_from_country_string("zxcvbnm"))
-        with pytest.warns(
-            UserWarning, match="Input string is too short for reliable matching. Returning None."
-        ):
-            self.assertIsNone(iso_from_country_string("jkl"))
-        with pytest.warns(UserWarning, match="No fuzzy matches found. Returning None"):
-            self.assertIsNone(iso_from_country_string("mnop"))
-        with pytest.warns(UserWarning, match="No fuzzy matches found. Returning None"):
-            self.assertIsNone(iso_from_country_string("uvwxyz"))
-        with pytest.warns(UserWarning, match="No fuzzy matches found. Returning None"):
-            self.assertIsNone(iso_from_country_string("abcdefghij"))
-        with pytest.warns(UserWarning, match="No fuzzy matches found. Returning None"):
-            self.assertIsNone(iso_from_country_string("klmnopqrst"))
-        with pytest.warns(UserWarning, match="No fuzzy matches found. Returning None"):
-            self.assertIsNone(iso_from_country_string("randomstring"))
-        with pytest.warns(UserWarning, match="No fuzzy matches found. Returning None"):
-            self.assertIsNone(iso_from_country_string("notacountry"))
-        with pytest.warns(
-            UserWarning, match="Input string is too short for reliable matching. Returning None."
-        ):
-            self.assertIsNone(iso_from_country_string("foo"))
-        with pytest.warns(
-            UserWarning, match="Input string is too short for reliable matching. Returning None."
-        ):
-            self.assertIsNone(iso_from_country_string("bar"))
-        with pytest.warns(
-            UserWarning, match="Input string is too short for reliable matching. Returning None."
-        ):
-            self.assertIsNone(iso_from_country_string("baz"))
-        with pytest.warns(UserWarning, match="No fuzzy matches found. Returning None"):
-            self.assertIsNone(iso_from_country_string("invalidcountryname"))
-        with pytest.warns(
-            UserWarning, match="Input string is too short for reliable matching. Returning None."
-        ):
-            self.assertIsNone(iso_from_country_string("zzz"))
-        with pytest.warns(UserWarning, match="No fuzzy matches found. Returning None"):
-            self.assertIsNone(iso_from_country_string("abcdef"))
-        with pytest.warns(UserWarning, match="No fuzzy matches found. Returning None"):
-            self.assertIsNone(iso_from_country_string("ghijkl"))
-        with pytest.warns(UserWarning, match="No fuzzy matches found. Returning None"):
-            self.assertIsNone(iso_from_country_string("mnopqrstu"))
-        with pytest.warns(
-            UserWarning, match="Input string is too short for reliable matching. Returning None."
-        ):
-            self.assertIsNone(iso_from_country_string("aaa"))
-        with pytest.warns(UserWarning, match="No fuzzy matches found. Returning None"):
-            self.assertIsNone(iso_from_country_string("nonsense"))
-        with pytest.warns(UserWarning, match="No fuzzy matches found. Returning None"):
-            self.assertIsNone(iso_from_country_string("gibberish"))
-        with pytest.warns(UserWarning, match="No fuzzy matches found. Returning None"):
-            self.assertIsNone(iso_from_country_string("fakeplace"))
+@pytest.mark.parametrize(
+    "input_string, expected_iso",
+    [
+        ("BFA", "BFA"),
+        ("SWZ", "SWZ"),
+        ("COD", "COD"),
+        ("KEN", "KEN"),
+        ("MDG", "MDG"),
+        ("MOZ", "MOZ"),
+        ("NGA", "NGA"),
+        ("SEN", "SEN"),
+        ("ZAF", "ZAF"),
+        ("SDN", "SDN"),
+        ("ZMB", "ZMB"),
+        ("AFG", "AFG"),
+        ("KHM", "KHM"),
+        ("CHN", "CHN"),
+        ("IND", "IND"),
+        ("JPN", "JPN"),
+        ("PAK", "PAK"),
+        ("VNM", "VNM"),
+        ("AUS", "AUS"),
+        ("NZL", "NZL"),
+        ("WSM", "WSM"),
+        ("PNG", "PNG"),
+        ("AZE", "AZE"),
+        ("BIH", "BIH"),
+        ("CYP", "CYP"),
+        ("DNK", "DNK"),
+        ("EST", "EST"),
+        ("FIN", "FIN"),
+        ("GRC", "GRC"),
+        ("LIE", "LIE"),
+        ("MDA", "MDA"),
+        ("PRT", "PRT"),
+        ("SMR", "SMR"),
+        ("GBR", "GBR"),
+        ("ABW", "ABW"),
+        ("BLZ", "BLZ"),
+        ("CAN", "CAN"),
+        ("DOM", "DOM"),
+        ("GTM", "GTM"),
+        ("LCA", "LCA"),
+        ("USA", "USA"),
+        ("ARG", "ARG"),
+        ("BRA", "BRA"),
+        ("CHL", "CHL"),
+        ("COL", "COL"),
+        ("ECU", "ECU"),
+        ("PER", "PER"),
+        ("URY", "URY"),
+        ("VEN", "VEN"),
+    ],
+)
+def test_iso_from_country_string_exact_ISO(input_string, expected_iso):
+    """
+    Test that ISO 3166-1 alpha-3 codes are correctly recognized and returned unchanged.
+
+    This verifies that the function can handle direct ISO code input (e.g., "USA", "BFA")
+    and return them as-is. Failure indicates the function cannot recognize valid ISO codes.
+    """
+    assert iso_from_country_string(input_string) == expected_iso
+
+    return
+
+
+@pytest.mark.parametrize(
+    "input_string, expected_iso",
+    [
+        ("Burkina Faso", "BFA"),
+        ("Eswatini", "SWZ"),
+        ("Congo, The Democratic Republic of the", "COD"),
+        ("Kenya", "KEN"),
+        ("Madagascar", "MDG"),
+        ("Mozambique", "MOZ"),
+        ("Nigeria", "NGA"),
+        ("Senegal", "SEN"),
+        ("South Africa", "ZAF"),
+        ("Sudan", "SDN"),
+        ("Zambia", "ZMB"),
+        ("Afghanistan", "AFG"),
+        ("Cambodia", "KHM"),
+        ("China", "CHN"),
+        ("India", "IND"),
+        ("Japan", "JPN"),
+        ("Pakistan", "PAK"),
+        ("Viet Nam", "VNM"),
+        ("Australia", "AUS"),
+        ("New Zealand", "NZL"),
+        ("Samoa", "WSM"),
+        ("Papua New Guinea", "PNG"),
+        ("Azerbaijan", "AZE"),
+        ("Bosnia and Herzegovina", "BIH"),
+        ("Cyprus", "CYP"),
+        ("Denmark", "DNK"),
+        ("Estonia", "EST"),
+        ("Finland", "FIN"),
+        ("Greece", "GRC"),
+        ("Liechtenstein", "LIE"),
+        ("Moldova", "MDA"),
+        ("Portugal", "PRT"),
+        ("San Marino", "SMR"),
+        ("United Kingdom", "GBR"),
+        ("Aruba", "ABW"),
+        ("Belize", "BLZ"),
+        ("Canada", "CAN"),
+        ("Dominican Republic", "DOM"),
+        ("Guatemala", "GTM"),
+        ("Saint Lucia", "LCA"),
+        ("United States of America", "USA"),
+        ("Argentina", "ARG"),
+        ("Brazil", "BRA"),
+        ("Chile", "CHL"),
+        ("Colombia", "COL"),
+        ("Ecuador", "ECU"),
+        ("Peru", "PER"),
+        ("Uruguay", "URY"),
+        ("Venezuela, Bolivarian Republic of", "VEN"),
+    ],
+)
+def test_iso_from_country_string_exact_country_names(input_string, expected_iso):
+    """
+    Test that exact country names are correctly mapped to their ISO 3166-1 alpha-3 codes.
+
+    This verifies that the function can look up country names in the mapping dictionary
+    and return the correct ISO code. Failure indicates incorrect or missing mappings.
+    """
+    assert iso_from_country_string(input_string) == expected_iso
+
+    return
+
+
+@pytest.mark.parametrize(
+    "input_string, expected_iso",
+    [
+        ("xyz", None),
+        ("asdfgh", None),
+        ("qwerty", None),
+        ("zxcvbnm", None),
+        ("jkl", None),
+        ("mnop", None),
+        ("uvwxyz", None),
+        ("abcdefghij", None),
+        ("klmnopqrst", None),
+        ("randomstring", None),
+        ("notacountry", None),
+        ("foo", None),
+        ("bar", None),
+        ("baz", None),
+        ("invalidcountryname", None),
+        ("zzz", None),
+        ("abcdef", None),
+        ("ghijkl", None),
+        ("mnopqrstu", None),
+        ("aaa", None),
+        ("nonsense", None),
+        ("gibberish", None),
+        ("fakeplace", None),
+    ],
+)
+def test_random_strings(input_string, expected_iso):
+    """
+    Test that random/invalid strings correctly return None.
+
+    This verifies that the function properly rejects inputs that don't match any
+    known country names or ISO codes, even with fuzzy matching. Failure indicates
+    the function is incorrectly matching invalid inputs to real countries.
+    """
+
+    prelude = (
+        f"No exact match found for input string '{input_string}'. Looking for potential matches."  # noqa: E501
+    )
+    tooshort = "Input string is too short for reliable matching. Returning None."
+    nomatches = "No fuzzy matches found. Returning None"
+
+    with pytest.warns(UserWarning, match=prelude):
+        if len(input_string) < 4:
+            with pytest.warns(UserWarning, match=tooshort):
+                assert iso_from_country_string(input_string) is None
+        else:
+            with pytest.warns(UserWarning, match=nomatches):
+                assert iso_from_country_string(input_string) is None
+
+    return
 
 
 if __name__ == "__main__":
