@@ -105,3 +105,31 @@ def iso_from_country_string(input_string: str) -> str | None:
         f"iso_from_country_string(): No matches found for '{input_string}'. Returning None."
     )
     return None
+
+
+def level_from_string(input_string: str) -> int | None:
+    """
+    Convert a level string in the form 'admin1' or 'ADM2' or '3' to a standardized level code.
+    """
+
+    lowered = input_string.lower().strip()
+
+    # Valid strings start with "admin" or "adm", followed by a number, or just a number
+    if lowered.startswith("admin"):
+        number_part = lowered[5:]
+    elif lowered.startswith("adm"):
+        number_part = lowered[3:]
+    else:
+        number_part = lowered
+
+    # Validate that number_part is a single digit between 0 and 4
+    if number_part.isdigit():
+        level_num = int(number_part)
+        if 0 <= level_num <= 4:
+            logger.info(
+                f"level_from_string(): Parsed level number {level_num} from input '{input_string}'."
+            )
+            return level_num
+
+    logger.info(f"level_from_string(): No matches found for '{input_string}'. Returning None.")
+    return None

@@ -7,13 +7,14 @@ import click
 
 from .config import VERSION
 from .logger import logger
-from .utils import iso_from_country_string
+from .utils import iso_from_country_string, level_from_string
 
 
 @click.command()
 @click.version_option(version=VERSION, prog_name="laser-init")
 @click.argument("country", required=True)
-def cli(country):
+@click.argument("level", required=True)
+def cli(country, level):
     """Download spatial data for modeling diseases across populations."""
     logger.info("Starting laser-init CLI")
     iso_code = iso_from_country_string(country)
@@ -23,7 +24,16 @@ def cli(country):
         )
         raise click.exceptions.Exit(1)
     click.echo(f"Country: {country} → ISO-3: {iso_code}")
-    # ...rest of CLI functionality...
+
+    adm_level = level_from_string(level)
+    if adm_level is None:
+        click.echo(
+            f"Sorry, could not determine the administrative level from '{level}'. Please check your input and try again."
+        )
+        raise click.exceptions.Exit(1)
+    click.echo(f"Administrative Level: {level} → ADM{adm_level}")
+
+    return
 
 
 if __name__ == "__main__":

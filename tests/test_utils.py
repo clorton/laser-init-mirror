@@ -13,7 +13,7 @@ import unittest
 
 import pytest
 
-from laser.init.utils import iso_from_country_string
+from laser.init.utils import iso_from_country_string, level_from_string
 
 
 class TestUtils(unittest.TestCase):
@@ -258,6 +258,50 @@ def test_random_strings(input_string, expected_iso):
     """
 
     assert iso_from_country_string(input_string) is None
+
+    return
+
+
+@pytest.mark.parametrize(
+    "input_string, expected_level",
+    [
+        ("ADMIN0", 0),
+        ("ADMIN1", 1),
+        ("ADMIN2", 2),
+        ("ADMIN3", 3),
+        ("ADMIN4", 4),
+        ("admin0", 0),
+        ("admin1", 1),
+        ("admin2", 2),
+        ("admin3", 3),
+        ("admin4", 4),
+        ("ADM0", 0),
+        ("ADM1", 1),
+        ("ADM2", 2),
+        ("ADM3", 3),
+        ("ADM4", 4),
+        ("adm0", 0),
+        ("adm1", 1),
+        ("adm2", 2),
+        ("adm3", 3),
+        ("adm4", 4),
+        ("0", 0),
+        ("1", 1),
+        ("2", 2),
+        ("3", 3),
+        ("4", 4),
+    ],
+)
+def test_level_from_string(input_string, expected_level):
+    """
+    Test that various level string formats are correctly parsed to standardized level codes.
+
+    This verifies that the function can handle different formats for administrative levels,
+    including "adminX", "admX", and just "X". Failure indicates the function cannot
+    correctly interpret level strings.
+    """
+
+    assert level_from_string(input_string) == expected_level
 
     return
 
