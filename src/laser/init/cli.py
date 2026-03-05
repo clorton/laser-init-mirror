@@ -19,9 +19,9 @@ from .utils import iso_from_country_string, level_from_string
 @click.version_option(version=VERSION, prog_name="laser-init")
 @click.argument("country", required=True)
 @click.argument("level", required=True)
-@click.argument("base_year", required=True, type=int)
+@click.argument("base-year", required=True, type=int)
 @click.option(
-    "--shape_source",
+    "--shape-source",
     type=str,
     default=None,
     help="Select the shape file source (default: laser_config value or 'UNOCHA')",

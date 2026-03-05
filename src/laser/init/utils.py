@@ -9,8 +9,11 @@ Using the [RapidFuzz package](https://rapidfuzz.github.io/RapidFuzz/) for fuzzy 
 
 import unicodedata
 import warnings
+from pathlib import Path
 
 import pycountry
+import requests
+from tqdm import tqdm
 
 from .french_iso import french_mapping as __french_mapping__
 from .logger import logger
@@ -133,3 +136,38 @@ def level_from_string(input_string: str) -> int | None:
 
     logger.info(f"level_from_string(): No matches found for '{input_string}'. Returning None.")
     return None
+
+
+def download_file(
+    url: str, dest_dir: Path, local_name: str = None, show_progress: bool = True
+) -> str:
+    """
+    Download a file from a URL and save it locally, displaying a progress bar.
+
+    Returns the local file path.
+    """
+
+    local_name = local_name or url.split("/")[-1]
+    local_path = dest_dir / local_name
+    logger.info(f"Downloading file from {url} to {local_path}...")
+    response = requests.get(url, stream=True)
+    response.raise_for_status()
+    total = int(response.headers.get("content-length", 0))
+    chunk_size = 8192
+
+    if total > 0 and show_progress:
+        progress = tqdm(total=total, unit="B", unit_scale=True, desc=local_name)
+
+    with open(local_path, "wb") as f:
+        for chunk in response.iter_content(chunk_size=chunk_size):
+            if chunk:
+                f.write(chunk)
+                if show_progress:
+                    progress.update(len(chunk))
+
+    if show_progress:
+        progress.close()
+
+    logger.info(f"File downloaded successfully: {local_path}")
+
+    return str(local_path)
