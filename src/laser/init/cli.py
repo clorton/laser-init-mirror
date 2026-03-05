@@ -7,7 +7,10 @@ from datetime import datetime
 
 import click
 
+from laser.init.extractors import gadm, geoboundaries, unocha
+
 from .config import VERSION
+from .config import configuration as config
 from .logger import logger
 from .utils import iso_from_country_string, level_from_string
 
@@ -17,7 +20,13 @@ from .utils import iso_from_country_string, level_from_string
 @click.argument("country", required=True)
 @click.argument("level", required=True)
 @click.argument("base_year", required=True, type=int)
-def cli(country, level, base_year):
+@click.option(
+    "--shape_source",
+    type=str,
+    default=None,
+    help="Select the shape file source (default: laser_config value or 'UNOCHA')",
+)
+def cli(country, level, base_year, shape_source):
     """Download spatial data for modeling diseases across populations."""
     logger.info("Starting laser-init CLI")
     iso_code = iso_from_country_string(country)
@@ -44,6 +53,29 @@ def cli(country, level, base_year):
         )
         raise click.exceptions.Exit(1)
     click.echo(f"Base year: {base_year}")
+
+    shape_source = (shape_source or config.get("shape_source", "unocha")).lower()
+    try:
+        extractor = {
+            "unocha": unocha.UNOCHAExtractor,
+            "geoboundaries": geoboundaries.GeoBoundariesExtractor,
+            "gadm": gadm.GADMExtractor,
+        }[shape_source]
+    except KeyError:
+        logger.error(
+            f"Invalid shape source '{shape_source}'. Valid options are: unocha, geoboundaries, gadm."
+        )
+        click.echo(
+            f"Invalid shape source '{shape_source}'. Valid options are: unocha, geoboundaries, gadm."
+        )
+        raise click.exceptions.Exit(1) from None
+
+    msg = f"Using shape source: {shape_source} ({extractor.description()})"
+    logger.info(msg)
+    click.echo(msg)
+
+    extractor_instance = extractor()
+    extractor_instance.extract(iso_code, adm_level, base_year)
 
     return
 

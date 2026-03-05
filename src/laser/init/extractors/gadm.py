@@ -10,8 +10,12 @@ class GADMExtractor:
     def __init__(self):
         pass
 
-    def description(self):
-        return "Extracts data from the Global Administrative Areas (GADM)."
+    @staticmethod
+    def description():
+        return "Extracts data from the Global Administrative Areas (GADM) at https://geodata.ucdavis.edu/gadm"
 
     def extract(self, country, level, year):
-        pass
+
+        # Try the geopackage first, then fall back to shapefile if it's not found
+
+        return

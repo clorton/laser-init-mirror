@@ -9,8 +9,9 @@ class UNOCHAExtractor:
     def __init__(self):
         pass
 
-    def description(self):
-        return "Extracts data from the United Nations Office for the Coordination of Humanitarian Affairs (UNOCHA)."
+    @staticmethod
+    def description():
+        return "Extracts data from the United Nations Office for the Coordination of Humanitarian Affairs (UNOCHA) at https://data.humdata.org"
 
     def extract(self, country, level, year):
         pass
