@@ -11,3 +11,6 @@ wheels/
 
 # tmp
 tmp/
+
+.coverage
+htmlcov/

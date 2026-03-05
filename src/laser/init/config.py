@@ -1,1 +1,3 @@
-VERSION = "0.1.0"
+from laser.init import __version__
+
+VERSION = __version__

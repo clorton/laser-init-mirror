@@ -1,3 +1,13 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/laser"]
+
+[tool.uv]
+package = true
+
 [project]
 name = "laser-init"
 version = "0.1.0"
@@ -5,8 +15,11 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "anthropic>=0.84.0",
     "click>=8.3.1",
     "geopandas>=1.1.2",
+    "openai>=2.24.0",
+    "pycountry>=26.2.16",
     "pyogrio>=0.12.1",
     "rapidfuzz>=3.14.3",
 ]
@@ -14,6 +27,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "pytest>=9.0.2",
+    "pytest-cov>=6.0.0",
 ]
 
 [project.scripts]
@@ -54,7 +68,7 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "-v --cov=laser_init --cov-report=term-missing"
+addopts = "-v --cov=laser.init --cov-report=term-missing"
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "network: marks tests as requiring network access",

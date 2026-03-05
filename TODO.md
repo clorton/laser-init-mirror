@@ -1,0 +1,28 @@
+- [ ] verify ISO-3 codes
+- [ ] verify country list (and ISO mapping)
+- [ ] verify French names (and ISO mapping)
+- [ ] exact match results
+- [ ] exact match testing
+- [ ] local, fuzzy match results
+- [ ] local, fuzzy match results testing
+- [ ] OpenAI/ChatGPT results, public access (no API key)
+- [ ] OpenAI/ChatGPT results, with API key
+- [ ] Anthropic/Claude results, public access (no API key)
+- [ ] Anthropic/Claude results, with API key
+- [ ] UNOCHA/HDX shapefile extractor
+- [ ] UNOCHA/HDX extractor tests
+- [ ] GADM shapefile extractor
+- [ ] GADM extractor tests
+- [ ] geoBoundaries shapefile extractor
+- [ ] geoBoundaries extractor tests
+- [ ] WorldPop population extractor
+- [ ] WorldPop population extractor tests
+- [ ] ¿UN WPP population extractor?
+- [ ] UN WPP population extractor tests
+- [ ] population rasterization against shapefile
+- [ ] Voronoi tesselation of shapes
+- [ ] population rasterization against Voronoi tesselated shapes
+- [ ] UN WPP age distribution extractor
+- [ ] UN WPP bithrate data extractor
+- [ ] UN WPP mortality data extractor
+- [ ] .laser file with OpenAI or Anthropic API key
