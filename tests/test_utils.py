@@ -257,19 +257,7 @@ def test_random_strings(input_string, expected_iso):
     the function is incorrectly matching invalid inputs to real countries.
     """
 
-    prelude = (
-        f"No exact match found for input string '{input_string}'. Looking for potential matches."  # noqa: E501
-    )
-    tooshort = "Input string is too short for reliable matching. Returning None."
-    nomatches = "No fuzzy matches found. Returning None"
-
-    with pytest.warns(UserWarning, match=prelude):
-        if len(input_string) < 4:
-            with pytest.warns(UserWarning, match=tooshort):
-                assert iso_from_country_string(input_string) is None
-        else:
-            with pytest.warns(UserWarning, match=nomatches):
-                assert iso_from_country_string(input_string) is None
+    assert iso_from_country_string(input_string) is None
 
     return
 

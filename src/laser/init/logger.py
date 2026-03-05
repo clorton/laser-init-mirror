@@ -15,7 +15,7 @@ from .config import configuration as config
 
 __all__ = ["logger"]
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("laser-init")
 logger.setLevel(logging.DEBUG)
 
 # Console handler (WARN or higher)

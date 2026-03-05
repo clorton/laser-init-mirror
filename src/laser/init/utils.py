@@ -13,6 +13,7 @@ import warnings
 import pycountry
 
 from .french_iso import french_mapping as __french_mapping__
+from .logger import logger
 
 
 def _normalize_string(value: str) -> str:
@@ -70,31 +71,37 @@ def iso_from_country_string(input_string: str) -> str | None:
     """
     Convert a country name to its ISO 3166-1 alpha-3 code.
     """
-    input_string = _normalize_string(input_string)
-
-    if input_string in __iso_codes__:
-        return __iso_codes__[input_string]
-    elif input_string in __name_mapping__:
-        return __name_mapping__[input_string]
-
-    warnings.warn(
-        f"No exact match found for input string '{input_string}'. Looking for potential matches.",
-        stacklevel=2,
+    normalized = _normalize_string(input_string)
+    logger.info(
+        f"iso_from_country_string(): Normalized input string '{input_string}' to '{normalized}'."
     )
 
-    if len(input_string) < 4:
-        warnings.warn(
-            "Input string is too short for reliable matching. Returning None.",
-            stacklevel=2,
+    if normalized in __iso_codes__:
+        iso3 = __iso_codes__[normalized]
+        logger.info(
+            f"iso_from_country_string(): Found exact ISO code match for '{normalized}': {iso3}"
+        )
+        return iso3
+    elif normalized in __name_mapping__:
+        iso3 = __name_mapping__[normalized]
+        logger.info(f"iso_from_country_string(): Found exact name match for '{normalized}': {iso3}")
+        return iso3
+
+    if len(normalized) < 4:
+        logger.info(
+            f"iso_from_country_string(): Input string '{input_string}' is too short for reliable matching. Returning None."
         )
         return None
 
     try:
-        options = pycountry.countries.search_fuzzy(input_string)
+        options = pycountry.countries.search_fuzzy(normalized)
         if options:
             matches = "\n\t".join(f"{country.name} (ISO: {country.alpha_3})" for country in options)
             warnings.warn(f"Possible match(es):\n\t{matches}", stacklevel=2)
     except LookupError:
-        warnings.warn("No fuzzy matches found. Returning None", stacklevel=2)
+        pass
 
+    logger.info(
+        f"iso_from_country_string(): No matches found for '{input_string}'. Returning None."
+    )
     return None

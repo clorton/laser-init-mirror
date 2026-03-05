@@ -7,14 +7,23 @@ import click
 
 from .config import VERSION
 from .logger import logger
+from .utils import iso_from_country_string
 
 
+@click.command()
 @click.version_option(version=VERSION, prog_name="laser-init")
-def cli():
+@click.argument("country", required=True)
+def cli(country):
     """Download spatial data for modeling diseases across populations."""
     logger.info("Starting laser-init CLI")
-    print("Hello from laser-init! This is a placeholder for the CLI functionality.")
-    pass
+    iso_code = iso_from_country_string(country)
+    if not iso_code:
+        click.echo(
+            f"Sorry, could not determine the ISO-3 code for '{country}'. Please check your input and try again."
+        )
+        raise click.exceptions.Exit(1)
+    click.echo(f"Country: {country} → ISO-3: {iso_code}")
+    # ...rest of CLI functionality...
 
 
 if __name__ == "__main__":
