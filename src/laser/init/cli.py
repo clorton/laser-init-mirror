@@ -4,6 +4,7 @@ Using the Click library to create a simple CLI entry point. This can be expanded
 """
 
 from datetime import datetime
+from pathlib import Path
 
 import click
 
@@ -20,13 +21,24 @@ from .config import configuration as config
 from .logger import logger
 from .utils import iso_from_country_string, level_from_string
 
+help = """
+Download spatial data for modeling diseases across populations and prepare for use with a LASER model.
+E.g., laser-init NGA ADM2 2010 2025
+"""
 
-@click.command()
+
+@click.command(help=help)
 @click.version_option(version=VERSION, prog_name="laser-init")
 @click.argument("country", required=True)
 @click.argument("level", required=True)
-@click.argument("start-year", required=True, type=int)
-@click.argument("end-year", required=True, type=int)
+@click.argument("start-year", required=True, type=click.IntRange(1950, 2050))
+@click.argument("end-year", required=True, type=click.IntRange(1950, 2050))
+@click.option(
+    "--out-dir",
+    type=Path,
+    default=None,
+    help="Output directory for transformed data (default: ./ISOCODE/start_year)",
+)
 @click.option(
     "--shape-source",
     type=str,
@@ -45,11 +57,14 @@ from .utils import iso_from_country_string, level_from_string
     default=None,
     help="Select the demographic stats source (default: laser_config value or 'UNWPP')",
 )
-def cli(country, level, start_year, end_year, shape_source, raster_source, stats_source):
-    """Download spatial data for modeling diseases across populations."""
+def cli(country, level, start_year, end_year, out_dir, shape_source, raster_source, stats_source):
+    """Download spatial data for modeling diseases across populations and prepare for use with a LASER model."""
     logger.info("Starting laser-init CLI")
+    logger.info(
+        f"Received arguments: country={country}, level={level}, start_year={start_year}, end_year={end_year}, out_dir={out_dir}, shape_source={shape_source}, raster_source={raster_source}, stats_source={stats_source}"
+    )
 
-    iso_code, adm_level = validate_arguments(country, level, start_year, end_year)
+    iso_code, adm_level, out_dir = validate_arguments(country, level, start_year, end_year, out_dir)
 
     # Extract (download)
     shape_data = download_shape_data(iso_code, adm_level, start_year, shape_source)
@@ -58,7 +73,7 @@ def cli(country, level, start_year, end_year, shape_source, raster_source, stats
 
     # Transform
     shape_file = transform_shape_and_raster_data(
-        shape_source, shape_data, iso_code, adm_level, raster_data
+        shape_source, shape_data, iso_code, adm_level, raster_data, out_dir
     )
     transform_stats_data(stats_source, stats_data, iso_code, start_year, end_year)
 
@@ -67,7 +82,7 @@ def cli(country, level, start_year, end_year, shape_source, raster_source, stats
     return
 
 
-def validate_arguments(country, level, start_year, end_year):
+def validate_arguments(country, level, start_year, end_year, out_dir):
 
     iso_code = iso_from_country_string(country)
     if not iso_code:
@@ -75,7 +90,9 @@ def validate_arguments(country, level, start_year, end_year):
             f"Sorry, could not determine the ISO-3 code for '{country}'. Please check your input and try again."
         )
         raise click.exceptions.Exit(1)
-    click.echo(f"Country: {country} → ISO-3: {iso_code}")
+    msg = f"Country: {country} → ISO-3: {iso_code}"
+    logger.info(msg)
+    click.echo(msg)
 
     adm_level = level_from_string(level)
     if adm_level is None:
@@ -83,7 +100,9 @@ def validate_arguments(country, level, start_year, end_year):
             f"Sorry, could not determine the administrative level from '{level}'. Please check your input and try again."
         )
         raise click.exceptions.Exit(1)
-    click.echo(f"Administrative Level: {level} → ADM{adm_level}")
+    msg = f"Administrative Level: {level} → ADM{adm_level}"
+    logger.info(msg)
+    click.echo(msg)
 
     # Rough validation of years
     # test against 1900 second to ensure `now` is set
@@ -92,7 +111,9 @@ def validate_arguments(country, level, start_year, end_year):
             f"Base year {start_year} is out of range 1900...{now.year}. Please check your input and try again."
         )
         raise click.exceptions.Exit(1)
-    click.echo(f"Base year: {start_year}")
+    msg = f"Base year: {start_year}"
+    logger.info(msg)
+    click.echo(msg)
 
     # test against 1900 second to ensure `now` is set
     if end_year > (now := datetime.now()).year or end_year < start_year:
@@ -100,9 +121,18 @@ def validate_arguments(country, level, start_year, end_year):
             f"End year {end_year} is out of range {start_year}...{now.year}. Please check your input and try again."
         )
         raise click.exceptions.Exit(1)
-    click.echo(f"End year: {end_year}")
+    msg = f"End year: {end_year}"
+    logger.info(msg)
+    click.echo(msg)
 
-    return iso_code, adm_level
+    out_dir = out_dir or Path.cwd() / iso_code / str(start_year)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    assert out_dir.is_dir(), f"Output directory {out_dir} is not a valid directory."
+    msg = f"Output directory: {out_dir}"
+    logger.info(msg)
+    click.echo(msg)
+
+    return iso_code, adm_level, out_dir
 
 
 def download_shape_data(iso_code, adm_level, start_year, shape_source):
@@ -171,7 +201,33 @@ def download_demographic_stats(iso_code, start_year, end_year, stats_source):
     return stats_extractor.extract(iso_code, start_year, end_year)
 
 
-def transform_shape_and_raster_data(shape_source, shape_data, iso_code, adm_level, raster_data):
+def transform_shape_and_raster_data(
+    shape_source: str,
+    shape_data: Path,
+    iso_code: str,
+    adm_level: int,
+    raster_data: Path,
+    out_dir: Path,
+):
+    """Transform shape and raster data using the specified shape transformer.
+    This function selects and instantiates the appropriate shape transformer based on
+    the provided shape_source, then uses it to transform the input shape and raster data.
+
+    Args:
+        shape_source: The source of shape data (e.g., "unocha"). If not provided,
+            defaults to the value from config. Case-insensitive.
+        shape_data: Path to the input shape data file.
+        iso_code: ISO country code for the region to process.
+        adm_level: Administrative level (e.g., 0 for country, 1 for regions).
+        raster_data: Path to the input raster data file.
+        out_dir: Path to the output directory where transformed data will be saved.
+
+    Returns:
+        The result of the shape transformer's transform method.
+
+    Raises:
+        KeyError: If the specified shape_source is not found in the available transformers.
+    """
 
     shape_source = (shape_source or config.get("shape_source", "unocha")).lower()
     shape_transformer = {
@@ -184,7 +240,7 @@ def transform_shape_and_raster_data(shape_source, shape_data, iso_code, adm_leve
     logger.info(msg)
     click.echo(msg)
 
-    return shape_transformer.transform(shape_data, iso_code, adm_level, raster_data)
+    return shape_transformer.transform(shape_data, iso_code, adm_level, raster_data, out_dir)
 
 
 def transform_stats_data(stats_source, stats_data, iso_code, start_year, end_year):

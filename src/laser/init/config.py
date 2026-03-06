@@ -12,13 +12,14 @@ VERSION = __version__
 
 configuration = {}
 
-# look for laser_config.yaml in the user's home directory / .laser, then in the
-# current working directory
+# look for laser_config.[yaml,json]
+# prefer the current working directory
+# then look in the user's home directory / .laser
 for path in [
-    Path.home() / ".laser" / "laser_config.yaml",
     Path.cwd() / "laser_config.yaml",
-    Path.home() / ".laser" / "laser_config.json",
     Path.cwd() / "laser_config.json",
+    Path.home() / ".laser" / "laser_config.yaml",
+    Path.home() / ".laser" / "laser_config.json",
 ]:
     if path.is_file():
         if path.suffix.lower() == ".yaml":

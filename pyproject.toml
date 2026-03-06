@@ -8,6 +8,9 @@ packages = ["src/laser"]
 [tool.uv]
 package = true
 
+[tool.uv.sources]
+rastertoolkit = { git = "https://github.com/institutefordiseasemodeling/rastertoolkit", rev = "v0.4.9" }
+
 [project]
 name = "laser-init"
 version = "0.1.0"
@@ -24,6 +27,7 @@ dependencies = [
     "pyogrio>=0.12.1",
     "pyyaml>=6.0.3",
     "rapidfuzz>=3.14.3",
+    "rastertoolkit",
     "requests>=2.32.5",
     "tqdm>=4.67.3",
 ]

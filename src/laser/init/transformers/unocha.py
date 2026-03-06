@@ -6,10 +6,15 @@ Unzip the downloaded file, load shape data, filter for country and administrativ
 We use GeoPackage since it is a single file rather than a directory (geodatabase) or set of files (.shp).
 """
 
+import contextlib
+import io
+import tempfile
 import warnings
 import zipfile
+from pathlib import Path
 
 import geopandas as gpd
+import rastertoolkit as rtk
 from tqdm import tqdm
 
 from ..logger import logger
@@ -23,7 +28,11 @@ class UnochaTransformer:
     def description():
         return "Transform UNOCHA shape data to GeoPackage format, filtered by country and administrative level."
 
-    def transform(self, shape_file, iso_code, adm_level, raster_file):
+    def transform(self, shape_file, iso_code, adm_level, raster_file, out_dir):
+
+        logger.info(
+            f"Starting UNOCHA transform with shape_file={shape_file}, iso_code={iso_code}, adm_level={adm_level}, raster_file={raster_file}, out_dir={out_dir}"
+        )
 
         if shape_file.suffix != ".zip":
             logger.error(f"Expected a .zip file for UNOCHA shape data, got: {shape_file}")
@@ -43,18 +52,81 @@ class UnochaTransformer:
                 members = zip_ref.infolist()
                 for member in tqdm(members, desc="Extracting UNOCHA zip", unit="file"):
                     zip_ref.extract(member, path=source_dir)
+            logger.info(f"Zip extraction complete: {gdb_dir}")
 
         if not gdb_dir.exists():
             logger.error(f"Expected a .gdb file in the extracted UNOCHA directory, got: {gdb_dir}")
             raise ValueError("Missing .gdb file in extracted UNOCHA data")
 
-        # Load the .gdb file using geopandas, ignoring specific RuntimeWarning
-        with warnings.catch_warnings():
-            warnings.filterwarnings(
-                "ignore",
-                message=r"organizePolygons\(\) received a polygon with more than 100 parts.  The processing may be really slow.  You can skip the processing by setting METHOD=SKIP.",
-                category=RuntimeWarning,
-            )
-            gdf = gpd.read_file(gdb_dir, layer=f"admin{adm_level}")
+        gdf = read_gbd_quietly(gdb_dir, layer_name=f"admin{adm_level}")
 
-        return
+        logger.info(
+            f"Loaded GeoDataFrame for admin{adm_level} from {gdb_dir}, {len(gdf)} features."
+        )
+
+        # We should already have the admin level we want, now filter to the country level using the ISO code
+        country_gdf = gdf[gdf.iso3 == iso_code]
+        logger.info(f"Filtered GeoDataFrame for iso_code={iso_code}: {len(country_gdf)} features.")
+        if len(country_gdf) == 0:
+            logger.warning(f"No features found for iso_code={iso_code} at admin{adm_level}.")
+
+        # Filter the columns we will not be using
+        names = [f"adm{i}_name" for i in range(adm_level + 1)]
+        pcode = f"adm{adm_level}_pcode"
+        country_gdf = country_gdf[names + [pcode, "geometry"]]
+
+        # using tempfile, create a temp directory, write the GeoDataFrame to a shapefile (.shp) in
+        # that directory and use it with RasterToolkit to clip the raster file
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_shapefile = Path(tmpdir) / f"{iso_code}_admin{adm_level}.shp"
+            country_gdf.to_file(tmp_shapefile, driver="ESRI Shapefile", engine="pyogrio")
+            logger.info(f"Wrote temporary shapefile: {tmp_shapefile}")
+            # Now we can use this temporary shapefile with RasterToolkit to clip the raster file
+            pop_dict = clip_quietly(raster_file, tmp_shapefile, shape_attr=pcode)
+            logger.info(
+                f"Clipped raster with {tmp_shapefile}, got {len(pop_dict)} population values."
+            )
+
+            # Add a new column, population, to the GeoDataFrame, and fill it with the matching
+            # values from the pop_dict dictionary. The keys of pop_dict should match the values in
+            # the pcode column of the GeoDataFrame, and the values in pop_dict should be the
+            # population values from the raster file.
+            country_gdf["population"] = country_gdf[pcode].map(pop_dict)
+
+        # Save the filtered GeoDataFrame to a GeoPackage file in the output directory
+        if out_dir.is_dir():
+            output_filename = out_dir / f"{iso_code}_admin{adm_level}.gpkg"
+            country_gdf.to_file(output_filename, driver="GPKG")
+            logger.info(f"Saved GeoPackage: {output_filename}")
+        else:
+            logger.error(f"Output directory {out_dir} is not a directory.")
+            raise ValueError("Invalid output directory")
+
+        logger.info(f"UNOCHA transform complete: {output_filename}")
+        return output_filename
+
+
+def read_gbd_quietly(gdb_path, layer_name):
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore",
+            message=r"organizePolygons\(\) received a polygon with more than 100 parts.  The processing may be really slow.  You can skip the processing by setting METHOD=SKIP.",
+            category=RuntimeWarning,
+        )
+        gdf = gpd.read_file(gdb_path, layer=layer_name)
+    logger.info(f"Read GDB layer '{layer_name}' from {gdb_path}: {len(gdf)} features.")
+    if len(gdf) == 0:
+        logger.warning(f"No features loaded from {gdb_path} layer '{layer_name}'.")
+
+    return gdf
+
+
+def clip_quietly(raster_file, shapefile, shape_attr):
+    with io.StringIO() as buf, contextlib.redirect_stdout(buf):
+        pop_dict = rtk.raster_clip(raster_file, shapefile, shape_attr=shape_attr)
+        output = buf.getvalue()
+    logger.info(
+        f"clip_quietly: Clipped raster_file={raster_file} with shapefile={shapefile}, shape_attr={shape_attr}. Captured stdout length={len(output)}."
+    )
+
+    return pop_dict
