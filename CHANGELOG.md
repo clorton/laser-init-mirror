@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- Suppress organizePolygons() RuntimeWarning in UNOCHA transformer when loading .gdb with geopandas
+- Added tqdm progress bar to UNOCHA zip extraction in UnochaTransformer
 - Comprehensive test suite for `iso_from_country_string` utility function
   - Added 46 test cases for exact ISO 3166-1 alpha-3 code matching
   - Added 46 test cases for exact country name to ISO code conversion

@@ -7,7 +7,13 @@ from datetime import datetime
 
 import click
 
-from laser.init.extractors import gadm, geoboundaries, unocha, unwpp, worldpop
+from laser.init.extractors import gadm as gadmex
+from laser.init.extractors import geoboundaries as geoboundariesex
+from laser.init.extractors import unocha as unochaex
+from laser.init.extractors import unwpp as unwppex
+from laser.init.extractors import worldpop as worldpopex
+from laser.init.transformers import unocha as unochatx
+from laser.init.transformers import unwpp as unwpptx
 
 from .config import VERSION
 from .config import configuration as config
@@ -46,11 +52,15 @@ def cli(country, level, start_year, end_year, shape_source, raster_source, stats
     iso_code, adm_level = validate_arguments(country, level, start_year, end_year)
 
     # Extract (download)
-    shape_file = download_shape_data(iso_code, adm_level, start_year, shape_source)
-    raster_file = download_raster_data(iso_code, start_year, raster_source)
-    stats_files = download_demographic_stats(iso_code, start_year, end_year, stats_source)
+    shape_data = download_shape_data(iso_code, adm_level, start_year, shape_source)
+    raster_data = download_raster_data(iso_code, start_year, raster_source)
+    stats_data = download_demographic_stats(iso_code, start_year, end_year, stats_source)
 
     # Transform
+    shape_file = transform_shape_and_raster_data(
+        shape_source, shape_data, iso_code, adm_level, raster_data
+    )
+    transform_stats_data(stats_source, stats_data, iso_code, start_year, end_year)
 
     # Load (emit data loading script)
 
@@ -100,9 +110,9 @@ def download_shape_data(iso_code, adm_level, start_year, shape_source):
     shape_source = (shape_source or config.get("shape_source", "unocha")).lower()
     try:
         shape_extractor = {
-            "unocha": unocha.UnochaExtractor,
-            "geoboundaries": geoboundaries.GeoBoundariesExtractor,
-            "gadm": gadm.GadmExtractor,
+            "unocha": unochaex.UnochaExtractor,
+            "geoboundaries": geoboundariesex.GeoBoundariesExtractor,
+            "gadm": gadmex.GadmExtractor,
         }[shape_source]()
     except KeyError:
         logger.error(
@@ -125,7 +135,7 @@ def download_raster_data(iso_code, start_year, raster_source):
     raster_source = (raster_source or config.get("raster_source", "worldpop")).lower()
     try:
         raster_extractor = {
-            "worldpop": worldpop.WorldPopExtractor,
+            "worldpop": worldpopex.WorldPopExtractor,
         }[raster_source]()
     except KeyError:
         logger.error(f"Invalid raster source '{raster_source}'. Valid options are: worldpop.")
@@ -145,7 +155,7 @@ def download_demographic_stats(iso_code, start_year, end_year, stats_source):
 
     try:
         stats_extractor = {
-            "unwpp": unwpp.UnwppExtractor,
+            "unwpp": unwppex.UnwppExtractor,
         }[stats_source]()
     except KeyError:
         logger.error(
@@ -159,6 +169,37 @@ def download_demographic_stats(iso_code, start_year, end_year, stats_source):
     click.echo(msg)
 
     return stats_extractor.extract(iso_code, start_year, end_year)
+
+
+def transform_shape_and_raster_data(shape_source, shape_data, iso_code, adm_level, raster_data):
+
+    shape_source = (shape_source or config.get("shape_source", "unocha")).lower()
+    shape_transformer = {
+        "unocha": unochatx.UnochaTransformer,
+        # "geoboundaries": geoboundariestx.GeoBoundariesTransformer,
+        # "gadm": gadmtx.GadmTransformer,
+    }[shape_source]()
+
+    msg = f"Using shape transformer: {shape_source} ({shape_transformer.description()})"
+    logger.info(msg)
+    click.echo(msg)
+
+    return shape_transformer.transform(shape_data, iso_code, adm_level, raster_data)
+
+
+def transform_stats_data(stats_source, stats_data, iso_code, start_year, end_year):
+
+    stats_source = (stats_source or config.get("stats_source", "unwpp")).lower()
+    stats_transformer = {
+        "unwpp": unwpptx.UnwppTransformer,
+        # Add other stats transformers here as needed
+    }[stats_source]()
+
+    msg = f"Using demographic stats transformer: {stats_source} ({stats_transformer.description()})"
+    logger.info(msg)
+    click.echo(msg)
+
+    return stats_transformer.transform(stats_data, iso_code, start_year, end_year)
 
 
 if __name__ == "__main__":
