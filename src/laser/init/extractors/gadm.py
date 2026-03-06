@@ -13,7 +13,7 @@ from ..logger import logger
 from ..utils import download_file
 
 
-class GADMExtractor:
+class GadmExtractor:
     def __init__(self, prefer_gpkg: bool = True):
 
         self.prefer_gpkg = prefer_gpkg

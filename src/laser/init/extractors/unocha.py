@@ -11,7 +11,7 @@ from ..logger import logger
 from ..utils import download_file
 
 
-class UNOCHAExtractor:
+class UnochaExtractor:
     def __init__(self) -> None:
         pass
 
