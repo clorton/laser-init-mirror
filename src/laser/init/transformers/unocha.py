@@ -6,18 +6,16 @@ Unzip the downloaded file, load shape data, filter for country and administrativ
 We use GeoPackage since it is a single file rather than a directory (geodatabase) or set of files (.shp).
 """
 
-import contextlib
-import io
 import tempfile
 import warnings
 import zipfile
 from pathlib import Path
 
 import geopandas as gpd
-import rastertoolkit as rtk
 from tqdm import tqdm
 
 from ..logger import logger
+from ..utils import clip_quietly
 
 
 class UnochaTransformer:
@@ -119,14 +117,3 @@ def read_gbd_quietly(gdb_path, layer_name):
         logger.warning(f"No features loaded from {gdb_path} layer '{layer_name}'.")
 
     return gdf
-
-
-def clip_quietly(raster_file, shapefile, shape_attr):
-    with io.StringIO() as buf, contextlib.redirect_stdout(buf):
-        pop_dict = rtk.raster_clip(raster_file, shapefile, shape_attr=shape_attr)
-        output = buf.getvalue()
-    logger.info(
-        f"clip_quietly: Clipped raster_file={raster_file} with shapefile={shapefile}, shape_attr={shape_attr}. Captured stdout length={len(output)}."
-    )
-
-    return pop_dict

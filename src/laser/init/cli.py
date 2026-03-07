@@ -13,6 +13,8 @@ from laser.init.extractors import geoboundaries as geoboundariesex
 from laser.init.extractors import unocha as unochaex
 from laser.init.extractors import unwpp as unwppex
 from laser.init.extractors import worldpop as worldpopex
+from laser.init.transformers import gadm as gadmtx
+from laser.init.transformers import geoboundaries as geoboundariestx
 from laser.init.transformers import unocha as unochatx
 from laser.init.transformers import unwpp as unwpptx
 
@@ -41,19 +43,19 @@ E.g., laser-init NGA ADM2 2010 2025
 )
 @click.option(
     "--shape-source",
-    type=str,
+    type=click.Choice(["unocha", "geoboundaries", "gadm"], case_sensitive=False),
     default=None,
     help="Select the shape file source (default: laser_config value or 'UNOCHA')",
 )
 @click.option(
     "--raster-source",
-    type=str,
+    type=click.Choice(["worldpop"], case_sensitive=False),
     default=None,
     help="Select the population raster file source (default: laser_config value or 'WorldPop')",
 )
 @click.option(
     "--stats-source",
-    type=str,
+    type=click.Choice(["unwpp"], case_sensitive=False),
     default=None,
     help="Select the demographic stats source (default: laser_config value or 'UNWPP')",
 )
@@ -232,8 +234,8 @@ def transform_shape_and_raster_data(
     shape_source = (shape_source or config.get("shape_source", "unocha")).lower()
     shape_transformer = {
         "unocha": unochatx.UnochaTransformer,
-        # "geoboundaries": geoboundariestx.GeoBoundariesTransformer,
-        # "gadm": gadmtx.GadmTransformer,
+        "geoboundaries": geoboundariestx.GeoBoundariesTransformer,
+        "gadm": gadmtx.GadmTransformer,
     }[shape_source]()
 
     msg = f"Using shape transformer: {shape_source} ({shape_transformer.description()})"

@@ -7,11 +7,14 @@ Using the [RapidFuzz package](https://rapidfuzz.github.io/RapidFuzz/) for fuzzy 
 
 """
 
+import contextlib
+import io
 import unicodedata
 import warnings
 from pathlib import Path
 
 import pycountry
+import rastertoolkit as rtk
 import requests
 from tqdm import tqdm
 
@@ -191,3 +194,14 @@ def download_file(
     logger.info(f"File downloaded successfully: {local_path}")
 
     return local_path
+
+
+def clip_quietly(raster_file, shapefile, shape_attr):
+    with io.StringIO() as buf, contextlib.redirect_stdout(buf):
+        pop_dict = rtk.raster_clip(raster_file, shapefile, shape_attr=shape_attr)
+        output = buf.getvalue()
+    logger.info(
+        f"clip_quietly: Clipped raster_file={raster_file} with shapefile={shapefile}, shape_attr={shape_attr}. Captured stdout length={len(output)}."
+    )
+
+    return pop_dict
