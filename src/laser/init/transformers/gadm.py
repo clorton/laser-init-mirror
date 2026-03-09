@@ -28,8 +28,7 @@ class GadmTransformer:
                 "GADM GeoPackage format is not yet supported. Please provide a zip file containing the shapefile."
             )
         else:
-            error(f"Unsupported shape file format: {shape_file.suffix}")
-            raise ValueError("Unsupported shape file format")
+            error(f"Unsupported shape file format: {shape_file.suffix}", ValueError)
 
         inform(
             f"Loading GADM data from {shape_file} layer gadm41_{iso_code.upper()}_{adm_level}..."

@@ -42,8 +42,10 @@ class UnwppExtractor:
     def extract(self, country, start_year, end_year) -> Path | None:
 
         if start_year < 1950 or end_year > 2100:
-            error(f"Year range {start_year}-{end_year} is out of range for UNWPP data (1950-2100).")
-            return None
+            error(
+                f"Year range {start_year}-{end_year} is out of range for UNWPP data (1950-2100).",
+                ValueError,
+            )
 
         # UNWPP data is provided as large CSV files covering all countries, so we download the relevant
         # files and then filter them locally (in the transformer) for the specified country and year range.
@@ -59,8 +61,7 @@ class UnwppExtractor:
             local_dist = download_file(url, dest_dir=cache_path)
             inform(f"Downloaded UNWPP age distribution data: {local_dist}")
         except Exception as e:
-            error(f"Failed to download UNWPP age distribution data: {e}.")
-            local_dist = None
+            error(f"Failed to download UNWPP age distribution data: {e}.", RuntimeError)
 
         # CBR and CDR (CMR)
         cxr_file = "WPP2024_Demographic_Indicators_Medium.csv.gz"
@@ -70,8 +71,10 @@ class UnwppExtractor:
             local_cxr = download_file(url, dest_dir=cache_path)
             inform(f"Downloaded UNWPP demographic indicators data: {local_cxr}")
         except Exception as e:
-            error(f"Failed to download UNWPP demographic indicators data: {e}.")
-            local_cxr = None
+            error(f"Failed to download UNWPP demographic indicators data: {e}.", RuntimeError)
+
+        local_life1 = None
+        local_life2 = None
 
         # Survival data (life tables)
         if start_year <= 2023:
@@ -82,8 +85,7 @@ class UnwppExtractor:
                 local_life1 = download_file(url, dest_dir=cache_path)
                 inform(f"Downloaded UNWPP life table data (1950-2023): {local_life1}")
             except Exception as e:
-                error(f"Failed to download UNWPP life table data (1950-2023): {e}.")
-                local_life1 = None
+                error(f"Failed to download UNWPP life table data (1950-2023): {e}.", RuntimeError)
 
         if end_year >= 2024:
             life_file2 = "WPP2024_Life_Table_Complete_Medium_Both_2024-2100.csv.gz"
@@ -93,7 +95,6 @@ class UnwppExtractor:
                 local_life2 = download_file(url, dest_dir=cache_path)
                 inform(f"Downloaded UNWPP life table data (2024-2100): {local_life2}")
             except Exception as e:
-                error(f"Failed to download UNWPP life table data (2024-2100): {e}.")
-                local_life2 = None
+                error(f"Failed to download UNWPP life table data (2024-2100): {e}.", RuntimeError)
 
         return (local_dist, local_cxr, local_life1, local_life2)

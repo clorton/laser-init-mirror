@@ -39,8 +39,7 @@ class WorldPopExtractor:
     def extract(self, country, year) -> Path | None:
 
         if year < 2000 or year > 2030:
-            error(f"Year {year} is out of range for WorldPop data (2000-2030).")
-            return None
+            error(f"Year {year} is out of range for WorldPop data (2000-2030).", ValueError)
 
         local_path = None
 
@@ -58,8 +57,7 @@ class WorldPopExtractor:
                 inform(f"Downloaded WorldPop data: {local_path}")
 
             except Exception as e:
-                error(f"Failed to download WorldPop data: {e}.")
-                local_path = None
+                error(f"Failed to download WorldPop data: {e}.", RuntimeError)
 
         elif year >= 2000:  # Use older data
             inform(f"Using WorldPop 2000-2020 data set for year {year}.")
@@ -72,11 +70,9 @@ class WorldPopExtractor:
                 inform(f"Downloaded WorldPop data: {local_path}")
 
             except Exception as e:
-                error(f"Failed to download WorldPop data: {e}.")
-                local_path = None
+                error(f"Failed to download WorldPop data: {e}.", RuntimeError)
 
         else:
-            error(f"Year {year} is out of range for WorldPop data (2000-2030).")
-            raise RuntimeError(f"Year {year} out of range.")
+            error(f"Year {year} is out of range for WorldPop data (2000-2030).", RuntimeError)
 
         return local_path

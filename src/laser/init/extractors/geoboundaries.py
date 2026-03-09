@@ -35,7 +35,6 @@ class GeoBoundariesExtractor:
             inform(f"Downloaded GeoBoundaries data: {local_path}")
 
         except Exception as e:
-            error(f"Failed to download GeoBoundaries data: {e}.")
-            local_path = None
+            error(f"Failed to download GeoBoundaries data: {e}.", RuntimeError)
 
         return local_path

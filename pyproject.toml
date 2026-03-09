@@ -22,6 +22,7 @@ dependencies = [
     "click>=8.3.1",
     "geopandas>=1.1.2",
     "laser-generic>=1.0.1",
+    "matplotlib>=3.10.8",
     "openai>=2.24.0",
     "pandas>=2.3.3",
     "pycountry>=26.2.16",

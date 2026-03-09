@@ -42,7 +42,7 @@ class GadmExtractor:
                 downloaded = True
 
             except Exception as e:
-                error(f"Failed to download GADM shapefile: {e}. No data available for {country}.")
+                inform(f"Failed to download GADM shapefile: {e}. Trying geopackage.")
                 downloaded = False
                 local_path = None
 
@@ -56,7 +56,7 @@ class GadmExtractor:
                 downloaded = True
 
             except Exception as e:
-                error(f"Failed to download GADM geopackage: {e}. Trying shapefile...")
+                error(f"Failed to download GADM geopackage: {e}.", RuntimeError)
                 local_path = None
 
         return local_path

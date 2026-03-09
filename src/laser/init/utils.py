@@ -214,8 +214,8 @@ def inform(msg: str) -> None:
     return
 
 
-def error(msg: str) -> None:
+def error(msg: str, exception=RuntimeError) -> None:
     click.echo(click.style(msg, fg="red"))
     logger.error(msg)
 
-    return
+    raise exception(msg) if isinstance(exception, type) else exception

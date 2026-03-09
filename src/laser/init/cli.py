@@ -7,6 +7,11 @@ from datetime import datetime
 from pathlib import Path
 
 import click
+import geopandas as gpd
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from matplotlib.backends.backend_pdf import PdfPages
 
 from laser.init.extractors import gadm as gadmex
 from laser.init.extractors import geoboundaries as geoboundariesex
@@ -99,7 +104,7 @@ def cli(
     stats_data = download_demographic_stats(iso_code, start_year, end_year, stats_source)
 
     # Transform
-    shape_filename = transform_shape_and_raster_data(
+    shapes_filename = transform_shape_and_raster_data(
         shape_source, shape_data, iso_code, adm_level, raster_data, output_dir
     )
     (cxr_filename, pop_filename, exp_filename) = transform_stats_data(
@@ -108,10 +113,10 @@ def cli(
 
     # Load (emit data loading script)
     emit_model_script(
-        mode, model, shape_filename, cxr_filename, pop_filename, exp_filename, output_dir
+        mode, model, shapes_filename, cxr_filename, pop_filename, exp_filename, output_dir
     )
 
-    write_plots(shape_filename, cxr_filename, pop_filename, exp_filename, output_dir)
+    write_plots(shapes_filename, cxr_filename, pop_filename, exp_filename, output_dir)
 
     return
 
@@ -121,34 +126,34 @@ def validate_arguments(country, level, start_year, end_year, output_dir):
     iso_code = iso_from_country_string(country)
     if not iso_code:
         error(
-            f"Could not determine the ISO-3 code for '{country}'. Please check your input and try again."
+            f"Could not determine the ISO-3 code for '{country}'. Please check your input and try again.",
+            click.exceptions.Exit(1),
         )
-        raise click.exceptions.Exit(1)
     inform(f"Country: {country} → ISO-3: {iso_code}")
 
     adm_level = level_from_string(level)
     if adm_level is None:
         error(
-            f"Could not determine the administrative level from '{level}'. Please check your input and try again."
+            f"Could not determine the administrative level from '{level}'. Please check your input and try again.",
+            click.exceptions.Exit(1),
         )
-        raise click.exceptions.Exit(1)
     inform(f"Administrative Level: {level} → ADM{adm_level}")
 
     # Rough validation of years
     # test against 1900 second to ensure `now` is set
     if start_year > (now := datetime.now()).year or start_year < 1900:
         error(
-            f"Base year {start_year} is out of range 1900...{now.year}. Please check your input and try again."
+            f"Base year {start_year} is out of range 1900...{now.year}. Please check your input and try again.",
+            click.exceptions.Exit(1),
         )
-        raise click.exceptions.Exit(1)
     inform(f"Base year: {start_year}")
 
     # test against 1900 second to ensure `now` is set
     if end_year > (now := datetime.now()).year or end_year < start_year:
         error(
-            f"End year {end_year} is out of range {start_year}...{now.year}. Please check your input and try again."
+            f"End year {end_year} is out of range {start_year}...{now.year}. Please check your input and try again.",
+            click.exceptions.Exit(1),
         )
-        raise click.exceptions.Exit(1)
     inform(f"End year: {end_year}")
 
     output_dir = output_dir or Path.cwd() / iso_code / str(start_year)
@@ -170,9 +175,9 @@ def download_shape_data(iso_code, adm_level, start_year, shape_source):
         }[shape_source]()
     except KeyError:
         error(
-            f"Invalid shape source '{shape_source}'. Valid options are: unocha, geoboundaries, gadm."
+            f"Invalid shape source '{shape_source}'. Valid options are: unocha, geoboundaries, gadm.",
+            click.exceptions.Exit(1),
         )
-        raise click.exceptions.Exit(1) from None
 
     inform(f"Using shape source: {shape_source} ({shape_extractor.description()})")
 
@@ -187,8 +192,10 @@ def download_raster_data(iso_code, start_year, raster_source):
             "worldpop": worldpopex.WorldPopExtractor,
         }[raster_source]()
     except KeyError:
-        error(f"Invalid raster source '{raster_source}'. Valid options are: worldpop.")
-        raise click.exceptions.Exit(1) from None
+        error(
+            f"Invalid raster source '{raster_source}'. Valid options are: worldpop.",
+            click.exceptions.Exit(1),
+        )
 
     inform(f"Using raster source: {raster_source} ({raster_extractor.description()})")
 
@@ -204,8 +211,10 @@ def download_demographic_stats(iso_code, start_year, end_year, stats_source):
             "unwpp": unwppex.UnwppExtractor,
         }[stats_source]()
     except KeyError:
-        error(f"Invalid demographic stats source '{stats_source}'. Valid options are: unwpp.")
-        raise click.exceptions.Exit(1) from None
+        error(
+            f"Invalid demographic stats source '{stats_source}'. Valid options are: unwpp.",
+            click.exceptions.Exit(1),
+        )
 
     inform(f"Using demographic stats source: UNWPP ({stats_extractor.description()})")
 
@@ -268,12 +277,12 @@ def transform_stats_data(stats_source, stats_data, iso_code, start_year, end_yea
 
 
 def emit_model_script(
-    mode, model, shape_filename, cxr_filename, pop_filename, exp_filename, output_dir
+    mode, model, shapes_filename, cxr_filename, pop_filename, exp_filename, output_dir
 ):
     # For now, just print the paths to the transformed data files. In the future, this could generate
     # a Python script that loads the data and prepares it for use with a LASER model.
     inform(f"Emitting model script for {mode}/{model} with data files:")
-    inform(f"Shape file:                       '{shape_filename}'")
+    inform(f"Shape file:                       '{shapes_filename}'")
     inform(f"CBR/CDR file:                     '{cxr_filename}'")
     inform(f"Population age distribution file: '{pop_filename}'")
     inform(f"Life expectancy file:             '{exp_filename}'")
@@ -288,20 +297,222 @@ def emit_model_script(
     }[f"{mode.upper()}/{model.upper()}"]()
 
     model_loader.emit_script(
-        mode, model, shape_filename, cxr_filename, pop_filename, exp_filename, output_dir
+        mode, model, shapes_filename, cxr_filename, pop_filename, exp_filename, output_dir
     )
 
 
-def write_plots(shape_filename, cxr_filename, pop_filename, exp_filename, output_dir):
-    # Placeholder for writing plots of the data. This could include:
-    # - A map of the administrative regions with population density
-    # - A plot of CBR/CDR over time
-    # - A plot of the age distribution
-    # - A plot of life expectancy over time
-    inform("Writing plots of the transformed data... (not implemented yet)")
+def write_plots(shapes_filename, cxr_filename, pop_filename, exp_filename, output_dir):
+    # Generate individual plots and save as PNGs, then combine into a PDF report
+    inform("Writing plots of the transformed data...")
 
-    # Generate choropleth map of population density by administrative region and
-    # write as a PNG in output_dir
+    # Create PDF report
+    pdf_path = Path(output_dir) / "report.pdf"
+    with PdfPages(pdf_path) as pdf:
+        # Generate each plot and add to PDF
+        if fig1 := plot_population_choropleth(shapes_filename, output_dir):
+            pdf.savefig(fig1, bbox_inches="tight")
+            plt.close(fig1)
+
+        if fig2 := plot_cbr_and_cdr(cxr_filename, output_dir):
+            pdf.savefig(fig2, bbox_inches="tight")
+            plt.close(fig2)
+
+        if fig3 := plot_age_distribution(pop_filename, output_dir):
+            pdf.savefig(fig3, bbox_inches="tight")
+            plt.close(fig3)
+
+        if fig4 := plot_life_expectancy(exp_filename, output_dir):
+            pdf.savefig(fig4, bbox_inches="tight")
+            plt.close(fig4)
+
+    inform(f"PDF report written to {pdf_path}")
+
+    return
+
+
+def plot_population_choropleth(shapes_filename, output_dir):
+    try:
+        gdf = gpd.read_file(shapes_filename)
+    except Exception as e:
+        error(f"Failed to read shape file: {e}", RuntimeError)
+
+    fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+    gdf["log_pop"] = np.log1p(gdf.population) / np.log(10)
+    gdf.plot(column="log_pop", ax=ax, legend=True, cmap="viridis", edgecolor="black")
+    ax.set_title("Population (log10) Choropleth")
+    ax.axis("off")
+
+    output_path = Path(output_dir) / "choropleth.png"
+    fig.savefig(output_path, bbox_inches="tight", dpi=200)
+    inform(f"Choropleth PNG written to {output_path}")
+
+    return fig
+
+
+def plot_cbr_and_cdr(cxr_filename, output_dir):
+    # Plot CBR and CDR over time and write as a PNG in output_dir
+    try:
+        cxr_df = pd.read_csv(cxr_filename)
+    except Exception as e:
+        error(f"Failed to read CBR/CDR file: {e}", RuntimeError)
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    # Plot CBR with enhanced styling
+    ax.plot(
+        cxr_df.Time,
+        cxr_df.CBR,
+        label="CBR",
+        color="#00897B",
+        linewidth=2.5,
+        marker="o",
+        markersize=3,
+        markevery=3,
+    )
+
+    # Plot CDR with enhanced styling
+    ax.plot(
+        cxr_df.Time,
+        cxr_df.CDR,
+        label="CDR",
+        color="#E65100",
+        linewidth=2.5,
+        marker="s",
+        markersize=3,
+        markevery=3,
+    )
+
+    # Fill areas under curves
+    ax.fill_between(cxr_df.Time, cxr_df.CBR, alpha=0.15, color="#00897B")
+    ax.fill_between(cxr_df.Time, cxr_df.CDR, alpha=0.15, color="#E65100")
+
+    # Fill area between curves to highlight natural growth rate
+    ax.fill_between(cxr_df.Time, cxr_df.CBR, cxr_df.CDR, alpha=0.1, color="#FFB300")
+
+    ax.set_title("Crude Birth Rate (CBR) and Crude Death Rate (CDR) Over Time", fontsize=12)
+    ax.set_xlabel("Year", fontsize=10)
+    ax.set_ylabel("Rate (per 1000 population)", fontsize=10)
+
+    # Enhanced gridlines
+    ax.grid(True, alpha=0.25, linestyle="--", linewidth=0.5)
+    ax.set_axisbelow(True)
+
+    # Clean up spines
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+    # Legend
+    ax.legend(frameon=True, fancybox=False, edgecolor="#CCCCCC", framealpha=0.95)
+
+    output_path = Path(output_dir) / "cbr_cdr.png"
+    fig.savefig(output_path, bbox_inches="tight", dpi=200, facecolor="white")
+    inform(f"CBR/CDR plot PNG written to {output_path}")
+
+    return fig
+
+
+def plot_age_distribution(pop_filename, output_dir):
+    # Plot the age distribution as a population pyramid (mirrored on the y-axis)
+    # Duplicate data to represent both males and females
+    try:
+        pop_df = pd.read_csv(pop_filename)
+    except Exception as e:
+        error(f"Failed to read population age distribution file: {e}", RuntimeError)
+
+    # Create age group labels
+    age_labels = [f"{start}-{start + 4}" for start in pop_df.AgeGrpStart[:-1]]
+    age_labels.append(f"{pop_df.AgeGrpStart.iloc[-1]}+")
+
+    # Calculate population values for each sex (duplicate the data)
+    male_pop = pop_df.PopTotal.values
+    female_pop = pop_df.PopTotal.values
+
+    # Find the maximum value for symmetric x-axis
+    max_pop = max(male_pop.max(), female_pop.max())
+
+    fig, ax = plt.subplots(figsize=(12, 8))
+
+    # Plot males (left side, negative values)
+    ax.barh(age_labels, -male_pop, height=0.8, color="#6495ED", edgecolor="white", linewidth=0.5)
+
+    # Plot females (right side, positive values)
+    ax.barh(age_labels, female_pop, height=0.8, color="#E91E8C", edgecolor="white", linewidth=0.5)
+
+    # Set x-axis limits and labels
+    ax.set_xlim(-max_pop * 1.1, max_pop * 1.1)
+    ax.set_xlabel("Population", fontsize=10)
+
+    # Format x-axis to show absolute values
+    ticks = ax.get_xticks()
+    ax.set_xticklabels([f"{abs(int(x)):,}" for x in ticks])
+
+    # Add legend
+    from matplotlib.patches import Patch
+
+    legend_elements = [
+        Patch(facecolor="#6495ED", label="Male"),
+        Patch(facecolor="#E91E8C", label="Female"),
+    ]
+    ax.legend(handles=legend_elements, loc="upper right", frameon=False)
+
+    # Add gridlines
+    ax.grid(True, axis="x", alpha=0.3, linestyle="-", linewidth=0.5)
+    ax.set_axisbelow(True)
+
+    # Remove top and right spines
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+    plt.tight_layout()
+    output_path = Path(output_dir) / "age_distribution.png"
+    fig.savefig(output_path, bbox_inches="tight", dpi=200, facecolor="white")
+    inform(f"Age distribution plot PNG written to {output_path}")
+
+    return fig
+
+
+def plot_life_expectancy(exp_filename, output_dir):
+
+    # Plot life expectancy as a Kaplan-Meier survival curve
+    try:
+        exp_df = pd.read_csv(exp_filename)
+    except Exception as e:
+        error(f"Failed to read life expectancy file: {e}", RuntimeError)
+
+    # Invert cumulative deaths to get survival probability
+    survival = exp_df.cumulative_deaths.max() - exp_df.cumulative_deaths
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    # Plot as step function (typical for Kaplan-Meier curves)
+    ax.step(
+        range(len(exp_df)),
+        survival,
+        where="post",
+        color="black",
+        linewidth=1,
+        label="Survival",
+    )
+
+    # Fill area under curve
+    ax.fill_between(range(len(exp_df)), survival, step="post", alpha=0.2, color="#2E86AB")
+
+    ax.set_title("Survival Curve (Life Expectancy)")
+    ax.set_xlabel("Age (years)")
+    ax.set_ylabel("Survival Probability (per 100,000 births)")
+    ax.set_ylim(0, survival.max() * 1.05)
+    ax.grid(True, alpha=0.3, linestyle="--", linewidth=0.5)
+    ax.legend(loc="upper right", frameon=False)
+
+    # Remove top and right spines for cleaner look
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+    output_path = Path(output_dir) / "life_expectancy.png"
+    fig.savefig(output_path, bbox_inches="tight", dpi=200, facecolor="white")
+    inform(f"Life expectancy plot PNG written to {output_path}")
+
+    return fig
 
 
 if __name__ == "__main__":

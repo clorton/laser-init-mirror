@@ -16,3 +16,4 @@ tmp/
 htmlcov/
 logs/
 .vscode/launch.json
+.DS_Store

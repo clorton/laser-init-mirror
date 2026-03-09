@@ -32,8 +32,7 @@ class UnochaTransformer:
         )
 
         if shape_file.suffix != ".zip":
-            error(f"Expected a .zip file for UNOCHA shape data, got: {shape_file}")
-            raise ValueError("Invalid shape file format")
+            error(f"Expected a .zip file for UNOCHA shape data, got: {shape_file}", ValueError)
 
         # Determine the UNOCHA directory name from the shape file path
         # The directory name is the shape file path without the .zip extension
@@ -52,8 +51,10 @@ class UnochaTransformer:
             inform(f"Zip extraction complete: {gdb_dir}")
 
         if not gdb_dir.exists():
-            error(f"Expected a .gdb file in the extracted UNOCHA directory, got: {gdb_dir}")
-            raise ValueError("Missing .gdb file in extracted UNOCHA data")
+            error(
+                f"Expected a .gdb file in the extracted UNOCHA directory, got: {gdb_dir}",
+                ValueError,
+            )
 
         gdf = read_gbd_quietly(gdb_dir, layer_name=f"admin{adm_level}")
 
@@ -63,7 +64,7 @@ class UnochaTransformer:
         country_gdf = gdf[gdf.iso3 == iso_code]
         inform(f"Filtered GeoDataFrame for iso_code={iso_code}: {len(country_gdf)} features.")
         if len(country_gdf) == 0:
-            inform(f"No features found for iso_code={iso_code} at admin{adm_level}.")
+            error(f"No features found for iso_code={iso_code} at admin{adm_level}.", ValueError)
 
         # Filter the columns we will not be using
         names = [f"adm{i}_name" for i in range(adm_level + 1)]
@@ -92,8 +93,7 @@ class UnochaTransformer:
             country_gdf.to_file(output_filename, driver="GPKG")
             inform(f"Saved GeoPackage: {output_filename}")
         else:
-            error(f"Output directory {output_dir} is not a directory.")
-            raise ValueError("Invalid output directory")
+            error(f"Output directory {output_dir} is not a directory.", ValueError)
 
         inform(f"UNOCHA transform complete: {output_filename}")
         return output_filename

@@ -33,7 +33,6 @@ class UnochaExtractor:
             inform(f"Downloaded UNOCHA data: {local_path}")
 
         except Exception as e:
-            error(f"Failed to download UNOCHA data: {e}.")
-            local_path = None
+            error(f"Failed to download UNOCHA data: {e}.", RuntimeError)
 
         return local_path
