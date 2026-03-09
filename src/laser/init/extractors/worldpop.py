@@ -25,8 +25,7 @@ Nigeria 2010: https://data.worldpop.org/GIS/Population/Global_2000_2020_1km_UNad
 from pathlib import Path
 
 from ..config import configuration as config
-from ..logger import logger
-from ..utils import download_file
+from ..utils import download_file, error, inform
 
 
 class WorldPopExtractor:
@@ -40,7 +39,7 @@ class WorldPopExtractor:
     def extract(self, country, year) -> Path | None:
 
         if year < 2000 or year > 2030:
-            logger.warning(f"Year {year} is out of range for WorldPop data (2000-2030).")
+            error(f"Year {year} is out of range for WorldPop data (2000-2030).")
             return None
 
         local_path = None
@@ -49,34 +48,35 @@ class WorldPopExtractor:
         cache_path.mkdir(parents=True, exist_ok=True)
 
         if year >= 2015:  # Use newer data
-            logger.info(f"Using WorldPop 2015-2030 dataset for year {year}.")
+            inform(f"Using WorldPop 2015-2030 dataset for year {year}.")
 
             tiff_file = f"{country.lower()}_pop_{year}_CN_1km_R2025A_UA_v1.tif"
             url: str = f"https://data.worldpop.org/GIS/Population/Global_2015_2030/R2025A/{year}/{country}/v1/1km_ua/constrained/{tiff_file}"
 
             try:
                 local_path: Path = download_file(url, dest_dir=cache_path)
-                logger.info(f"Downloaded WorldPop data: {local_path}")
+                inform(f"Downloaded WorldPop data: {local_path}")
 
             except Exception as e:
-                logger.warning(f"Failed to download WorldPop data: {e}.")
+                error(f"Failed to download WorldPop data: {e}.")
                 local_path = None
 
         elif year >= 2000:  # Use older data
-            logger.info(f"Using WorldPop 2000-2020 data set for year {year}.")
+            inform(f"Using WorldPop 2000-2020 data set for year {year}.")
 
             tiff_file = f"{country.lower()}_ppp_{year}_1km_Aggregated_UNadj.tif"
             url: str = f"https://data.worldpop.org/GIS/Population/Global_2000_2020_1km_UNadj/{year}/{country}/{tiff_file}"
 
             try:
                 local_path: Path = download_file(url, dest_dir=cache_path)
-                logger.info(f"Downloaded WorldPop data: {local_path}")
+                inform(f"Downloaded WorldPop data: {local_path}")
 
             except Exception as e:
-                logger.warning(f"Failed to download WorldPop data: {e}.")
+                error(f"Failed to download WorldPop data: {e}.")
                 local_path = None
 
         else:
+            error(f"Year {year} is out of range for WorldPop data (2000-2030).")
             raise RuntimeError(f"Year {year} out of range.")
 
         return local_path

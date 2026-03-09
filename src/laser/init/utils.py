@@ -13,6 +13,7 @@ import unicodedata
 import warnings
 from pathlib import Path
 
+import click
 import pycountry
 import rastertoolkit as rtk
 import requests
@@ -94,8 +95,8 @@ def iso_from_country_string(input_string: str) -> str | None:
         return iso3
 
     if len(normalized) < 4:
-        logger.info(
-            f"iso_from_country_string(): Input string '{input_string}' is too short for reliable matching. Returning None."
+        inform(
+            f"iso_from_country_string(): Input string '{input_string}' is too short for reliable matching."
         )
         return None
 
@@ -107,9 +108,7 @@ def iso_from_country_string(input_string: str) -> str | None:
     except LookupError:
         pass
 
-    logger.info(
-        f"iso_from_country_string(): No matches found for '{input_string}'. Returning None."
-    )
+    inform(f"iso_from_country_string(): No matches found for '{input_string}'.")
     return None
 
 
@@ -169,10 +168,10 @@ def download_file(
     local_path = dest_dir / local_name
 
     if local_path.exists() and not force:
-        logger.info(f"File already exists and force is not set: {local_path}")
+        inform(f"File already exists: {local_path}. Use force=True to re-download.")
         return local_path
 
-    logger.info(f"Downloading file from {url} to {local_path}...")
+    inform(f"Downloading file from {url} to {local_path}...")
     response = requests.get(url, stream=True)
     response.raise_for_status()
     total = int(response.headers.get("content-length", 0))
@@ -191,17 +190,32 @@ def download_file(
     if show_progress:
         progress.close()
 
-    logger.info(f"File downloaded successfully: {local_path}")
+    inform(f"File downloaded successfully: {local_path}")
 
     return local_path
 
 
 def clip_quietly(raster_file, shapefile, shape_attr):
+    inform(
+        f"Clipping raster_file={raster_file} with shapefile={shapefile}, shape_attr={shape_attr}..."
+    )
     with io.StringIO() as buf, contextlib.redirect_stdout(buf):
         pop_dict = rtk.raster_clip(raster_file, shapefile, shape_attr=shape_attr)
-        output = buf.getvalue()
-    logger.info(
-        f"clip_quietly: Clipped raster_file={raster_file} with shapefile={shapefile}, shape_attr={shape_attr}. Captured stdout length={len(output)}."
-    )
+        _output = buf.getvalue()
+    inform(f"Clipped raster_file={raster_file}.")
 
     return pop_dict
+
+
+def inform(msg: str) -> None:
+    click.echo(msg)
+    logger.info(msg)
+
+    return
+
+
+def error(msg: str) -> None:
+    click.echo(click.style(msg, fg="red"))
+    logger.error(msg)
+
+    return

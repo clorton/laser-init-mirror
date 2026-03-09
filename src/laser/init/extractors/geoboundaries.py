@@ -7,8 +7,7 @@ E.g., https://github.com/wmgeolab/geoBoundaries/raw/refs/heads/main/releaseData/
 from pathlib import Path
 
 from ..config import configuration as config
-from ..logger import logger
-from ..utils import download_file
+from ..utils import download_file, error, inform
 
 
 class GeoBoundariesExtractor:
@@ -33,10 +32,10 @@ class GeoBoundariesExtractor:
 
         try:
             local_path = download_file(url, dest_dir=cache_path)
-            logger.info(f"Downloaded GeoBoundaries data: {local_path}")
+            inform(f"Downloaded GeoBoundaries data: {local_path}")
 
         except Exception as e:
-            logger.warning(f"Failed to download GeoBoundaries data: {e}.")
+            error(f"Failed to download GeoBoundaries data: {e}.")
             local_path = None
 
         return local_path

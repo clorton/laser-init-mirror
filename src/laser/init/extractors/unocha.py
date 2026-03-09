@@ -7,8 +7,7 @@ https://data.humdata.org/dataset/70f1cb54-a30c-43b2-a751-44e77d8f5ade/resource/7
 from pathlib import Path
 
 from ..config import configuration as config
-from ..logger import logger
-from ..utils import download_file
+from ..utils import download_file, error, inform
 
 
 class UnochaExtractor:
@@ -31,10 +30,10 @@ class UnochaExtractor:
 
         try:
             local_path: Path = download_file(url, dest_dir=cache_path)
-            logger.info(f"Downloaded UNOCHA data: {local_path}")
+            inform(f"Downloaded UNOCHA data: {local_path}")
 
         except Exception as e:
-            logger.warning(f"Failed to download UNOCHA data: {e}.")
+            error(f"Failed to download UNOCHA data: {e}.")
             local_path = None
 
         return local_path

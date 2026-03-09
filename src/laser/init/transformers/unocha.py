@@ -14,8 +14,7 @@ from pathlib import Path
 import geopandas as gpd
 from tqdm import tqdm
 
-from ..logger import logger
-from ..utils import clip_quietly
+from ..utils import clip_quietly, error, inform
 
 
 class UnochaTransformer:
@@ -26,14 +25,14 @@ class UnochaTransformer:
     def description():
         return "Transform UNOCHA shape data to GeoPackage format, filtered by country and administrative level."
 
-    def transform(self, shape_file, iso_code, adm_level, raster_file, out_dir):
+    def transform(self, shape_file, iso_code, adm_level, raster_file, output_dir):
 
-        logger.info(
-            f"Starting UNOCHA transform with shape_file={shape_file}, iso_code={iso_code}, adm_level={adm_level}, raster_file={raster_file}, out_dir={out_dir}"
+        inform(
+            f"Starting UNOCHA transform with shape_file={shape_file}, iso_code={iso_code}, adm_level={adm_level}, raster_file={raster_file}, output_dir={output_dir}"
         )
 
         if shape_file.suffix != ".zip":
-            logger.error(f"Expected a .zip file for UNOCHA shape data, got: {shape_file}")
+            error(f"Expected a .zip file for UNOCHA shape data, got: {shape_file}")
             raise ValueError("Invalid shape file format")
 
         # Determine the UNOCHA directory name from the shape file path
@@ -45,28 +44,26 @@ class UnochaTransformer:
         gdb_dir = source_dir / shape_file.stem
 
         if not gdb_dir.exists():
-            logger.info(f"Extracting {shape_file} to {source_dir}...")
+            inform(f"Extracting {shape_file} to {source_dir}...")
             with zipfile.ZipFile(shape_file, "r") as zip_ref:
                 members = zip_ref.infolist()
                 for member in tqdm(members, desc="Extracting UNOCHA zip", unit="file"):
                     zip_ref.extract(member, path=source_dir)
-            logger.info(f"Zip extraction complete: {gdb_dir}")
+            inform(f"Zip extraction complete: {gdb_dir}")
 
         if not gdb_dir.exists():
-            logger.error(f"Expected a .gdb file in the extracted UNOCHA directory, got: {gdb_dir}")
+            error(f"Expected a .gdb file in the extracted UNOCHA directory, got: {gdb_dir}")
             raise ValueError("Missing .gdb file in extracted UNOCHA data")
 
         gdf = read_gbd_quietly(gdb_dir, layer_name=f"admin{adm_level}")
 
-        logger.info(
-            f"Loaded GeoDataFrame for admin{adm_level} from {gdb_dir}, {len(gdf)} features."
-        )
+        inform(f"Loaded GeoDataFrame for admin{adm_level} from {gdb_dir}, {len(gdf)} features.")
 
         # We should already have the admin level we want, now filter to the country level using the ISO code
         country_gdf = gdf[gdf.iso3 == iso_code]
-        logger.info(f"Filtered GeoDataFrame for iso_code={iso_code}: {len(country_gdf)} features.")
+        inform(f"Filtered GeoDataFrame for iso_code={iso_code}: {len(country_gdf)} features.")
         if len(country_gdf) == 0:
-            logger.warning(f"No features found for iso_code={iso_code} at admin{adm_level}.")
+            inform(f"No features found for iso_code={iso_code} at admin{adm_level}.")
 
         # Filter the columns we will not be using
         names = [f"adm{i}_name" for i in range(adm_level + 1)]
@@ -78,12 +75,10 @@ class UnochaTransformer:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp_shapefile = Path(tmpdir) / f"{iso_code}_admin{adm_level}.shp"
             country_gdf.to_file(tmp_shapefile, driver="ESRI Shapefile", engine="pyogrio")
-            logger.info(f"Wrote temporary shapefile: {tmp_shapefile}")
+            inform(f"Wrote temporary shapefile: {tmp_shapefile}")
             # Now we can use this temporary shapefile with RasterToolkit to clip the raster file
             pop_dict = clip_quietly(raster_file, tmp_shapefile, shape_attr=pcode)
-            logger.info(
-                f"Clipped raster with {tmp_shapefile}, got {len(pop_dict)} population values."
-            )
+            inform(f"Clipped raster with {tmp_shapefile}, got {len(pop_dict)} population values.")
 
             # Add a new column, population, to the GeoDataFrame, and fill it with the matching
             # values from the pop_dict dictionary. The keys of pop_dict should match the values in
@@ -92,15 +87,15 @@ class UnochaTransformer:
             country_gdf["population"] = country_gdf[pcode].map(pop_dict)
 
         # Save the filtered GeoDataFrame to a GeoPackage file in the output directory
-        if out_dir.is_dir():
-            output_filename = out_dir / f"{iso_code}_admin{adm_level}.gpkg"
+        if output_dir.is_dir():
+            output_filename = output_dir / f"{iso_code}_admin{adm_level}.gpkg"
             country_gdf.to_file(output_filename, driver="GPKG")
-            logger.info(f"Saved GeoPackage: {output_filename}")
+            inform(f"Saved GeoPackage: {output_filename}")
         else:
-            logger.error(f"Output directory {out_dir} is not a directory.")
+            error(f"Output directory {output_dir} is not a directory.")
             raise ValueError("Invalid output directory")
 
-        logger.info(f"UNOCHA transform complete: {output_filename}")
+        inform(f"UNOCHA transform complete: {output_filename}")
         return output_filename
 
 
@@ -112,8 +107,8 @@ def read_gbd_quietly(gdb_path, layer_name):
             category=RuntimeWarning,
         )
         gdf = gpd.read_file(gdb_path, layer=layer_name)
-    logger.info(f"Read GDB layer '{layer_name}' from {gdb_path}: {len(gdf)} features.")
+    inform(f"Read GDB layer '{layer_name}' from {gdb_path}: {len(gdf)} features.")
     if len(gdf) == 0:
-        logger.warning(f"No features loaded from {gdb_path} layer '{layer_name}'.")
+        inform(f"No features loaded from {gdb_path} layer '{layer_name}'.")
 
     return gdf

@@ -6,8 +6,7 @@ format for loading into our database.
 
 import geopandas as gpd
 
-from ..logger import logger
-from ..utils import clip_quietly
+from ..utils import clip_quietly, inform
 
 
 class GeoBoundariesTransformer:
@@ -20,13 +19,14 @@ class GeoBoundariesTransformer:
             "Transform geoBoundaries shape data by filtering for country and administrative level."
         )
 
-    def transform(self, shape_file, iso_code, adm_level, raster_file, out_dir):
+    def transform(self, shape_file, iso_code, adm_level, raster_file, output_dir):
 
         # The geoBoundaries data is already constrained to the country and administrative level we want.
         # We should be able to use it directly with RasterToolkit.
 
         # Load the GeoPackage file using geopandas
         layer = f"geoBoundaries-{iso_code.upper()}-ADM{adm_level}"
+        inform(f"Loading GeoBoundaries data from {shape_file} layer {layer}...")
         gdf = gpd.read_file(shape_file, layer=layer)
 
         gdf = gdf[["shapeName", "shapeID", "geometry"]]
@@ -35,8 +35,8 @@ class GeoBoundariesTransformer:
         pop_dict = clip_quietly(raster_file, shape_file / subfile, shape_attr="shapeID")
         gdf["population"] = gdf["shapeID"].map(pop_dict)
 
-        output_filename = out_dir / f"{iso_code}_admin{adm_level}.gpkg"
+        output_filename = output_dir / f"{iso_code}_admin{adm_level}.gpkg"
         gdf.to_file(output_filename, driver="GPKG")
-        logger.info(f"GeoBoundaries transform complete: {output_filename}")
+        inform(f"GeoBoundaries transform complete: {output_filename}")
 
         return output_filename

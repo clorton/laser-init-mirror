@@ -8,8 +8,7 @@ https://geodata.ucdavis.edu/gadm/gadm4.1/shp/gadm41_NGA_shp.zip
 from pathlib import Path
 
 from ..config import configuration as config
-from ..logger import logger
-from ..utils import download_file
+from ..utils import download_file, error, inform
 
 
 class GadmExtractor:
@@ -38,22 +37,12 @@ class GadmExtractor:
 
             try:
                 local_path = download_file(url, dest_dir=cache_path)
-                logger.info(f"Downloaded GADM shapefile zip: {local_path}")
-
-                # # Save the unzip for the transform step
-                # # But we could unzip here to check that the file is valid and contains data
-
-                # # Unzip the shapefile into the same directory
-
-                # with zipfile.ZipFile(local_path, "r") as zip_ref:
-                #     zip_ref.extractall(cache_path)
+                inform(f"Downloaded GADM shapefile zip: {local_path}")
 
                 downloaded = True
 
             except Exception as e:
-                logger.error(
-                    f"Failed to download GADM shapefile: {e}. No data available for {country}."
-                )
+                error(f"Failed to download GADM shapefile: {e}. No data available for {country}.")
                 downloaded = False
                 local_path = None
 
@@ -63,11 +52,11 @@ class GadmExtractor:
 
             try:
                 local_path = download_file(url, dest_dir=cache_path)
-                logger.info(f"Downloaded GADM geopackage: {local_path}")
+                inform(f"Downloaded GADM geopackage: {local_path}")
                 downloaded = True
 
             except Exception as e:
-                logger.warning(f"Failed to download GADM geopackage: {e}. Trying shapefile...")
+                error(f"Failed to download GADM geopackage: {e}. Trying shapefile...")
                 local_path = None
 
         return local_path
