@@ -37,6 +37,16 @@ class GadmTransformer:
         names = [f"NAME_{i}" for i in range(1, adm_level + 1)]
         gid = f"GID_{adm_level}"
         gdf = gdf[names + [gid, "geometry"]]
+
+        # Ensure "nodeid" and "name" columns
+        gdf["nodeid"] = list(range(len(gdf)))
+        if adm_level == 0:
+            gdf["name"] = gdf.GID_0
+        elif adm_level < 4:
+            gdf["name"] = gdf[f"NAME_{adm_level}"]
+        else:
+            gdf["name"] = gdf.NAME_3.astype(str) + ":" + gdf.NAME_4.astype(str)
+
         pop_dict = clip_quietly(raster_file, shape_filepath, shape_attr=gid)
         gdf["population"] = gdf[gid].map(pop_dict)
 

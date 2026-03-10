@@ -25,15 +25,6 @@ def show_plots(model, output_dir: Path | None):
                 pdf.savefig(fig)
                 plt.close(fig)
 
-    # stacked_e_and_i(model, output_dir)
-    # r_effective_t(model, output_dir)
-    # choropleth_snapshots(model, output_dir)
-    # arrival_time_choropleth(model, output_dir)
-    # individual_incidence(model, output_dir)
-    # import_pressure(model, output_dir)
-    # peak_timing_peak_size(model, output_dir)
-    # cumulative_incidence(model, output_dir)
-
     return
 
 
@@ -65,7 +56,7 @@ def stacked_e_and_i(model, output_dir: Path | None):
 
     # Create stacked area plot for Infectious
     # Get node names from the scenario GeoDataFrame
-    node_names = [model.scenario.shapeName.iloc[node] for node in top_nodes]
+    node_names = [model.scenario.name.iloc[node] for node in top_nodes]
     labels_i = [f"{name} (I)" for name in node_names] + ["Other nodes (I)"]
     ax.stackplot(range(num_timesteps), i_stack.T, labels=labels_i, colors=colors_i, alpha=0.8)
 
@@ -147,15 +138,17 @@ def choropleth_snapshots(model, output_dir: Path | None):
     vmin = 0
     # vmax = model.nodes.I[time_points, :].max()
     # vmax should be the maximum of (I/population) for all selected time points and locations
-    vmax = (model.nodes.I[time_points, :] / model.scenario.population.values[None, :]).max()
+    vmax = (
+        model.nodes.I[time_points, :] / np.maximum(model.scenario.population.values, 1)[None, :]
+    ).max()
 
     for idx, t in enumerate(time_points):
         ax = axes[idx]
 
         # Add infectious counts to the GeoDataFrame for this time point
         # gdf["value"] = model.nodes.I[t, :]
-        gdf["value"] = (
-            model.nodes.I[t, :] / model.scenario.population
+        gdf["value"] = model.nodes.I[t, :] / np.maximum(
+            model.scenario.population.values, 1
         )  # Normalize by population for better visualization
 
         # Create choropleth
@@ -279,7 +272,7 @@ def individual_incidence(model, output_dir: Path | None):
         incidence_safe = np.where(incidence > 0, incidence, np.nan)
 
         # Get node name from scenario GeoDataFrame
-        node_name = model.scenario.shapeName.iloc[node]
+        node_name = model.scenario.name.iloc[node]
 
         ax.plot(incidence_safe, label=node_name, color=colors[idx], linewidth=2, alpha=0.8)
 
@@ -365,7 +358,7 @@ def import_pressure(model, output_dir: Path | None):
         )
 
         # Get source node name for title
-        source_name = model.scenario.shapeName.iloc[source_node]
+        source_name = model.scenario.name.iloc[source_node]
         ax.set_title(f"Import Pressure from {source_name}", fontsize=11)
         ax.axis("off")
 
@@ -396,7 +389,7 @@ def peak_timing_peak_size(model, output_dir: Path | None):
     peak_sizes = np.zeros(num_locations)
 
     # Get population for each node
-    populations = model.scenario.population.values
+    populations = np.maximum(model.scenario.population.values, 1)
 
     # Find peak timing and peak size for each node
     for loc in range(num_locations):

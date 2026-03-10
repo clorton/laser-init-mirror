@@ -1,3 +1,4 @@
+import shutil
 from pathlib import Path
 
 __yaml__ = """
@@ -40,7 +41,7 @@ class AbmLoader:
 
         assert mode.upper() == "ABM", f"AbmLoader only supports ABM mode, got {mode}"
 
-        yaml = __yaml__.replace("%%data-dir%%", str(output_dir))
+        yaml = __yaml__.replace("%%data-dir%%", str(output_dir.absolute()))
         yaml = yaml.replace("%%shape-data%%", str(shape_filename.name))
         yaml = yaml.replace("%%cxr-data%%", str(cxr_filename.name))
         yaml = yaml.replace("%%pop-data%%", str(pop_filename.name))
@@ -48,7 +49,7 @@ class AbmLoader:
         (Path(output_dir) / "config.yaml").write_text(yaml)
 
         source_dir = Path(__file__).parent.parent
-        (Path(output_dir) / "seir.py").write_text((source_dir / "seir.py").read_text())
-        (Path(output_dir) / "plot.py").write_text((source_dir / "plot.py").read_text())
+        shutil.copy2(source_dir / "seir.py", Path(output_dir) / "seir.py")
+        shutil.copy2(source_dir / "plot.py", Path(output_dir) / "plot.py")
 
         return

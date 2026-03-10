@@ -71,6 +71,13 @@ class UnochaTransformer:
         pcode = f"adm{adm_level}_pcode"
         country_gdf = country_gdf[names + [pcode, "geometry"]]
 
+        # Ensure "nodeid" and "name" columns
+        gdf["nodeid"] = list(range(len(gdf)))
+        if adm_level < 4:
+            country_gdf["name"] = country_gdf[f"adm{adm_level}_name"]
+        else:
+            country_gdf["name"] = country_gdf.adm3_name + country_gdf.adm4_name
+
         # using tempfile, create a temp directory, write the GeoDataFrame to a shapefile (.shp) in
         # that directory and use it with RasterToolkit to clip the raster file
         with tempfile.TemporaryDirectory() as tmpdir:

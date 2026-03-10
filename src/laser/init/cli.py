@@ -41,6 +41,7 @@ E.g., laser-init NGA ADM2 2010 2025
 @click.argument("start-year", required=True, type=click.IntRange(1950, 2050))
 @click.argument("end-year", required=True, type=click.IntRange(1950, 2050))
 @click.option(
+    "-o",
     "--output-dir",
     type=Path,
     default=None,
@@ -437,6 +438,7 @@ def plot_age_distribution(pop_filename, output_dir):
 
     # Format x-axis to show absolute values
     ticks = ax.get_xticks()
+    ax.set_xticks(ticks)
     ax.set_xticklabels([f"{abs(int(x)):,}" for x in ticks])
 
     # Add legend

@@ -58,7 +58,10 @@ def main(config_file, data_dir):
     scenario["R"] = 0
     scenario.S -= scenario.I + scenario.R
 
-    daily_cbr = np.repeat(cxr_df.CBR.to_numpy()[0:NYEARS], 365)
+    cbr = cxr_df.CBR.to_numpy()
+    if len(cbr) < NYEARS:
+        cbr = np.pad(cbr, (0, NYEARS - len(cbr)), mode="edge")
+    daily_cbr = np.repeat(cbr[0:NYEARS], 365)
     birthrates = ValuesMap.from_timeseries(daily_cbr, len(scenario))
 
     params = PropertySet(

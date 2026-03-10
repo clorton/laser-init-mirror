@@ -31,6 +31,10 @@ class GeoBoundariesTransformer:
 
         gdf = gdf[["shapeName", "shapeID", "geometry"]]
 
+        # Ensure "nodeid" and "name" columns
+        gdf["nodeid"] = list(range(len(gdf)))
+        gdf["name"] = gdf["shapeName"]
+
         subfile = f"geoBoundaries-{iso_code.upper()}-ADM{adm_level}.shp"
         pop_dict = clip_quietly(raster_file, shape_file / subfile, shape_attr="shapeID")
         gdf["population"] = gdf["shapeID"].map(pop_dict)
