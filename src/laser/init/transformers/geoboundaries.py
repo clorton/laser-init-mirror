@@ -6,7 +6,7 @@ format for loading into our database.
 
 import geopandas as gpd
 
-from ..utils import clip_quietly, inform
+from ..utils import clip_quietly, inform, update_local_provenance
 
 
 class GeoBoundariesTransformer:
@@ -37,6 +37,7 @@ class GeoBoundariesTransformer:
 
         output_filename = output_dir / f"{iso_code}_admin{adm_level}.gpkg"
         gdf.to_file(output_filename, driver="GPKG")
+        update_local_provenance(output_dir, output_filename, shape_file, raster_file)
         inform(f"GeoBoundaries transform complete: {output_filename}")
 
         return output_filename

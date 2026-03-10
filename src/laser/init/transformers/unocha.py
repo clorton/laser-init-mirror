@@ -14,7 +14,7 @@ from pathlib import Path
 import geopandas as gpd
 from tqdm import tqdm
 
-from ..utils import clip_quietly, error, inform
+from ..utils import clip_quietly, error, inform, update_local_provenance
 
 
 class UnochaTransformer:
@@ -91,6 +91,7 @@ class UnochaTransformer:
         if output_dir.is_dir():
             output_filename = output_dir / f"{iso_code}_admin{adm_level}.gpkg"
             country_gdf.to_file(output_filename, driver="GPKG")
+            update_local_provenance(output_dir, output_filename, shape_file, raster_file)
             inform(f"Saved GeoPackage: {output_filename}")
         else:
             error(f"Output directory {output_dir} is not a directory.", ValueError)

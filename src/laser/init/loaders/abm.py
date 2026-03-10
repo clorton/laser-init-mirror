@@ -47,4 +47,8 @@ class AbmLoader:
         yaml = yaml.replace("%%exp-data%%", str(exp_filename.name))
         (Path(output_dir) / "config.yaml").write_text(yaml)
 
+        source_dir = Path(__file__).parent.parent
+        (Path(output_dir) / "seir.py").write_text((source_dir / "seir.py").read_text())
+        (Path(output_dir) / "plot.py").write_text((source_dir / "plot.py").read_text())
+
         return

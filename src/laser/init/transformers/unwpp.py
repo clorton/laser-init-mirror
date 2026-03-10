@@ -5,7 +5,7 @@ Transform UNWPP demographic data to a usable format, filtered by country and yea
 import numpy as np
 import pandas as pd
 
-from ..utils import inform
+from ..utils import inform, update_local_provenance
 
 
 class UnwppTransformer:
@@ -40,6 +40,7 @@ class UnwppTransformer:
         cbr_cdr = years_df[["Time", "CBR", "CDR"]]
         cxr_filename = output_dir / "cxr.csv"
         cbr_cdr.to_csv(cxr_filename, index=False)
+        update_local_provenance(output_dir, cxr_filename, demo_filename)
         inform(f"Saved CBR/CDR data to {cxr_filename}")
 
         # Population distribution by age (as of start_year) from population by 5 year age group .csv.gz
@@ -59,6 +60,7 @@ class UnwppTransformer:
         age_dist_df = age_dist_df[["AgeGrpStart", "PopTotal"]]
         pop_filename = output_dir / "age_dist.csv"
         age_dist_df.to_csv(pop_filename, index=False)
+        update_local_provenance(output_dir, pop_filename, stats_data[0])
         inform(f"Saved age distribution data to {pop_filename}")
 
         # Life expectancy (as of start_year) from life table(s) .csv.gz
@@ -104,6 +106,12 @@ class UnwppTransformer:
         life_exp_df["cumulative_deaths"] = cumulative
         life_exp = output_dir / "life_exp.csv"
         life_exp_df[["cumulative_deaths"]].to_csv(life_exp, index=False)
+        update_local_provenance(
+            output_dir,
+            life_exp,
+            *([stats_data[2], stats_data[3]] if life_filename2 else [stats_data[2]]),
+        )
+        inform(f"Saved life expectancy data to {life_exp}")
         inform("Finished loading demographics stats.")
 
         return cxr_filename, pop_filename, life_exp

@@ -50,15 +50,16 @@ class UnwppExtractor:
         # UNWPP data is provided as large CSV files covering all countries, so we download the relevant
         # files and then filter them locally (in the transformer) for the specified country and year range.
 
-        cache_path = Path(config["cache_dir"]) / "UNWPP"
-        cache_path.mkdir(parents=True, exist_ok=True)
+        cache_root = Path(config.get("cache_dir", Path.cwd()))
+        unwpp_path = Path("UNWPP")
+        (cache_root / unwpp_path).mkdir(parents=True, exist_ok=True)
 
         # Age distribution data (5-year age groups)
         dist_file = "WPP2024_Population1JanuaryByAge5GroupSex_Medium.csv.gz"
         url = f"https://population.un.org/wpp/assets/Excel%20Files/1_Indicator%20(Standard)/CSV_FILES/{dist_file}"
 
         try:
-            local_dist = download_file(url, dest_dir=cache_path)
+            local_dist = download_file(url, cache_dir=cache_root, dest_dir=unwpp_path)
             inform(f"Downloaded UNWPP age distribution data: {local_dist}")
         except Exception as e:
             error(f"Failed to download UNWPP age distribution data: {e}.", RuntimeError)
@@ -68,7 +69,7 @@ class UnwppExtractor:
         url = f"https://population.un.org/wpp/assets/Excel%20Files/1_Indicator%20(Standard)/CSV_FILES/{cxr_file}"
 
         try:
-            local_cxr = download_file(url, dest_dir=cache_path)
+            local_cxr = download_file(url, cache_dir=cache_root, dest_dir=unwpp_path)
             inform(f"Downloaded UNWPP demographic indicators data: {local_cxr}")
         except Exception as e:
             error(f"Failed to download UNWPP demographic indicators data: {e}.", RuntimeError)
@@ -82,7 +83,7 @@ class UnwppExtractor:
             url = f"https://population.un.org/wpp/assets/Excel%20Files/1_Indicator%20(Standard)/CSV_FILES/{life_file1}"
 
             try:
-                local_life1 = download_file(url, dest_dir=cache_path)
+                local_life1 = download_file(url, cache_dir=cache_root, dest_dir=unwpp_path)
                 inform(f"Downloaded UNWPP life table data (1950-2023): {local_life1}")
             except Exception as e:
                 error(f"Failed to download UNWPP life table data (1950-2023): {e}.", RuntimeError)
@@ -92,7 +93,7 @@ class UnwppExtractor:
             url = f"https://population.un.org/wpp/assets/Excel%20Files/1_Indicator%20(Standard)/CSV_FILES/{life_file2}"
 
             try:
-                local_life2 = download_file(url, dest_dir=cache_path)
+                local_life2 = download_file(url, cache_dir=cache_root, dest_dir=unwpp_path)
                 inform(f"Downloaded UNWPP life table data (2024-2100): {local_life2}")
             except Exception as e:
                 error(f"Failed to download UNWPP life table data (2024-2100): {e}.", RuntimeError)

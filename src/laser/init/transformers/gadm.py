@@ -6,7 +6,7 @@ format for loading into our database.
 
 import geopandas as gpd
 
-from ..utils import clip_quietly, error, inform
+from ..utils import clip_quietly, error, inform, update_local_provenance
 
 
 class GadmTransformer:
@@ -42,6 +42,7 @@ class GadmTransformer:
 
         output_filename = output_dir / f"{iso_code}_admin{adm_level}.gpkg"
         gdf.to_file(output_filename, driver="GPKG")
+        update_local_provenance(output_dir, output_filename, shape_file, raster_file)
         inform(f"Saved GeoPackage: {output_filename}")
 
         inform(f"GADM transform complete: {output_filename}")

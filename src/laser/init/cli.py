@@ -309,21 +309,14 @@ def write_plots(shapes_filename, cxr_filename, pop_filename, exp_filename, outpu
     pdf_path = Path(output_dir) / "report.pdf"
     with PdfPages(pdf_path) as pdf:
         # Generate each plot and add to PDF
-        if fig1 := plot_population_choropleth(shapes_filename, output_dir):
-            pdf.savefig(fig1, bbox_inches="tight")
-            plt.close(fig1)
-
-        if fig2 := plot_cbr_and_cdr(cxr_filename, output_dir):
-            pdf.savefig(fig2, bbox_inches="tight")
-            plt.close(fig2)
-
-        if fig3 := plot_age_distribution(pop_filename, output_dir):
-            pdf.savefig(fig3, bbox_inches="tight")
-            plt.close(fig3)
-
-        if fig4 := plot_life_expectancy(exp_filename, output_dir):
-            pdf.savefig(fig4, bbox_inches="tight")
-            plt.close(fig4)
+        for fig in [
+            plot_population_choropleth(shapes_filename, output_dir),
+            plot_cbr_and_cdr(cxr_filename, output_dir),
+            plot_age_distribution(pop_filename, output_dir),
+            plot_life_expectancy(exp_filename, output_dir),
+        ]:
+            pdf.savefig(fig, bbox_inches="tight")
+            plt.close(fig)
 
     inform(f"PDF report written to {pdf_path}")
 

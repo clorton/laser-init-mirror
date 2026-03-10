@@ -9,8 +9,10 @@ Using the [RapidFuzz package](https://rapidfuzz.github.io/RapidFuzz/) for fuzzy 
 
 import contextlib
 import io
+import json
 import unicodedata
 import warnings
+from datetime import datetime
 from pathlib import Path
 
 import click
@@ -19,6 +21,7 @@ import rastertoolkit as rtk
 import requests
 from tqdm import tqdm
 
+from .config import configuration as config
 from .french_iso import french_mapping as __french_mapping__
 from .logger import logger
 
@@ -142,6 +145,7 @@ def level_from_string(input_string: str) -> int | None:
 
 def download_file(
     url: str,
+    cache_dir: Path,
     dest_dir: Path,
     local_name: str = None,
     show_progress: bool = True,
@@ -165,7 +169,7 @@ def download_file(
     """
 
     local_name = local_name or url.split("/")[-1]
-    local_path = dest_dir / local_name
+    local_path = cache_dir / dest_dir / local_name
 
     if local_path.exists() and not force:
         inform(f"File already exists: {local_path}. Use force=True to re-download.")
@@ -190,9 +194,51 @@ def download_file(
     if show_progress:
         progress.close()
 
+    update_cache_provenance(cache_dir, local_path, url)
     inform(f"File downloaded successfully: {local_path}")
 
     return local_path
+
+
+def update_cache_provenance(cache_root: Path, file_path: Path, source_url: str) -> None:
+    """
+    Update the provenance log with information about a downloaded file.
+
+    Args:
+        cache_root (Path): The root directory for cached data.
+        file_path (Path): The name of the downloaded file.
+        source_url (str): The URL from which the file was downloaded.
+    """
+    provenance_file = cache_root / "provenance.json"
+    provenance = json.loads(provenance_file.read_text() if provenance_file.exists() else "{}")
+
+    timestamp = datetime.now().isoformat()
+    provenance.update({file_path.name: {"source_url": source_url, "timestamp": timestamp}})
+
+    with provenance_file.open("w") as f:
+        json.dump(provenance, f, indent=4)
+
+    inform(f"Cache provenance updated: {file_path.name} from {source_url} at {timestamp}")
+
+    return
+
+
+def update_local_provenance(output_dir, output_filename, *files):
+    cache_root = Path(config.get("cache_dir", Path.cwd()))
+    provenance_file = cache_root / "provenance.json"
+    sources = json.loads(provenance_file.read_text())
+    provenance_local = output_dir / "provenance.json"
+    provenance = json.loads(provenance_local.read_text() if provenance_local.exists() else "{}")
+    records = {file.name: sources[file.name] for file in files}
+    provenance.update({output_filename.name: records})
+    with provenance_local.open("w") as file:
+        json.dump(provenance, file, indent=4)
+
+    inform(
+        f"Local provenance updated: {output_filename.name} from {', '.join(file.name for file in files)}"
+    )
+
+    return
 
 
 def clip_quietly(raster_file, shapefile, shape_attr):

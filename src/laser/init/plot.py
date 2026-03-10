@@ -2,18 +2,37 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.backends.backend_pdf import PdfPages
 
 
 def show_plots(model, output_dir: Path | None):
 
-    stacked_e_and_i(model, output_dir)
-    r_effective_t(model, output_dir)
-    choropleth_snapshots(model, output_dir)
-    arrival_time_choropleth(model, output_dir)
-    individual_incidence(model, output_dir)
-    import_pressure(model, output_dir)
-    peak_timing_peak_size(model, output_dir)
-    cumulative_incidence(model, output_dir)
+    plots = [
+        stacked_e_and_i,
+        r_effective_t,
+        choropleth_snapshots,
+        arrival_time_choropleth,
+        individual_incidence,
+        import_pressure,
+        peak_timing_peak_size,
+        cumulative_incidence,
+    ]
+    figs = (plot_func(model, output_dir) for plot_func in plots)
+    if output_dir:
+        pdf_path = Path(output_dir) / "output.pdf"
+        with PdfPages(pdf_path) as pdf:
+            for fig in figs:
+                pdf.savefig(fig)
+                plt.close(fig)
+
+    # stacked_e_and_i(model, output_dir)
+    # r_effective_t(model, output_dir)
+    # choropleth_snapshots(model, output_dir)
+    # arrival_time_choropleth(model, output_dir)
+    # individual_incidence(model, output_dir)
+    # import_pressure(model, output_dir)
+    # peak_timing_peak_size(model, output_dir)
+    # cumulative_incidence(model, output_dir)
 
     return
 
@@ -320,7 +339,7 @@ def import_pressure(model, output_dir: Path | None):
         total_import_pressure = import_pressure_over_time.sum(axis=0)
         total_import_pressure[source_node] = 0  # Zero out self-import
 
-        all_pressures.append(total_import_pressure)
+        all_pressures.append(np.log1p(total_import_pressure))
 
     # Find global max for consistent color scaling
     vmin = 0
@@ -358,7 +377,7 @@ def import_pressure(model, output_dir: Path | None):
     plt.tight_layout(rect=[0, 0.05, 1, 0.96])
 
     cbar = fig.colorbar(sm, ax=axes, orientation="horizontal", pad=0.08, aspect=40, shrink=0.8)
-    cbar.set_label("Total Import Pressure", fontsize=10)
+    cbar.set_label("Total Import Pressure (log space)", fontsize=10)
 
     if output_dir:
         plt.savefig(Path(output_dir) / "import_pressure.png", dpi=200, bbox_inches="tight")

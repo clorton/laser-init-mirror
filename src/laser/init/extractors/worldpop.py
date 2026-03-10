@@ -43,8 +43,9 @@ class WorldPopExtractor:
 
         local_path = None
 
-        cache_path: Path = Path(config.get("cache_dir", Path.cwd())) / "WorldPop"
-        cache_path.mkdir(parents=True, exist_ok=True)
+        cache_root = Path(config.get("cache_dir", Path.cwd()))
+        worldpop_path: Path = Path("WorldPop")
+        (cache_root / worldpop_path).mkdir(parents=True, exist_ok=True)
 
         if year >= 2015:  # Use newer data
             inform(f"Using WorldPop 2015-2030 dataset for year {year}.")
@@ -53,7 +54,7 @@ class WorldPopExtractor:
             url: str = f"https://data.worldpop.org/GIS/Population/Global_2015_2030/R2025A/{year}/{country}/v1/1km_ua/constrained/{tiff_file}"
 
             try:
-                local_path: Path = download_file(url, dest_dir=cache_path)
+                local_path: Path = download_file(url, cache_dir=cache_root, dest_dir=worldpop_path)
                 inform(f"Downloaded WorldPop data: {local_path}")
 
             except Exception as e:
@@ -66,7 +67,7 @@ class WorldPopExtractor:
             url: str = f"https://data.worldpop.org/GIS/Population/Global_2000_2020_1km_UNadj/{year}/{country}/{tiff_file}"
 
             try:
-                local_path: Path = download_file(url, dest_dir=cache_path)
+                local_path: Path = download_file(url, cache_dir=cache_root, dest_dir=worldpop_path)
                 inform(f"Downloaded WorldPop data: {local_path}")
 
             except Exception as e:

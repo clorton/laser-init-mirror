@@ -24,8 +24,9 @@ class GadmExtractor:
 
     def extract(self, country, level, year):
 
-        cache_path = Path(config.get("cache_dir", Path.cwd())) / "gadm" / country
-        cache_path.mkdir(parents=True, exist_ok=True)
+        cache_root = Path(config.get("cache_dir", Path.cwd()))
+        gadm_path = Path("gadm") / country
+        (cache_root / gadm_path).mkdir(parents=True, exist_ok=True)
 
         local_path = None
         downloaded = False
@@ -36,7 +37,7 @@ class GadmExtractor:
             url = f"https://geodata.ucdavis.edu/gadm/gadm4.1/shp/{shp_zip}"
 
             try:
-                local_path = download_file(url, dest_dir=cache_path)
+                local_path = download_file(url, cache_dir=cache_root, dest_dir=gadm_path)
                 inform(f"Downloaded GADM shapefile zip: {local_path}")
 
                 downloaded = True
@@ -51,7 +52,7 @@ class GadmExtractor:
             url = f"https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/{gpkg}"
 
             try:
-                local_path = download_file(url, dest_dir=cache_path)
+                local_path = download_file(url, cache_dir=cache_root, dest_dir=gadm_path)
                 inform(f"Downloaded GADM geopackage: {local_path}")
                 downloaded = True
 

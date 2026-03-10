@@ -20,8 +20,9 @@ class UnochaExtractor:
 
     def extract(self, country, level, year) -> Path | None:
 
-        cache_path: Path = Path(config.get("cache_dir", Path.cwd())) / "UNOCHA"
-        cache_path.mkdir(parents=True, exist_ok=True)
+        cache_root = Path(config.get("cache_dir", Path.cwd()))
+        unocha_path: Path = Path("UNOCHA")
+        (cache_root / unocha_path).mkdir(parents=True, exist_ok=True)
 
         local_path = None
 
@@ -29,7 +30,7 @@ class UnochaExtractor:
         url: str = f"https://data.humdata.org/dataset/70f1cb54-a30c-43b2-a751-44e77d8f5ade/resource/733a9d4c-4e70-4f67-a5af-4138922cf43f/download/{zip_file}"
 
         try:
-            local_path: Path = download_file(url, dest_dir=cache_path)
+            local_path: Path = download_file(url, cache_dir=cache_root, dest_dir=unocha_path)
             inform(f"Downloaded UNOCHA data: {local_path}")
 
         except Exception as e:
