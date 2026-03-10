@@ -1,8 +1,9 @@
 from pathlib import Path
 
 __yaml__ = """
+data-dir: %%data-dir%%
+
 datafiles:
-    data-dir: %%data-dir%%
     shape-data: %%shape-data%%
     cxr-data: %%cxr-data%%
     pop-data: %%pop-data%%
