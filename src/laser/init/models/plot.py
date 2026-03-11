@@ -6,6 +6,19 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 
 def show_plots(model, output_dir: Path | None):
+    """Generate all visualization plots for model output.
+
+    Creates a comprehensive set of plots for analyzing epidemic model results,
+    including temporal dynamics, spatial patterns, and summary statistics.
+    If output_dir is provided, saves all plots to a single PDF file.
+
+    Args:
+        model: LASER model instance with completed simulation results.
+        output_dir: Directory where output PDF will be saved, or None to skip saving.
+
+    Returns:
+        None
+    """
 
     plots = [
         stacked_e_and_i,
@@ -29,6 +42,15 @@ def show_plots(model, output_dir: Path | None):
 
 
 def stacked_e_and_i(model, output_dir: Path | None):
+    """Plot stacked infectious individuals over time for top locations.
+
+    Args:
+        model: LASER model instance with simulation results.
+        output_dir: Directory where PNG will be saved, or None to skip saving.
+
+    Returns:
+        Matplotlib figure object.
+    """
 
     # Get the indices of the top N nodes with the highest incidence across the simulation
     top_n = 16
@@ -82,6 +104,15 @@ def stacked_e_and_i(model, output_dir: Path | None):
 
 
 def r_effective_t(model, output_dir: Path | None):
+    """Plot effective reproduction number (R_t) over time.
+
+    Args:
+        model: LASER model instance with simulation results.
+        output_dir: Directory where PNG will be saved, or None to skip saving.
+
+    Returns:
+        Matplotlib figure object.
+    """
 
     # Calculate the effective reproduction number R_t over time
     new_infections = model.nodes.newly_infected
@@ -108,6 +139,15 @@ def r_effective_t(model, output_dir: Path | None):
 
 
 def choropleth_snapshots(model, output_dir: Path | None):
+    """Plot choropleth maps showing spatial spread over time.
+
+    Args:
+        model: LASER model instance with simulation results.
+        output_dir: Directory where PNG will be saved, or None to skip saving.
+
+    Returns:
+        Matplotlib figure object.
+    """
 
     # Create choropleth snapshots of the infectious population at specific time points
     # two rows, four columns
@@ -185,6 +225,15 @@ def choropleth_snapshots(model, output_dir: Path | None):
 
 
 def arrival_time_choropleth(model, output_dir: Path | None):
+    """Plot time to first infection for each location.
+
+    Args:
+        model: LASER model instance with simulation results.
+        output_dir: Directory where PNG will be saved, or None to skip saving.
+
+    Returns:
+        Matplotlib figure object.
+    """
 
     # Determine the time to first infection for each node and create a choropleth map of these arrival times
     # shapes are in the GeoPandas GeoDataFrame model.scenario
@@ -249,6 +298,15 @@ def arrival_time_choropleth(model, output_dir: Path | None):
 
 
 def individual_incidence(model, output_dir: Path | None):
+    """Plot incidence curves for top locations (log scale).
+
+    Args:
+        model: LASER model instance with simulation results.
+        output_dir: Directory where PNG will be saved, or None to skip saving.
+
+    Returns:
+        Matplotlib figure object.
+    """
 
     # Plot the incidence curve (new infections per day), in log space, for a few selected nodes
     # Get the indices of the top N nodes with the highest total incidence across the simulation
@@ -297,6 +355,15 @@ def individual_incidence(model, output_dir: Path | None):
 
 
 def import_pressure(model, output_dir: Path | None):
+    """Plot import pressure from top source locations.
+
+    Args:
+        model: LASER model instance with simulation results.
+        output_dir: Directory where PNG will be saved, or None to skip saving.
+
+    Returns:
+        Matplotlib figure object.
+    """
 
     # Pick the top 6 nodes (2 rows, 3 columns) with the highest total case counts (model.nodes.newly_infected.sum()) and plot the import
     # pressure at the _other_ nodes from these top nodes. Import pressure can be calculated using the total
@@ -380,6 +447,15 @@ def import_pressure(model, output_dir: Path | None):
 
 
 def peak_timing_peak_size(model, output_dir: Path | None):
+    """Plot peak timing versus peak size scatter plot.
+
+    Args:
+        model: LASER model instance with simulation results.
+        output_dir: Directory where PNG will be saved, or None to skip saving.
+
+    Returns:
+        Matplotlib figure object.
+    """
 
     # Find the peak case timing and peak size (fraction of population) for each node, and plot these against each other in a scatter plot. Color the points by the total population of the node (model.scenario.population).
     # Find the peak incidence timing and peak size (fraction) for each node, and plot these against each other in a scatter plot. Color the points by the total population of the node (model.scenario.population).
@@ -448,6 +524,15 @@ def peak_timing_peak_size(model, output_dir: Path | None):
 
 
 def cumulative_incidence(model, output_dir: Path | None):
+    """Plot ranked cumulative incidence distribution across locations.
+
+    Args:
+        model: LASER model instance with simulation results.
+        output_dir: Directory where PNG will be saved, or None to skip saving.
+
+    Returns:
+        Matplotlib figure object.
+    """
 
     # Plot the cumulative incidence over time for the entire population and for selected nodes
     # Assume you have:

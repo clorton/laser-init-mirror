@@ -123,6 +123,21 @@ def cli(
 
 
 def validate_arguments(country, level, start_year, end_year, output_dir):
+    """Validate and normalize command-line arguments.
+
+    Args:
+        country: Country name or ISO code string.
+        level: Administrative level string (e.g., "admin1", "ADM2", "3").
+        start_year: Starting year for the simulation.
+        end_year: Ending year for the simulation.
+        output_dir: Output directory path or None for default.
+
+    Returns:
+        Tuple of (iso_code, adm_level, output_dir) with validated and normalized values.
+
+    Raises:
+        click.exceptions.Exit: If validation fails for any argument.
+    """
 
     iso_code = iso_from_country_string(country)
     if not iso_code:
@@ -157,7 +172,7 @@ def validate_arguments(country, level, start_year, end_year, output_dir):
         )
     inform(f"End year: {end_year}")
 
-    output_dir = output_dir or Path.cwd() / iso_code / str(start_year)
+    output_dir = output_dir or (Path.cwd() / iso_code / str(start_year))
     output_dir.mkdir(parents=True, exist_ok=True)
     assert output_dir.is_dir(), f"Output directory {output_dir} is not a valid directory."
     inform(f"Output directory: {output_dir}")
@@ -166,6 +181,20 @@ def validate_arguments(country, level, start_year, end_year, output_dir):
 
 
 def download_shape_data(iso_code, adm_level, start_year, shape_source):
+    """Download administrative boundary shape data.
+
+    Args:
+        iso_code: ISO 3166-1 alpha-3 country code.
+        adm_level: Administrative level (0-4).
+        start_year: Year for the data (for cache organization).
+        shape_source: Data source name ("unocha", "geoboundaries", or "gadm").
+
+    Returns:
+        Path to the downloaded shape data file.
+
+    Raises:
+        click.exceptions.Exit: If invalid shape_source is specified.
+    """
 
     shape_source = (shape_source or config.get("shape_source", "unocha")).lower()
     try:
@@ -186,6 +215,19 @@ def download_shape_data(iso_code, adm_level, start_year, shape_source):
 
 
 def download_raster_data(iso_code, start_year, raster_source):
+    """Download population raster data.
+
+    Args:
+        iso_code: ISO 3166-1 alpha-3 country code.
+        start_year: Year for the population data.
+        raster_source: Data source name (currently only "worldpop").
+
+    Returns:
+        Path to the downloaded raster file.
+
+    Raises:
+        click.exceptions.Exit: If invalid raster_source is specified.
+    """
 
     raster_source = (raster_source or config.get("raster_source", "worldpop")).lower()
     try:
@@ -204,6 +246,20 @@ def download_raster_data(iso_code, start_year, raster_source):
 
 
 def download_demographic_stats(iso_code, start_year, end_year, stats_source):
+    """Download demographic statistics data.
+
+    Args:
+        iso_code: ISO 3166-1 alpha-3 country code.
+        start_year: Start year for the data range.
+        end_year: End year for the data range.
+        stats_source: Data source name (currently only "unwpp").
+
+    Returns:
+        Tuple of Paths to downloaded demographic data files.
+
+    Raises:
+        click.exceptions.Exit: If invalid stats_source is specified.
+    """
 
     stats_source = (stats_source or config.get("stats_source", "unwpp")).lower()
 
@@ -280,6 +336,20 @@ def transform_stats_data(stats_source, stats_data, iso_code, start_year, end_yea
 def emit_model_script(
     mode, model, shapes_filename, cxr_filename, pop_filename, exp_filename, output_dir
 ):
+    """Generate model script and configuration files.
+
+    Args:
+        mode: Model mode ("ABM" or "MPM").
+        model: Model type ("SI", "SIR", or "SEIR").
+        shapes_filename: Path to the administrative boundaries GeoPackage.
+        cxr_filename: Path to the crude birth/death rate CSV.
+        pop_filename: Path to the age distribution CSV.
+        exp_filename: Path to the life expectancy CSV.
+        output_dir: Directory where model files will be written.
+
+    Returns:
+        None
+    """
     # For now, just print the paths to the transformed data files. In the future, this could generate
     # a Python script that loads the data and prepares it for use with a LASER model.
     inform(f"Emitting model script for {mode}/{model} with data files:")
@@ -301,8 +371,26 @@ def emit_model_script(
         mode, model, shapes_filename, cxr_filename, pop_filename, exp_filename, output_dir
     )
 
+    return
+
 
 def write_plots(shapes_filename, cxr_filename, pop_filename, exp_filename, output_dir):
+    """Generate visualization plots and combine into a PDF report.
+
+    Creates individual plots for population choropleth, birth/death rates,
+    age distribution, and life expectancy, then combines them into a single
+    PDF report.
+
+    Args:
+        shapes_filename: Path to the administrative boundaries GeoPackage.
+        cxr_filename: Path to the crude birth/death rate CSV.
+        pop_filename: Path to the age distribution CSV.
+        exp_filename: Path to the life expectancy CSV.
+        output_dir: Directory where plots and PDF will be saved.
+
+    Returns:
+        None
+    """
     # Generate individual plots and save as PNGs, then combine into a PDF report
     inform("Writing plots of the transformed data...")
 
@@ -325,6 +413,18 @@ def write_plots(shapes_filename, cxr_filename, pop_filename, exp_filename, outpu
 
 
 def plot_population_choropleth(shapes_filename, output_dir):
+    """Generate a population choropleth map.
+
+    Args:
+        shapes_filename: Path to the administrative boundaries GeoPackage.
+        output_dir: Directory where the PNG image will be saved.
+
+    Returns:
+        Matplotlib figure object.
+
+    Raises:
+        RuntimeError: If the shape file cannot be read.
+    """
     try:
         gdf = gpd.read_file(shapes_filename)
     except Exception as e:
@@ -344,6 +444,18 @@ def plot_population_choropleth(shapes_filename, output_dir):
 
 
 def plot_cbr_and_cdr(cxr_filename, output_dir):
+    """Generate crude birth and death rate time series plot.
+
+    Args:
+        cxr_filename: Path to the CSV file with CBR/CDR data.
+        output_dir: Directory where the PNG image will be saved.
+
+    Returns:
+        Matplotlib figure object.
+
+    Raises:
+        RuntimeError: If the CBR/CDR file cannot be read.
+    """
     # Plot CBR and CDR over time and write as a PNG in output_dir
     try:
         cxr_df = pd.read_csv(cxr_filename)
@@ -406,6 +518,18 @@ def plot_cbr_and_cdr(cxr_filename, output_dir):
 
 
 def plot_age_distribution(pop_filename, output_dir):
+    """Generate population pyramid plot showing age distribution.
+
+    Args:
+        pop_filename: Path to the CSV file with age distribution data.
+        output_dir: Directory where the PNG image will be saved.
+
+    Returns:
+        Matplotlib figure object.
+
+    Raises:
+        RuntimeError: If the population file cannot be read.
+    """
     # Plot the age distribution as a population pyramid (mirrored on the y-axis)
     # Duplicate data to represent both males and females
     try:
@@ -467,6 +591,18 @@ def plot_age_distribution(pop_filename, output_dir):
 
 
 def plot_life_expectancy(exp_filename, output_dir):
+    """Generate Kaplan-Meier survival curve plot.
+
+    Args:
+        exp_filename: Path to the CSV file with cumulative deaths data.
+        output_dir: Directory where the PNG image will be saved.
+
+    Returns:
+        Matplotlib figure object.
+
+    Raises:
+        RuntimeError: If the life expectancy file cannot be read.
+    """
 
     # Plot life expectancy as a Kaplan-Meier survival curve
     try:

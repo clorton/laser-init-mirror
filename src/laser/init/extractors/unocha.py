@@ -12,13 +12,36 @@ from ..utils import download_file, error, inform
 
 class UnochaExtractor:
     def __init__(self) -> None:
+        """Initialize the UNOCHA extractor."""
         pass
 
     @staticmethod
     def description() -> str:
+        """Return a brief description of this extractor.
+
+        Returns:
+            A string describing the data source and purpose of this extractor.
+        """
         return "Extracts data from the United Nations Office for the Coordination of Humanitarian Affairs (UNOCHA) at https://data.humdata.org"
 
     def extract(self, country, level, year) -> Path | None:
+        """Extract UNOCHA global administrative boundaries data.
+
+        Downloads the global administrative boundaries dataset from UNOCHA's
+        Humanitarian Data Exchange. This is a single global file containing
+        all countries, which will be filtered in the transform step.
+
+        Args:
+            country: ISO 3166-1 alpha-3 country code (used for cache organization).
+            level: Administrative level (used for subsequent filtering).
+            year: Year for the data (used for cache organization, but data is latest).
+
+        Returns:
+            Path to the downloaded geodatabase zip file, or None if download failed.
+
+        Raises:
+            RuntimeError: If the download fails.
+        """
 
         cache_root = Path(config.get("cache_dir", Path.cwd()))
         unocha_path: Path = Path("UNOCHA")

@@ -13,16 +13,43 @@ from ..utils import download_file, error, inform
 
 class GadmExtractor:
     def __init__(self, prefer_gpkg: bool = False):
+        """Initialize the GADM extractor.
 
+        Args:
+            prefer_gpkg: If True, prefer downloading GeoPackage format over shapefile format.
+                Defaults to False (prefers shapefile).
+        """
         self.prefer_gpkg = prefer_gpkg
 
         return
 
     @staticmethod
     def description():
+        """Return a brief description of this extractor.
+
+        Returns:
+            A string describing the data source and purpose of this extractor.
+        """
         return "Extracts data from the Global Administrative Areas (GADM) at https://geodata.ucdavis.edu/gadm"
 
     def extract(self, country, level, year):
+        """Extract GADM administrative boundary data for a country.
+
+        Downloads either shapefile (zip) or geopackage format administrative boundary
+        data from GADM for the specified country. Files are cached locally to avoid
+        redundant downloads.
+
+        Args:
+            country: ISO 3166-1 alpha-3 country code (e.g., "NGA" for Nigeria).
+            level: Administrative level (0=country, 1=regions, 2=districts, etc.).
+            year: Year for the data (used for cache organization, but GADM data is not yearly).
+
+        Returns:
+            Path to the downloaded file (zip or gpkg), or None if download failed.
+
+        Raises:
+            RuntimeError: If both shapefile and geopackage downloads fail.
+        """
 
         cache_root = Path(config.get("cache_dir", Path.cwd()))
         gadm_path = Path("gadm") / country

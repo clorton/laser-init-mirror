@@ -11,15 +11,37 @@ from ..utils import clip_quietly, inform, update_local_provenance
 
 class GeoBoundariesTransformer:
     def __init__(self):
+        """Initialize the GeoBoundaries transformer."""
         pass
 
     @staticmethod
     def description():
+        """Return a brief description of this transformer.
+
+        Returns:
+            A string describing the transformation performed by this class.
+        """
         return (
             "Transform geoBoundaries shape data by filtering for country and administrative level."
         )
 
     def transform(self, shape_file, iso_code, adm_level, raster_file, output_dir):
+        """Transform GeoBoundaries administrative boundaries and combine with population data.
+
+        Loads GeoBoundaries shape data from zip file, extracts relevant attributes,
+        clips population raster data to administrative boundaries, and saves as a
+        GeoPackage file.
+
+        Args:
+            shape_file: Path to the GeoBoundaries zip file.
+            iso_code: ISO 3166-1 alpha-3 country code.
+            adm_level: Administrative level to extract.
+            raster_file: Path to the WorldPop population raster file.
+            output_dir: Directory where output GeoPackage will be saved.
+
+        Returns:
+            Path to the output GeoPackage file.
+        """
 
         # The geoBoundaries data is already constrained to the country and administrative level we want.
         # We should be able to use it directly with RasterToolkit.

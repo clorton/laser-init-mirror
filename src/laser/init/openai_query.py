@@ -62,22 +62,30 @@ def _maybe_prefilter_candidates(
     allowed_names: list[str],
     top_k: int = 80,
 ) -> tuple[list[str], list[str]]:
-    """
-        Reduce candidate set to keep prompts smaller.
+    """Reduce candidate set to keep prompts smaller.
 
-        Why this exists
-        ---------------
-        The OpenAI call includes the allow-list inside the user message.
-        When ``allowed_names`` is large, this increases prompt tokens and latency.
-        Prefiltering keeps the prompt smaller while still being deterministic.
+    Why this exists
+    ---------------
+    The OpenAI call includes the allow-list inside the user message.
+    When ``allowed_names`` is large, this increases prompt tokens and latency.
+    Prefiltering keeps the prompt smaller while still being deterministic.
 
-        How it works
-        ------------
-        - If RapidFuzz is available, we rank candidate names by similarity to the
-            input and keep the top ``top_k``.
-        - Otherwise, we use a token containment heuristic.
+    How it works
+    ------------
+    - If RapidFuzz is available, we rank candidate names by similarity to the
+        input and keep the top ``top_k``.
+    - Otherwise, we use a token containment heuristic.
 
-    Returns: (iso3_subset, names_subset)
+    Args:
+        user_text: The user's input string to match against.
+        allowed_iso3: Full list of allowed ISO-3 codes.
+        allowed_names: Full list of allowed country names.
+        top_k: Maximum number of candidates to keep (default: 80).
+
+    Returns:
+        Tuple of (iso3_subset, names_subset) where:
+        - iso3_subset: Filtered or full list of ISO-3 codes
+        - names_subset: Top-k most similar country names to user_text
     """
     user_text_norm = (user_text or "").strip().lower()
     if not user_text_norm or top_k <= 0:
@@ -124,8 +132,20 @@ def _maybe_prefilter_candidates(
 
 
 def _build_response_schema(allowed_iso3: list[str]) -> dict[str, Any]:
-    """
-    Build the JSON Schema used for structured outputs.
+    """Build a JSON Schema for OpenAI structured outputs.
+
+    Creates a strict JSON schema that constrains the model to return only allowed
+    ISO-3 codes and provides structured country normalization results.
+
+    Args:
+        allowed_iso3: List of allowed ISO 3166-1 alpha-3 country codes.
+
+    Returns:
+        Dictionary containing a JSON schema configuration with:
+        - type: "json_schema"
+        - name: Schema identifier
+        - schema: Complete JSON schema definition with enum constraints
+        - strict: True (enforces strict adherence to schema)
 
     Why JSON Schema
     ---------------

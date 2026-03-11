@@ -33,13 +33,43 @@ from ..utils import download_file, error, inform
 
 class UnwppExtractor:
     def __init__(self) -> None:
+        """Initialize the UNWPP extractor."""
         pass
 
     @staticmethod
     def description() -> str:
+        """Return a brief description of this extractor.
+
+        Returns:
+            A string describing the data source and purpose of this extractor.
+        """
         return "Extracts data from the UN World Population Prospects (UNWPP) at https://population.un.org/wpp/"
 
     def extract(self, country, start_year, end_year) -> Path | None:
+        """Extract UN World Population Prospects demographic data.
+
+        Downloads global demographic data files from UNWPP including:
+        - Population by age group (5-year intervals)
+        - Demographic indicators (CBR, CDR, etc.)
+        - Life tables for mortality estimation
+
+        The downloaded files contain data for all countries, which will be
+        filtered in the transform step.
+
+        Args:
+            country: ISO 3166-1 alpha-3 country code (used for subsequent filtering).
+            start_year: Start year for the data range (must be >= 1950).
+            end_year: End year for the data range (must be <= 2100).
+
+        Returns:
+            Tuple of Paths: (age_distribution_file, demographic_indicators_file,
+                life_table_1950_2023_file, life_table_2024_2100_file).
+                The life table files may be None if not needed for the year range.
+
+        Raises:
+            ValueError: If start_year < 1950 or end_year > 2100.
+            RuntimeError: If any required download fails.
+        """
 
         if start_year < 1950 or end_year > 2100:
             error(

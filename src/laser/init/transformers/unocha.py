@@ -19,13 +19,39 @@ from ..utils import clip_quietly, error, inform, update_local_provenance
 
 class UnochaTransformer:
     def __init__(self):
+        """Initialize the UNOCHA transformer."""
         pass
 
     @staticmethod
     def description():
+        """Return a brief description of this transformer.
+
+        Returns:
+            A string describing the transformation performed by this class.
+        """
         return "Transform UNOCHA shape data to GeoPackage format, filtered by country and administrative level."
 
     def transform(self, shape_file, iso_code, adm_level, raster_file, output_dir):
+        """Transform UNOCHA global administrative boundaries and combine with population data.
+
+        Extracts geodatabase from zip file, loads global administrative boundary data,
+        filters by country and administrative level, clips population raster data to
+        boundaries, and saves as a GeoPackage file.
+
+        Args:
+            shape_file: Path to the UNOCHA global boundaries geodatabase zip file.
+            iso_code: ISO 3166-1 alpha-3 country code to filter for.
+            adm_level: Administrative level to extract (0=country, 1=first-level, etc.).
+            raster_file: Path to the WorldPop population raster file.
+            output_dir: Directory where output GeoPackage will be saved.
+
+        Returns:
+            Path to the output GeoPackage file.
+
+        Raises:
+            ValueError: If shape_file is not a zip file, or if no features found for
+                the specified country and administrative level.
+        """
 
         inform(
             f"Starting UNOCHA transform with shape_file={shape_file}, iso_code={iso_code}, adm_level={adm_level}, raster_file={raster_file}, output_dir={output_dir}"
@@ -56,7 +82,7 @@ class UnochaTransformer:
                 ValueError,
             )
 
-        gdf = read_gbd_quietly(gdb_dir, layer_name=f"admin{adm_level}")
+        gdf = read_gdb_quietly(gdb_dir, layer_name=f"admin{adm_level}")
 
         inform(f"Loaded GeoDataFrame for admin{adm_level} from {gdb_dir}, {len(gdf)} features.")
 
@@ -72,7 +98,7 @@ class UnochaTransformer:
         country_gdf = country_gdf[names + [pcode, "geometry"]]
 
         # Ensure "nodeid" and "name" columns
-        gdf["nodeid"] = list(range(len(gdf)))
+        country_gdf["nodeid"] = list(range(len(country_gdf)))
         if adm_level < 4:
             country_gdf["name"] = country_gdf[f"adm{adm_level}_name"]
         else:
@@ -107,7 +133,16 @@ class UnochaTransformer:
         return output_filename
 
 
-def read_gbd_quietly(gdb_path, layer_name):
+def read_gdb_quietly(gdb_path, layer_name):
+    """Read a geodatabase layer while suppressing polygon processing warnings.
+
+    Args:
+        gdb_path: Path to the geodatabase directory.
+        layer_name: Name of the layer to read from the geodatabase.
+
+    Returns:
+        GeoDataFrame containing the layer data.
+    """
     with warnings.catch_warnings():
         warnings.filterwarnings(
             "ignore",

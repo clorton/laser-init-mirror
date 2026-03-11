@@ -26,10 +26,16 @@ simulation:
 
 class AbmLoader:
     def __init__(self) -> None:
+        """Initialize the ABM (Agent-Based Model) loader."""
         pass
 
     @staticmethod
     def description() -> str:
+        """Return a brief description of this loader.
+
+        Returns:
+            A string describing the model script generation performed by this class.
+        """
         return "Write an ABM model script loading data from the downloaded data sources."
 
     def emit_script(
@@ -42,6 +48,24 @@ class AbmLoader:
         exp_filename: Path,
         output_dir: Path,
     ) -> None:
+        """Generate ABM model script and configuration files.
+
+        Creates a YAML configuration file with data file paths and simulation parameters,
+        then copies the appropriate model script (SI, SIR, or SEIR) and plotting utilities
+        to the output directory.
+
+        Args:
+            mode: Model mode (must be "ABM").
+            model: Model type ("SI", "SIR", or "SEIR").
+            shape_filename: Path to the GeoPackage file with administrative boundaries.
+            cxr_filename: Path to the CSV file with crude birth/death rates.
+            pop_filename: Path to the CSV file with age distribution.
+            exp_filename: Path to the CSV file with life expectancy data.
+            output_dir: Directory where model script and config will be written.
+
+        Raises:
+            AssertionError: If mode is not "ABM".
+        """
 
         assert mode.upper() == "ABM", f"AbmLoader only supports ABM mode, got {mode}"
 

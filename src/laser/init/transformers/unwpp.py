@@ -10,13 +10,39 @@ from ..utils import inform, update_local_provenance
 
 class UnwppTransformer:
     def __init__(self):
+        """Initialize the UNWPP transformer."""
         pass
 
     @staticmethod
     def description():
+        """Return a brief description of this transformer.
+
+        Returns:
+            A string describing the transformation performed by this class.
+        """
         return "Transform UNWPP demographic data to a usable format, filtered by country and year range."
 
     def transform(self, stats_data, iso_code, start_year, end_year, output_dir):
+        """Transform UNWPP demographic data into model-ready CSV files.
+
+        Extracts and filters UN World Population Prospects data for a specific country
+        and year range, producing three output files:
+        - CBR/CDR (crude birth/death rates) by year
+        - Age distribution (population by 5-year age groups) at start_year
+        - Life expectancy (cumulative deaths for survival estimation) at start_year
+
+        Args:
+            stats_data: Tuple of Paths to UNWPP data files:
+                (age_distribution_file, demographic_indicators_file,
+                 life_table_1950_2023_file, life_table_2024_2100_file).
+            iso_code: ISO 3166-1 alpha-3 country code to filter for.
+            start_year: Start year for the simulation (used for age dist and life exp).
+            end_year: End year for the simulation (used for CBR/CDR range).
+            output_dir: Directory where output CSV files will be saved.
+
+        Returns:
+            Tuple of Paths: (cxr_filename, pop_filename, life_exp_filename).
+        """
 
         # stats_data is a tuple with the following entries:
         # population by 5 year age group .csv.gz

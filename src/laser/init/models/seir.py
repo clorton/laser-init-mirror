@@ -31,6 +31,19 @@ from plot import show_plots
     help="Path to the data directory.",
 )
 def main(config_file, data_dir):
+    """Run an SEIR (Susceptible-Exposed-Infectious-Recovered) epidemiological model.
+
+    Loads configuration and data files, sets up the model with vital dynamics
+    (births and mortality), runs the simulation, and generates output plots.
+    The SEIR model includes an exposed (latent) period before individuals become infectious.
+
+    Args:
+        config_file: Path to the YAML configuration file.
+        data_dir: Path to the data directory, or None to use config value.
+
+    Returns:
+        None
+    """
     config = yaml.safe_load(config_file.read_text())
 
     data_dir = Path(data_dir or config["data_dir"])

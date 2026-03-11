@@ -29,9 +29,19 @@ from .logger import logger
 def _normalize_string(value: str) -> str:
     """Normalize a country string for matching.
 
-    - Unicode NFKD + drop combining marks: makes accents/diacritics comparable.
-    - Casefold: more aggressive (and correct) case normalization than lower().
-    - Strip: removes surrounding whitespace.
+    Applies Unicode normalization to handle accents and diacritics, performs
+    case-folding for better case-insensitive matching, and strips whitespace.
+
+    Args:
+        value: The string to normalize (typically a country name).
+
+    Returns:
+        Normalized string suitable for case-insensitive fuzzy matching.
+
+    Notes:
+        - Unicode NFKD + drop combining marks: makes accents/diacritics comparable.
+        - Casefold: more aggressive (and correct) case normalization than lower().
+        - Strip: removes surrounding whitespace.
     """
 
     decomposed = unicodedata.normalize("NFKD", (value or "").strip())
@@ -78,8 +88,25 @@ __name_mapping__.update(
 
 
 def iso_from_country_string(input_string: str) -> str | None:
-    """
-    Convert a country name to its ISO 3166-1 alpha-3 code.
+    """Convert a country name to its ISO 3166-1 alpha-3 code.
+
+    Performs normalized matching against ISO codes, country names (including
+    official names), and French country names. If no exact match is found,
+    attempts fuzzy matching using pycountry.
+
+    Args:
+        input_string: Country name or ISO code to convert (e.g., "Nigeria", "nga", "Nigéria").
+
+    Returns:
+        ISO 3166-1 alpha-3 code (e.g., "NGA"), or None if no match found.
+
+    Examples:
+        >>> iso_from_country_string("Nigeria")
+        "NGA"
+        >>> iso_from_country_string("République démocratique du Congo")
+        "COD"
+        >>> iso_from_country_string("USA")
+        "USA"
     """
     normalized = _normalize_string(input_string)
     logger.info(
@@ -116,8 +143,26 @@ def iso_from_country_string(input_string: str) -> str | None:
 
 
 def level_from_string(input_string: str) -> int | None:
-    """
-    Convert a level string in the form 'admin1' or 'ADM2' or '3' to a standardized level code.
+    """Convert a level string to a standardized administrative level number.
+
+    Parses strings in the format 'admin1', 'ADM2', or '3' and returns the
+    corresponding administrative level number.
+
+    Args:
+        input_string: Level string to parse (case-insensitive, accepts "admin1",
+            "ADM2", "3", etc.).
+
+    Returns:
+        Administrative level number (0-4), or None if parsing fails or value
+            is out of range.
+
+    Examples:
+        >>> level_from_string("admin1")
+        1
+        >>> level_from_string("ADM2")
+        2
+        >>> level_from_string("3")
+        3
     """
 
     lowered = input_string.lower().strip()
@@ -151,21 +196,24 @@ def download_file(
     show_progress: bool = True,
     force: bool = False,
 ) -> Path:
-    """
-    Download a file from a URL and save it to the specified directory.
+    """Download a file from a URL and save it to the specified directory.
 
     The function streams the file in chunks, displays a progress bar if enabled.
     If the file already exists and force is False, the existing file is returned without downloading.
 
     Args:
-        url (str): The URL of the file to download.
-        dest_dir (Path): The directory where the file will be saved.
-        local_name (str, optional): The name to use for the saved file. If None, uses the filename from the URL.
-        show_progress (bool, optional): If True, display a progress bar during download (default: True).
-        force (bool, optional): If True, download even if the file already exists (default: False).
+        url: The URL of the file to download.
+        cache_dir: The root cache directory (used for provenance tracking).
+        dest_dir: The subdirectory within cache_dir where the file will be saved.
+        local_name: The name to use for the saved file. If None, uses the filename from the URL.
+        show_progress: If True, display a progress bar during download (default: True).
+        force: If True, download even if the file already exists (default: False).
 
     Returns:
-        Path: The path to the downloaded file.
+        Path to the downloaded file.
+
+    Side Effects:
+        Updates provenance.json in cache_dir with download metadata (URL, timestamp).
     """
 
     local_name = local_name or url.split("/")[-1]
@@ -201,13 +249,18 @@ def download_file(
 
 
 def update_cache_provenance(cache_root: Path, file_path: Path, source_url: str) -> None:
-    """
-    Update the provenance log with information about a downloaded file.
+    """Update the provenance log with information about a downloaded file.
+
+    Creates or updates provenance.json in the cache root directory with metadata
+    about downloaded files, including source URLs and timestamps.
 
     Args:
-        cache_root (Path): The root directory for cached data.
-        file_path (Path): The name of the downloaded file.
-        source_url (str): The URL from which the file was downloaded.
+        cache_root: The root directory for cached data.
+        file_path: The path to the downloaded file.
+        source_url: The URL from which the file was downloaded.
+
+    Returns:
+        None
     """
     provenance_file = cache_root / "provenance.json"
     provenance = json.loads(provenance_file.read_text() if provenance_file.exists() else "{}")
@@ -224,6 +277,19 @@ def update_cache_provenance(cache_root: Path, file_path: Path, source_url: str) 
 
 
 def update_local_provenance(output_dir, output_filename, *files):
+    """Update local provenance for transformed files.
+
+    Tracks which cached source files were used to create each transformed output file
+    by copying provenance records from cache provenance.json to local provenance.json.
+
+    Args:
+        output_dir: Directory where the output file and local provenance.json are located.
+        output_filename: Path to the output file being tracked.
+        *files: Variable number of Path objects representing source files from cache.
+
+    Returns:
+        None
+    """
     cache_root = Path(config.get("cache_dir", Path.cwd()))
     provenance_file = cache_root / "provenance.json"
     sources = json.loads(provenance_file.read_text())
@@ -242,6 +308,19 @@ def update_local_provenance(output_dir, output_filename, *files):
 
 
 def clip_quietly(raster_file, shapefile, shape_attr):
+    """Clip a raster file using a shapefile while suppressing stdout output.
+
+    Uses rastertoolkit.raster_clip to extract population values for each shape
+    in the shapefile, redirecting stdout to suppress verbose output.
+
+    Args:
+        raster_file: Path to the population raster file (GeoTIFF).
+        shapefile: Path to the shapefile containing administrative boundaries.
+        shape_attr: Attribute name in the shapefile to use as dictionary keys.
+
+    Returns:
+        Dictionary mapping shape attribute values to population counts.
+    """
     inform(
         f"Clipping raster_file={raster_file} with shapefile={shapefile}, shape_attr={shape_attr}..."
     )
@@ -254,6 +333,14 @@ def clip_quietly(raster_file, shapefile, shape_attr):
 
 
 def inform(msg: str) -> None:
+    """Display an informational message to the user and log it.
+
+    Args:
+        msg: The message to display and log.
+
+    Returns:
+        None
+    """
     click.echo(msg)
     logger.info(msg)
 
@@ -261,6 +348,18 @@ def inform(msg: str) -> None:
 
 
 def error(msg: str, exception=RuntimeError) -> None:
+    """Display an error message, log it, and raise an exception.
+
+    Args:
+        msg: The error message to display and log.
+        exception: Exception class or instance to raise (default: RuntimeError).
+
+    Returns:
+        None (function raises an exception before returning).
+
+    Raises:
+        The exception type specified in the exception parameter.
+    """
     click.echo(click.style(msg, fg="red"))
     logger.error(msg)
 

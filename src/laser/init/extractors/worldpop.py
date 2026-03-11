@@ -30,13 +30,37 @@ from ..utils import download_file, error, inform
 
 class WorldPopExtractor:
     def __init__(self) -> None:
+        """Initialize the WorldPop extractor."""
         pass
 
     @staticmethod
     def description() -> str:
+        """Return a brief description of this extractor.
+
+        Returns:
+            A string describing the data source and purpose of this extractor.
+        """
         return "Extracts data from WorldPop at https://www.worldpop.org"
 
     def extract(self, country, year) -> Path | None:
+        """Extract WorldPop population raster data for a country and year.
+
+        Downloads gridded population data at 1km resolution. Automatically
+        selects the appropriate dataset based on the year:
+        - 2015-2030: Uses Global_2015_2030/R2025A dataset
+        - 2000-2014: Uses Global_2000_2020_1km_UNadj dataset
+
+        Args:
+            country: ISO 3166-1 alpha-3 country code (e.g., "NGA" for Nigeria).
+            year: Year for the population data (must be 2000-2030).
+
+        Returns:
+            Path to the downloaded GeoTIFF raster file, or None if download failed.
+
+        Raises:
+            ValueError: If year is outside the valid range (2000-2030).
+            RuntimeError: If the download fails.
+        """
 
         if year < 2000 or year > 2030:
             error(f"Year {year} is out of range for WorldPop data (2000-2030).", ValueError)

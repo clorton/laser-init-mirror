@@ -11,13 +11,38 @@ from ..utils import clip_quietly, error, inform, update_local_provenance
 
 class GadmTransformer:
     def __init__(self):
+        """Initialize the GADM transformer."""
         pass
 
     @staticmethod
     def description():
+        """Return a brief description of this transformer.
+
+        Returns:
+            A string describing the transformation performed by this class.
+        """
         return "Transform GADM shape data by filtering for country and administrative level."
 
     def transform(self, shape_file, iso_code, adm_level, raster_file, output_dir):
+        """Transform GADM administrative boundaries and combine with population data.
+
+        Loads GADM shape data, filters by administrative level, clips population
+        raster data to administrative boundaries, and saves as a GeoPackage file.
+
+        Args:
+            shape_file: Path to the GADM zip file containing shapefiles or gpkg file.
+            iso_code: ISO 3166-1 alpha-3 country code.
+            adm_level: Administrative level to extract (0=country, 1=regions, etc.).
+            raster_file: Path to the WorldPop population raster file.
+            output_dir: Directory where output GeoPackage will be saved.
+
+        Returns:
+            Path to the output GeoPackage file.
+
+        Raises:
+            NotImplementedError: If trying to use GeoPackage format (not yet supported).
+            ValueError: If shape_file format is unsupported.
+        """
 
         if shape_file.suffix == ".zip":
             inform(f"Processing GADM shape file from zip archive: {shape_file}")
