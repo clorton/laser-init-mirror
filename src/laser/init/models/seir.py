@@ -33,20 +33,15 @@ from plot import show_plots
 def main(config_file, data_dir):
     config = yaml.safe_load(config_file.read_text())
 
-    data_dir = Path(data_dir or config["data-dir"])
+    data_dir = Path(data_dir or config["data_dir"])
     datafiles = config["datafiles"]
-    scenario = gpd.read_file(data_dir / datafiles["shape-data"])
-    cxr_df = pd.read_csv(data_dir / datafiles["cxr-data"])  # "cxr.csv")
-    pop_df = pd.read_csv(data_dir / datafiles["pop-data"])  # "age_dist.csv")
-    exp_df = pd.read_csv(data_dir / datafiles["exp-data"])  # "life_exp.csv")
+    scenario = gpd.read_file(data_dir / datafiles["shape_data"])
+    cxr_df = pd.read_csv(data_dir / datafiles["cxr_data"])  # "cxr.csv")
+    pop_df = pd.read_csv(data_dir / datafiles["pop_data"])  # "age_dist.csv")
+    exp_df = pd.read_csv(data_dir / datafiles["exp_data"])  # "life_exp.csv")
 
-    sim_params = config["simulation"]
-    EXPOSED_DURATION_SHAPE = sim_params["exposed-duration-shape"]
-    EXPOSED_DURATION_SCALE = sim_params["exposed-duration-scale"]
-    INFECTIOUS_DURATION_MEAN = sim_params["infectious-duration-mean"]
-    NYEARS = sim_params["nyears"]
-    NTICKS = 365 * NYEARS
-    R0 = sim_params["r0"]
+    params = PropertySet(config["simulation"])
+    params += {"nticks": params.nyears * 365, "beta": params.r0 / params.infectious_duration_mean}
 
     scenario["nodeid"] = np.arange(len(scenario), dtype=np.int32)
     scenario["S"] = scenario.population
@@ -55,31 +50,22 @@ def main(config_file, data_dir):
     # seed the largest population center with some initial infections
     imax = np.argmax(scenario.population)
     scenario.at[imax, "I"] = 50
-    scenario["R"] = 0
+    if params.naive_population:
+        scenario["R"] = 0
+    else:
+        scenario["R"] = ((1 - 1 / params.r0) * scenario.population).astype(np.int32)
     scenario.S -= scenario.I + scenario.R
 
     cbr = cxr_df.CBR.to_numpy()
-    if len(cbr) < NYEARS:
-        cbr = np.pad(cbr, (0, NYEARS - len(cbr)), mode="edge")
-    daily_cbr = np.repeat(cbr[0:NYEARS], 365)
+    if len(cbr) < params.nyears:
+        cbr = np.pad(cbr, (0, params.nyears - len(cbr)), mode="edge")
+    daily_cbr = np.repeat(cbr[0 : params.nyears], 365)
     birthrates = ValuesMap.from_timeseries(daily_cbr, len(scenario))
-
-    params = PropertySet(
-        {
-            "exposed_duration_shape": EXPOSED_DURATION_SHAPE,
-            "exposed_duration_scale": EXPOSED_DURATION_SCALE,
-            "infectious_duration_mean": INFECTIOUS_DURATION_MEAN,
-            "nyears": NYEARS,
-            "nticks": NTICKS,
-            "r0": R0,
-            "beta": R0 / INFECTIOUS_DURATION_MEAN,
-        }
-    )
 
     model = Model(scenario, params, birthrates=birthrates)
 
-    expdist = dists.gamma(shape=EXPOSED_DURATION_SHAPE, scale=EXPOSED_DURATION_SCALE)
-    infdist = dists.normal(loc=INFECTIOUS_DURATION_MEAN, scale=2)
+    expdist = dists.gamma(shape=params.exposed_duration_shape, scale=params.exposed_duration_scale)
+    infdist = dists.normal(loc=params.infectious_duration_mean, scale=2)
 
     s = SEIR.Susceptible(model)
     e = SEIR.Exposed(model, expdist, infdist)

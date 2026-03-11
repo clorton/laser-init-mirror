@@ -2,21 +2,25 @@ import shutil
 from pathlib import Path
 
 __yaml__ = """
-data-dir: %%data-dir%%
+data_dir: %%data_dir%%
 
 datafiles:
-    shape-data: %%shape-data%%
-    cxr-data: %%cxr-data%%
-    pop-data: %%pop-data%%
-    exp-data: %%exp-data%%
+    shape_data: %%shape_data%%
+    cxr_data: %%cxr_data%%
+    pop_data: %%pop_data%%
+    exp_data: %%exp_data%%
 
 simulation:
-    nyears: 10
+    nyears: 2
     r0: 2.5
-    exposed-duration-shape: 4.5
-    exposed-duration-scale: 1.0
-    infectious-duration-mean: 7.0
-
+    exposed_duration_shape: 4.5
+    exposed_duration_scale: 1.0
+    infectious_duration_mean: 7.0
+    gravity_k: 500
+    gravity_a: 1
+    gravity_b: 1
+    gravity_c: 2
+    naive_population: true
 """
 
 
@@ -41,11 +45,11 @@ class AbmLoader:
 
         assert mode.upper() == "ABM", f"AbmLoader only supports ABM mode, got {mode}"
 
-        yaml = __yaml__.replace("%%data-dir%%", str(output_dir.absolute()))
-        yaml = yaml.replace("%%shape-data%%", str(shape_filename.name))
-        yaml = yaml.replace("%%cxr-data%%", str(cxr_filename.name))
-        yaml = yaml.replace("%%pop-data%%", str(pop_filename.name))
-        yaml = yaml.replace("%%exp-data%%", str(exp_filename.name))
+        yaml = __yaml__.replace("%%data_dir%%", str(output_dir.absolute()))
+        yaml = yaml.replace("%%shape_data%%", str(shape_filename.name))
+        yaml = yaml.replace("%%cxr_data%%", str(cxr_filename.name))
+        yaml = yaml.replace("%%pop_data%%", str(pop_filename.name))
+        yaml = yaml.replace("%%exp_data%%", str(exp_filename.name))
         (Path(output_dir) / "config.yaml").write_text(yaml)
 
         source_dir = Path(__file__).parent.parent / "models"
