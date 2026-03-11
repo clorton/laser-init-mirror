@@ -471,7 +471,10 @@ def cumulative_incidence(model, output_dir: Path | None):
 
     # Calculate total population for each center
     # Use final timestep to get total population (S + E + I + R)
-    pop = model.nodes.S[-1, :] + model.nodes.E[-1, :] + model.nodes.I[-1, :] + model.nodes.R[-1, :]
+    pop = model.nodes.S[-1, :]
+    pop += model.nodes.E[-1, :] if hasattr(model.nodes, "E") else 0
+    pop += model.nodes.I[-1, :]
+    pop += model.nodes.R[-1, :] if hasattr(model.nodes, "R") else 0
 
     # Calculate cumulative cases per center (sum over all time)
     cum_cases = model.nodes.newly_infected.sum(axis=0)

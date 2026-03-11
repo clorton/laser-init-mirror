@@ -56,8 +56,8 @@ E.g., laser-init NGA ADM2 2010 2025
 @click.option(
     "--model",
     type=click.Choice(["SI", "SIR", "SEIR"], case_sensitive=False),
-    default="SIR",
-    help="Select the type of epidemiological model to prepare data for (default: SIR)",
+    default="SEIR",
+    help="Select the type of epidemiological model to prepare data for (default: SEIR)",
 )
 @click.option(
     "--shape-source",

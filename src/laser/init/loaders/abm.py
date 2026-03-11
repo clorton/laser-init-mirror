@@ -48,8 +48,8 @@ class AbmLoader:
         yaml = yaml.replace("%%exp-data%%", str(exp_filename.name))
         (Path(output_dir) / "config.yaml").write_text(yaml)
 
-        source_dir = Path(__file__).parent.parent
-        shutil.copy2(source_dir / "seir.py", Path(output_dir) / "seir.py")
+        source_dir = Path(__file__).parent.parent / "models"
+        shutil.copy2(source_dir / f"{model.lower()}.py", Path(output_dir) / f"{model.lower()}.py")
         shutil.copy2(source_dir / "plot.py", Path(output_dir) / "plot.py")
 
         return
