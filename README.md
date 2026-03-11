@@ -8,11 +8,13 @@ laser-init <country> <level> <start-year> <end-year>
 
 `laser-init` requires a country, an administrative level, a starting year, and an ending year (inclusive)
 
-`country` may be a country name, or preferrably, an ISO-3 code, e.g., "PAK"
+`country` may be a country name*, or preferrably, an ISO-3 code, e.g., "PAK"
+
+\* Fuzzy matching for country names has not been implemented yet, so the tool is somewhat picky about country names.
 
 `level` is generally in the range of [0-4] although shape data beyond level 2 may not be available or reliable
 
-`laser-init` will attempt to download shapefile data for the selected country at the selected administrative (LGA) level and aggregate population data, using [RasterToolkit](https://github.com/InstituteforDiseaseModeling/RasterToolkit) from a population raster file with it to produce a [GeoPackage] file with both the administrative boundaries and the population of each LGA. `laser-init` will also attempt to download demographics statistics for the selected country over the specified time span and extract CBR and CDR for the time span, population age distribution as of the start (base) year, and a survival curve/life expectancy curve also as of the start/base year.
+`laser-init` will attempt to download shapefile data for the selected country at the selected administrative (LGA) level and aggregate population data from a population raster file with it, using [RasterToolkit](https://github.com/InstituteforDiseaseModeling/RasterToolkit), to produce a [GeoPackage](https://www.geopackage.org/) file with both the administrative boundaries and the population of each LGA. The GeoPackage file can be loaded by [`GeoPandas`](https://geopandas.org/en/stable/) into a GeoDataFrame with `nodeid`, `name`, `population`, and `geometry` columns (at a minimum). `laser-init` will also attempt to download demographics statistics for the selected country over the specified time span and extract CBR and CDR for the time span, population age distribution as of the start (base) year, and a survival curve/life expectancy curve also as of the start year.
 
 `laser-init` will then place the extracted data into a folder along with a generic [SI/SIR/SEIR] LASER model script and a supporting script for plotting simulation results. The model script, e.g. `seir.py` should be executable in the Python environment `laser-init` is installed into or any Python environment with [`laser.generic`](https://pypi.org/project/laser.generic/) installed.
 
@@ -46,10 +48,11 @@ total 12440
 
 The .png files in the directory give some visuals for validation of the downloaded data. `report.pdf` is merely a single PDF file with the same visuals.
 
-`provenance.json` contains information about the sources of the data in the geopackage and csv files.
+`provenance.json` contains information about the sources of the data in the GeoPackage and CSV files.
 
-`seir.py` will run a LASER implementation of an SEIR ABM with the number of population nodes and population found in the `NGA_admin2.gpkg` geopackage file. It will references `config.yaml` to find these data files, so `seir.py`, `plot.py`, and `config.yaml` could be moved to another location. `config.yaml` also contains some basic disease dynamics parameters.
+`seir.py` will run a LASER implementation of an SEIR ABM with the number of population nodes and population found in the `NGA_admin2.gpkg` geopackage file. It references `config.yaml` to find these data files, so `seir.py`, `plot.py`, and `config.yaml` could be moved to another location. `config.yaml` also contains some basic disease dynamics parameters.
 
+The model currently defaults to using a gravity model to determine spatial connectivity. Parameters for the gravity model _have not yet_ been exposed in  `config.yaml`.
 
 ## Options
 
