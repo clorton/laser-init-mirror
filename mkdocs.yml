@@ -57,6 +57,7 @@ nav:
   - Configuration: configuration.md
   - Data Sources: datasources.md
   - Models: models.md
+  - Troubleshooting: troubleshooting.md
   - Architecture: architecture.md
   - API Reference:
       - Core:

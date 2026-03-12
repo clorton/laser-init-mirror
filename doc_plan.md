@@ -263,17 +263,125 @@ You should see generated HTML files including:
 
 ### What's Complete
 
-Phase 2 part 3 is now complete:
+Phase 2 parts 3 and 4 are now complete:
+
+**Part 3 - Documentation restructuring:**
 - ✅ Landing page (index.md) converted from boilerplate
 - ✅ Installation guide created
 - ✅ Quick start guide created
+- ✅ Troubleshooting guide created
 - ✅ All existing docs reviewed (userguide, datasources, models, architecture, configuration, contributing)
+
+**Part 4 - API reference:**
+- ✅ API reference directory structure created
+- ✅ Core module API pages (cli, config, utils, logger)
+- ✅ Extractor API pages (gadm, geoboundaries, worldpop, unwpp, unocha)
+- ✅ Transformer API pages (gadm, geoboundaries, unwpp, unocha)
+- ✅ Model API pages (si, sir, seir, plot)
+- ✅ mkdocs.yml navigation updated with troubleshooting page
 
 ### What's Next
 
 Remaining tasks for Phase 2:
-- Create troubleshooting guide page
-- Create API reference structure (Phase 2 part 4)
+- Verify all docstrings follow Google style (manual code review)
+- Ensure all docstrings include Args, Returns, Raises sections (manual code review)
+
+These tasks are best done through code review and are not part of the automated documentation setup.
+
+## Verification for Phase 2 Parts 3 & 4 (Complete)
+
+After completing all Phase 2 work, verify by:
+
+### 1. Check all documentation files exist:
+
+```shell
+ls -1 docs/
+ls -1 docs/api/
+ls -1 docs/api/extractors/
+ls -1 docs/api/transformers/
+ls -1 docs/api/models/
+```
+
+You should see all documentation and API reference files.
+
+### 2. Preview the complete documentation:
+
+```shell
+mkdocs serve
+```
+
+Then visit http://127.0.0.1:8000 and verify:
+
+- [ ] Home page loads correctly
+- [ ] All navigation sections work (Getting Started, User Guide, Configuration, etc.)
+- [ ] Troubleshooting page appears in navigation
+- [ ] API Reference section expands with all modules
+- [ ] All API reference pages load and show module documentation
+- [ ] Code examples are syntax highlighted
+- [ ] Search works for all content
+- [ ] Light/dark mode toggle works
+
+### 3. Build the complete site:
+
+```shell
+mkdocs build
+```
+
+Should complete without errors. Warnings about docstrings are OK and expected.
+
+### 4. Verify API documentation renders:
+
+Visit these pages in your browser after running `mkdocs serve`:
+
+- http://127.0.0.1:8000/api/cli/
+- http://127.0.0.1:8000/api/extractors/gadm/
+- http://127.0.0.1:8000/api/transformers/unocha/
+- http://127.0.0.1:8000/api/models/seir/
+
+Each should show:
+- Module/class documentation from docstrings
+- Function signatures
+- Source code toggle (if docstrings exist)
+
+### 5. Test navigation flow:
+
+Try navigating through the documentation as a new user would:
+
+1. Start at Home
+2. Go to Installation
+3. Follow Quick Start
+4. Explore API Reference
+5. Check Troubleshooting for common issues
+
+### Summary of Created Files
+
+**New documentation pages:**
+- docs/installation.md
+- docs/quickstart.md
+- docs/troubleshooting.md
+
+**API reference pages (17 total):**
+- docs/api/cli.md
+- docs/api/config.md
+- docs/api/utils.md
+- docs/api/logger.md
+- docs/api/extractors/gadm.md
+- docs/api/extractors/geoboundaries.md
+- docs/api/extractors/worldpop.md
+- docs/api/extractors/unwpp.md
+- docs/api/extractors/unocha.md
+- docs/api/transformers/gadm.md
+- docs/api/transformers/geoboundaries.md
+- docs/api/transformers/unwpp.md
+- docs/api/transformers/unocha.md
+- docs/api/models/si.md
+- docs/api/models/sir.md
+- docs/api/models/seir.md
+- docs/api/models/plot.md
+
+**Modified files:**
+- docs/index.md (updated from boilerplate)
+- mkdocs.yml (added troubleshooting to navigation)
 
 ----
 
@@ -311,16 +419,16 @@ Remaining tasks for Phase 2:
 - [x] Review and update docs/contributing.md
 - [x] Create installation guide page
 - [x] Create quick start tutorial page
-- [ ] Create troubleshooting guide page
-- [ ] Create API reference structure
+- [x] Create troubleshooting guide page
+- [x] Create API reference structure
 
 #### 4. Create API reference documentation
 - [x] Set up mkdocstrings configuration in mkdocs.yml
-- [ ] Create API reference page for core modules (config, cli, utils)
-- [ ] Create API reference page for logger module
-- [ ] Create API reference page for extractors (gadm, geoboundaries, worldpop, unwpp, unocha)
-- [ ] Create API reference page for transformers (gadm, geoboundaries, unwpp, unocha)
-- [ ] Create API reference page for models (si, sir, seir, plot)
+- [x] Create API reference page for core modules (config, cli, utils)
+- [x] Create API reference page for logger module
+- [x] Create API reference page for extractors (gadm, geoboundaries, worldpop, unwpp, unocha)
+- [x] Create API reference page for transformers (gadm, geoboundaries, unwpp, unocha)
+- [x] Create API reference page for models (si, sir, seir, plot)
 - [ ] Verify all docstrings follow Google style
 - [ ] Ensure all docstrings include Args, Returns, Raises sections
 
