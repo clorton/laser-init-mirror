@@ -95,7 +95,7 @@ def main(config_file, data_dir):
 
     model.run()
 
-    show_plots(model, output_dir=Path(__file__).parent)
+    show_plots(model, output_dir=Path(__file__).parent, name="seir")
 
     return
 

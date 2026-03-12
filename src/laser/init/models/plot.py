@@ -5,7 +5,7 @@ import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
 
 
-def show_plots(model, output_dir: Path | None):
+def show_plots(model, output_dir: Path | None, name: str = "model") -> Path:
     """Generate all visualization plots for model output.
 
     Creates a comprehensive set of plots for analyzing epidemic model results,
@@ -32,13 +32,15 @@ def show_plots(model, output_dir: Path | None):
     ]
     figs = (plot_func(model, output_dir) for plot_func in plots)
     if output_dir:
-        pdf_path = Path(output_dir) / "output.pdf"
+        pdf_path = Path(output_dir) / f"{name}_output.pdf"
         with PdfPages(pdf_path) as pdf:
             for fig in figs:
                 pdf.savefig(fig)
                 plt.close(fig)
+    else:
+        pdf_path = None
 
-    return
+    return pdf_path
 
 
 def stacked_e_and_i(model, output_dir: Path | None):
@@ -375,6 +377,9 @@ def import_pressure(model, output_dir: Path | None):
 
     # Get the indices of the top 6 nodes
     top_nodes = np.argsort(total_cases)[-6:]
+
+    # Reverse node indices so that the node with the highest cases is plotted first
+    top_nodes = top_nodes[::-1]
 
     # Create 2x3 subplot grid
     fig, axes = plt.subplots(2, 3, figsize=(18, 12))
