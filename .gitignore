@@ -17,3 +17,6 @@ htmlcov/
 logs/
 .vscode/launch.json
 .DS_Store
+
+# MkDocs build output
+site/
