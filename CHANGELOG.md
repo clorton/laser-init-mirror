@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- Comprehensive documentation overhaul
+  - Updated pyproject.toml with proper package description
+  - Completely rewrote README.md with installation instructions, prerequisites, troubleshooting, advanced usage, and comprehensive examples
+  - Created docs/configuration.md: Complete configuration guide covering global config, run config, model parameters, and API keys
+  - Created docs/userguide.md: Comprehensive user guide with workflows, tutorials, and best practices
+  - Created docs/datasources.md: Detailed documentation of all data sources (UNOCHA, geoBoundaries, GADM, WorldPop, UN WPP) with comparison tables and selection guidance
+  - Created docs/models.md: Complete epidemiological models documentation (SI, SIR, SEIR) with theory, parameters, spatial connectivity, and extension examples
+  - Created docs/architecture.md: Developer documentation with system architecture, component interfaces, data flow, and extension points
+  - Created docs/contributing.md: Contributing guide with development workflow, code style, testing guidelines, and PR process
+  - Created docs/examples-plan.md: Comprehensive plan for examples directory with 20+ example scripts and notebooks
 - Comprehensive docstring coverage across the entire codebase
   - Added docstrings to all extractor classes (GADM, GeoBoundaries, UNOCHA, UNWPP, WorldPop)
   - Added docstrings to all transformer classes (GADM, GeoBoundaries, UNOCHA, UNWPP)

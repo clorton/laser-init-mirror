@@ -1,24 +1,85 @@
 # laser-init - a tool to bootstrap spatial modeling with LASER
 
+**laser-init** prepares geospatial, population, and demographic data for epidemiological modeling with [LASER](https://github.com/InstituteforDiseaseModeling/laser-core). It downloads administrative boundary shapefiles, population raster data, and demographic statistics, then generates a ready-to-run spatial disease model.
+
+## Prerequisites
+
+- Python 3.10 or higher
+- Recommended: [uv](https://docs.astral.sh/uv/) for fast dependency management
+- Internet connection for downloading data sources
+- ~500MB-2GB of disk space for cached data (varies by country and data source)
+
+## Installation
+
+### Using uv (recommended)
+
+```shell
+# Clone the repository
+git clone https://github.com/InstituteforDiseaseModeling/laser-init.git
+cd laser-init
+
+# Install with uv
+uv sync
+```
+
+### Using pip
+
+```shell
+# Clone the repository
+git clone https://github.com/InstituteforDiseaseModeling/laser-init.git
+cd laser-init
+
+# Install the package
+pip install -e .
+```
+
+## Quick Start
+
+Once installed, you can run `laser-init` from the command line:
+
+```shell
+# Generate model data for Nigeria, admin level 2, years 2000-2025
+laser-init NGA 2 2000 2025
+```
+
+This will create a directory `NGA/2000/` with all necessary data files and a ready-to-run SEIR model script.
+
 ## Basic Usage
 
 ```shell
 laser-init <country> <level> <start-year> <end-year>
 ```
 
-`laser-init` requires a country, an administrative level, a starting year, and an ending year (inclusive)
+### Arguments
 
-`country` may be a country name*, or preferrably, an ISO-3 code, e.g., "PAK"
+- **`country`**: Country name or ISO-3 code (e.g., "PAK", "Nigeria", "Pakistan")
+  - ISO-3 codes are preferred for precision
+  - Country names support fuzzy matching, including common misspellings and French names
+  - Optionally configure OpenAI or Anthropic API for enhanced country name resolution (see [Configuration](#configuration))
 
-\* Fuzzy matching for country names has not been implemented yet, so the tool is somewhat picky about country names.
+- **`level`**: Administrative level (0-4)
+  - 0 = country level
+  - 1 = state/province
+  - 2 = district/county
+  - 3-4 = sub-district (availability varies by country and data source)
+  - Note: Data beyond level 2 may not be available or reliable for all countries
 
-`level` is generally in the range of [0-4] although shape data beyond level 2 may not be available or reliable
+- **`start-year`**: Starting year for demographic data (1950-2050)
 
-`laser-init` will attempt to download shapefile data for the selected country at the selected administrative (LGA) level and aggregate population data from a population raster file with it, using [RasterToolkit](https://github.com/InstituteforDiseaseModeling/RasterToolkit), to produce a [GeoPackage](https://www.geopackage.org/) file with both the administrative boundaries and the population of each LGA. The GeoPackage file can be loaded by [`GeoPandas`](https://geopandas.org/en/stable/) into a GeoDataFrame with `nodeid`, `name`, `population`, and `geometry` columns (at a minimum). `laser-init` will also attempt to download demographics statistics for the selected country over the specified time span and extract CBR and CDR for the time span, population age distribution as of the start (base) year, and a survival curve/life expectancy curve also as of the start year.
+- **`end-year`**: Ending year for demographic data (1950-2050, inclusive)
 
-`laser-init` will then place the extracted data into a folder along with a generic [SI/SIR/SEIR] LASER model script and a supporting script for plotting simulation results. The model script, e.g. `seir.py` should be executable in the Python environment `laser-init` is installed into or any Python environment with [`laser.generic`](https://pypi.org/project/laser.generic/) installed.
+### What laser-init Does
 
-Note: the default shapefile source, UNOCHA (see below), has a single, world-wide GeoDatabase which is quite large. However, `laser-init` will cache that file locally for future use.
+1. **Downloads shapefile data** for the specified country at the selected administrative level
+2. **Downloads population raster data** (e.g., from WorldPop)
+3. **Aggregates population** from raster to administrative boundaries using [RasterToolkit](https://github.com/InstituteforDiseaseModeling/RasterToolkit)
+4. **Downloads demographic statistics** from UN World Population Prospects:
+   - Crude Birth Rate (CBR) and Crude Death Rate (CDR)
+   - Population age distribution
+   - Life expectancy/survival curves
+5. **Generates a GeoPackage** with administrative boundaries, population, and geometry
+6. **Creates a ready-to-run model script** (SI, SIR, or SEIR)
+7. **Generates validation plots** and a combined PDF report
 
 ## Example
 
@@ -29,7 +90,7 @@ laser-init NGA 2 2000 2025
 End result:
 
 ```text
-% ls -l NGA/2000 
+% ls -l NGA/2000
 total 12440
 -rw-r--r--  1 user  staff  3170304 Mar 10 00:18 NGA_admin2.gpkg
 -rw-r--r--  1 user  staff      265 Mar 10 00:18 age_dist.csv
@@ -46,32 +107,284 @@ total 12440
 -rw-r--r--  1 user  staff     3301 Mar 10 00:18 seir.py
 ```
 
-The .png files in the directory give some visuals for validation of the downloaded data. `report.pdf` is merely a single PDF file with the same visuals.
+### Output Files
 
-`provenance.json` contains information about the sources of the data in the GeoPackage and CSV files.
+- **`NGA_admin2.gpkg`**: GeoPackage with administrative boundaries, population, and geometry
+  - Can be loaded with GeoPandas: `gpd.read_file("NGA_admin2.gpkg")`
+  - Contains columns: `nodeid`, `name`, `population`, `geometry`
 
-`seir.py` will run a LASER implementation of an SEIR ABM with the number of population nodes and population found in the `NGA_admin2.gpkg` geopackage file. It references `config.yaml` to find these data files, so `seir.py`, `plot.py`, and `config.yaml` could be moved to another location. `config.yaml` also contains some basic disease dynamics parameters.
+- **`config.yaml`**: Configuration file referencing data files and model parameters
 
-The model currently defaults to using a gravity model to determine spatial connectivity. Parameters for the gravity model _have not yet_ been exposed in  `config.yaml`.
+- **`seir.py`**: Ready-to-run SEIR model script
+  - Run with: `python seir.py` or `python seir.py --config config.yaml`
+  - Requires `laser.generic` package
+
+- **`plot.py`**: Script for generating simulation result plots
+
+- **Demographic data files**:
+  - `age_dist.csv`: Population age distribution for the start year
+  - `cxr.csv`: Crude Birth Rate (CBR) and Crude Death Rate (CDR) time series
+  - `life_exp.csv`: Life expectancy/survival curve for the start year
+
+- **Validation plots**:
+  - `age_distribution.png`: Age pyramid for the start year
+  - `cbr_cdr.png`: Birth and death rates over the simulation period
+  - `choropleth.png`: Population density map
+  - `life_expectancy.png`: Survival curve
+  - `report.pdf`: Combined PDF with all validation plots
+
+- **`provenance.json`**: Metadata tracking data sources and download timestamps
 
 ## Options
 
-### `--shape-source`
+### `--model` (Model Type)
 
-Currently three shapefile sources are supported:
+Choose which epidemiological model to generate (default: `SEIR`):
 
-- [UNOCHA](https://knowledge.base.unocha.org/wiki/spaces/imtoolbox/pages/2557378679/Administrative+Boundaries+COD-AB)
-- [geoBoundaries](https://github.com/wmgeolab/geoBoundaries/)
-- [GADM](https://gadm.org/)
+```shell
+laser-init NGA 2 2000 2025 --model SI    # Susceptible-Infectious
+laser-init NGA 2 2000 2025 --model SIR   # Susceptible-Infectious-Recovered
+laser-init NGA 2 2000 2025 --model SEIR  # Susceptible-Exposed-Infectious-Recovered
+```
 
-### `--raster-source`
+- **SI**: Simple model with susceptible and infectious states
+- **SIR**: Adds recovery (immunity) to the model
+- **SEIR**: Includes an exposed (latent) period before infectiousness
 
-Currently only one population raster file source is supported:
+### `--mode` (Modeling Mode)
 
-- [WorldPop](https://hub.worldpop.org/)
+Select the modeling approach (default: `ABM`):
 
-### `--stats-source`
+```shell
+laser-init NGA 2 2000 2025 --mode ABM  # Agent-Based Model
+laser-init NGA 2 2000 2025 --mode MPM  # Metapopulation Model
+```
 
-Currently only one demographics statistics source is supported:
+### `--shape-source` (Administrative Boundaries)
 
-- [UN World Population Prospects](https://population.un.org/wpp/)
+Choose the source for administrative boundary shapefiles:
+
+```shell
+laser-init NGA 2 2000 2025 --shape-source unocha         # Default
+laser-init NGA 2 2000 2025 --shape-source geoboundaries
+laser-init NGA 2 2000 2025 --shape-source gadm
+```
+
+Supported sources:
+- **[UNOCHA COD-AB](https://knowledge.base.unocha.org/wiki/spaces/imtoolbox/pages/2557378679/Administrative+Boundaries+COD-AB)** (default): UN Office for Coordination of Humanitarian Affairs
+  - High quality, humanitarian-focused
+  - World-wide geodatabase (~1-2GB, cached locally)
+  - Best coverage for crisis-affected regions
+
+- **[geoBoundaries](https://github.com/wmgeolab/geoBoundaries/)**: Open geospatial boundary database
+  - Academic research quality
+  - Good global coverage
+
+- **[GADM](https://gadm.org/)**: Database of Global Administrative Areas
+  - Comprehensive global coverage
+  - Frequent updates
+
+See [docs/datasources.md](docs/datasources.md) for detailed comparison.
+
+### `--raster-source` (Population Data)
+
+Choose the population raster data source:
+
+```shell
+laser-init NGA 2 2000 2025 --raster-source worldpop  # Default and only option
+```
+
+Currently supported:
+- **[WorldPop](https://hub.worldpop.org/)** (default): High-resolution population distribution
+
+### `--stats-source` (Demographics Statistics)
+
+Choose the demographic statistics source:
+
+```shell
+laser-init NGA 2 2000 2025 --stats-source unwpp  # Default and only option
+```
+
+Currently supported:
+- **[UN World Population Prospects](https://population.un.org/wpp/)** (default): Comprehensive demographic indicators
+
+### `--output-dir` (Output Directory)
+
+Specify a custom output directory:
+
+```shell
+laser-init NGA 2 2000 2025 --output-dir /path/to/output
+```
+
+Default: `./ISOCODE/start_year` (e.g., `./NGA/2000`)
+
+## Configuration
+
+You can create an optional configuration file to set default preferences and API keys for enhanced country name resolution.
+
+Create `~/.laser/laser_config.yaml` or `laser_config.yaml` in your current directory:
+
+```yaml
+# Default data source preferences
+shape_source: unocha      # or geoboundaries, gadm
+raster_source: worldpop
+stats_source: unwpp
+
+# Optional: API keys for LLM-enhanced country name matching
+# If provided, laser-init can use AI to resolve ambiguous country names
+openai_api_key: sk-your-key-here
+anthropic_api_key: sk-ant-your-key-here
+```
+
+Alternatively, use JSON format (`laser_config.json`):
+
+```json
+{
+  "shape_source": "unocha",
+  "raster_source": "worldpop",
+  "stats_source": "unwpp",
+  "openai_api_key": "sk-your-key-here",
+  "anthropic_api_key": "sk-ant-your-key-here"
+}
+```
+
+## Running the Generated Model
+
+After running `laser-init`, you'll have a complete model setup:
+
+```shell
+cd NGA/2000
+python seir.py
+```
+
+The model will:
+1. Load configuration and data from `config.yaml`
+2. Initialize the population across administrative units
+3. Simulate disease transmission using a spatial gravity model
+4. Generate output plots in the same directory
+
+### Customizing Model Parameters
+
+Edit `config.yaml` to adjust model behavior:
+
+```yaml
+data-dir: /path/to/NGA/2000
+
+datafiles:
+    shape-data: NGA_admin2.gpkg
+    cxr-data: cxr.csv
+    pop-data: age_dist.csv
+    exp-data: life_exp.csv
+
+simulation:
+    nyears: 10                        # Simulation duration in years
+    r0: 2.5                           # Basic reproduction number
+    exposed-duration-shape: 4.5       # Exposed period distribution shape (SEIR only)
+    exposed-duration-scale: 1.0       # Exposed period distribution scale (SEIR only)
+    infectious-duration-mean: 7.0     # Mean infectious period in days
+    naive-population: true            # If false, initialize with (1-1/R0)S in R compartment
+```
+
+**Note**: Spatial connectivity is determined by a gravity model. Gravity model parameters are currently hard-coded in the model script but can be modified by editing the generated Python file.
+
+## Troubleshooting
+
+### Country Not Found
+
+**Error**: "Could not determine ISO code for country: XYZ"
+
+**Solutions**:
+- Use the ISO-3 code instead (e.g., "PAK" instead of "Pakistan")
+- Check spelling and try common variants
+- Try the French name (e.g., "Chine" for China)
+- Configure OpenAI or Anthropic API key for enhanced matching
+
+### No Data Available for Administrative Level
+
+**Error**: Data source has no data for level 3 or 4
+
+**Solutions**:
+- Try a lower administrative level (0, 1, or 2)
+- Try a different `--shape-source` (coverage varies by source and country)
+- Check the data source websites for country-specific coverage
+
+### Large Download Size
+
+**Issue**: First run downloads large files (e.g., UNOCHA's 1-2GB global database)
+
+**Solutions**:
+- Files are cached locally in `~/.cache/laser-init/` for future use
+- Subsequent runs will be much faster
+- Consider using `--shape-source geoboundaries` or `gadm` for smaller downloads
+
+### Memory Issues
+
+**Issue**: Processing fails with memory errors
+
+**Solutions**:
+- Use a lower administrative level (fewer polygons)
+- Close other applications
+- Try a different shape source with simpler geometries
+
+### Missing Dependencies
+
+**Error**: "No module named 'laser.generic'" when running model
+
+**Solutions**:
+```shell
+pip install laser.generic
+# or
+uv pip install laser.generic
+```
+
+## Advanced Usage
+
+### Batch Processing Multiple Countries
+
+```shell
+for country in NGA KEN ETH; do
+  laser-init $country 2 2000 2025
+done
+```
+
+### Custom Model Modifications
+
+The generated model scripts are fully editable Python files. Common modifications:
+
+1. **Change initial seed locations**: Edit the seeding logic in `seir.py`
+2. **Modify transmission parameters**: Adjust `r0`, `beta`, or duration parameters
+3. **Add interventions**: Insert intervention logic into the model components
+4. **Customize plots**: Modify `plot.py` or import it and call specific plot functions
+
+### Using Output Data in Other Tools
+
+The GeoPackage can be used in any GIS tool:
+
+```python
+import geopandas as gpd
+import matplotlib.pyplot as plt
+
+# Load the data
+gdf = gpd.read_file("NGA/2000/NGA_admin2.gpkg")
+
+# Plot population density
+gdf.plot(column="population", legend=True, figsize=(10, 10))
+plt.title("Population Distribution")
+plt.show()
+```
+
+## Documentation
+
+- [User Guide](docs/userguide.md) - Comprehensive tutorial and workflows
+- [Data Sources](docs/datasources.md) - Detailed comparison of data sources
+- [Models](docs/models.md) - Epidemiological model documentation
+- [Architecture](docs/architecture.md) - Developer documentation
+- [Contributing](docs/contributing.md) - Development setup and guidelines
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Support
+
+For issues, questions, or contributions, please visit the [GitHub repository](https://github.com/InstituteforDiseaseModeling/laser-init).
