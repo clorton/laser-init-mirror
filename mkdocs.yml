@@ -161,8 +161,6 @@ extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/laser-base/laser-init
-  version:
-    provider: mike
 
 # Extra JavaScript for MathJax support
 extra_javascript:
