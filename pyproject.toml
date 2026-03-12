@@ -14,7 +14,7 @@ rastertoolkit = { git = "https://github.com/institutefordiseasemodeling/rasterto
 [project]
 name = "laser-init"
 version = "0.1.0"
-description = "Add your description here"
+description = "A tool to bootstrap spatial epidemiological modeling with LASER by preparing geospatial, population, and demographic data"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [

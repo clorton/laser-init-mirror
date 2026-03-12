@@ -1,87 +1,79 @@
 # Docstring Analysis for laser-init Package
 
-Generated: 2026-03-11
+Generated: 2026-03-11 (Updated after documentation improvements)
 
 ## 1. Functions with No Docstring
 
-### [src/laser/init/loaders/mpm.py](src/laser/init/loaders/mpm.py)
-- `MpmLoader.__init__` (line 2)
-- `MpmLoader.description` (line 6)
-- `MpmLoader.emit_script` (line 9)
+### [src/laser/init/cli.py](src/laser/init/cli.py)
+- `transform_stats_data` (line 265)
+  - **Missing**: Complete docstring - no description, parameters, or return value documented
+
+## 2. Functions with Incomplete Docstrings
 
 ### [src/laser/init/extractors/gadm.py](src/laser/init/extractors/gadm.py)
 - `GadmExtractor.__init__` (line 15)
-- `GadmExtractor.description` (line 22)
-- `GadmExtractor.extract` (line 25)
+  - **Missing**: Returns section (should document returns None)
 
 ### [src/laser/init/extractors/geoboundaries.py](src/laser/init/extractors/geoboundaries.py)
 - `GeoBoundariesExtractor.__init__` (line 14)
-- `GeoBoundariesExtractor.description` (line 18)
-- `GeoBoundariesExtractor.extract` (line 21)
+  - **Missing**: Returns section
 
 ### [src/laser/init/extractors/unocha.py](src/laser/init/extractors/unocha.py)
 - `UnochaExtractor.__init__` (line 14)
-- `UnochaExtractor.description` (line 18)
-- `UnochaExtractor.extract` (line 21)
+  - **Missing**: Returns section
 
 ### [src/laser/init/extractors/unwpp.py](src/laser/init/extractors/unwpp.py)
 - `UnwppExtractor.__init__` (line 35)
-- `UnwppExtractor.description` (line 39)
-- `UnwppExtractor.extract` (line 42)
+  - **Missing**: Returns section
 
 ### [src/laser/init/extractors/worldpop.py](src/laser/init/extractors/worldpop.py)
 - `WorldPopExtractor.__init__` (line 32)
-- `WorldPopExtractor.description` (line 36)
-- `WorldPopExtractor.extract` (line 39)
-
-### [src/laser/init/transformers/unwpp.py](src/laser/init/transformers/unwpp.py)
-- `UnwppTransformer.__init__` (line 12)
-- `UnwppTransformer.description` (line 16)
-- `UnwppTransformer.transform` (line 19)
-
-### [src/laser/init/transformers/geoboundaries.py](src/laser/init/transformers/geoboundaries.py)
-- `GeoBoundariesTransformer.__init__` (line 13)
-- `GeoBoundariesTransformer.description` (line 17)
-- `GeoBoundariesTransformer.transform` (line 22)
-
-### [src/laser/init/transformers/unocha.py](src/laser/init/transformers/unocha.py)
-- `UnochaTransformer.__init__` (line 21)
-- `UnochaTransformer.description` (line 25)
-- `UnochaTransformer.transform` (line 28)
-- `read_gbd_quietly` (line 110)
+  - **Missing**: Returns section
 
 ### [src/laser/init/transformers/gadm.py](src/laser/init/transformers/gadm.py)
 - `GadmTransformer.__init__` (line 13)
-- `GadmTransformer.description` (line 17)
-- `GadmTransformer.transform` (line 20)
+  - **Missing**: Returns section
+
+### [src/laser/init/transformers/geoboundaries.py](src/laser/init/transformers/geoboundaries.py)
+- `GeoBoundariesTransformer.__init__` (line 13)
+  - **Missing**: Returns section
+
+### [src/laser/init/transformers/unocha.py](src/laser/init/transformers/unocha.py)
+- `UnochaTransformer.__init__` (line 21)
+  - **Missing**: Returns section
+
+### [src/laser/init/transformers/unwpp.py](src/laser/init/transformers/unwpp.py)
+- `UnwppTransformer.__init__` (line 12)
+  - **Missing**: Returns section
+
+### [src/laser/init/loaders/mpm.py](src/laser/init/loaders/mpm.py)
+- `MpmLoader.__init__` (line 2)
+  - **Missing**: Returns section
+- `MpmLoader.emit_script` (line 15)
+  - **Missing**: All parameters (mode, model, shape_filename, cxr_filename, pop_filename, exp_filename, output_dir)
+
+### [src/laser/init/loaders/abm.py](src/laser/init/loaders/abm.py)
+- `AbmLoader.__init__` (line 28)
+  - **Missing**: Returns section
 
 ### [src/laser/init/utils.py](src/laser/init/utils.py)
-- `update_local_provenance` (line 226)
-- `clip_quietly` (line 244)
-- `inform` (line 256)
-- `error` (line 263)
-
-### [src/laser/init/cli.py](src/laser/init/cli.py)
-- `cli` (line 80) - *Note: function has a docstring, but @click.command help text may be intended to replace it*
-- `validate_arguments` (line 125)
-- `download_shape_data` (line 168)
-- `download_raster_data` (line 188)
-- `download_demographic_stats` (line 206)
-- `emit_model_script` (line 280)
-- `write_plots` (line 305)
-- `plot_population_choropleth` (line 327)
-- `plot_cbr_and_cdr` (line 346)
-- `plot_age_distribution` (line 408)
-- `plot_life_expectancy` (line 469)
+- `download_file` (line 146)
+  - **Missing**: Raises section (function raises exceptions on download failure)
 
 ### [src/laser/init/models/si.py](src/laser/init/models/si.py)
 - `main` (line 33)
+  - **Missing**: Raises section (Click exceptions for invalid paths)
 
 ### [src/laser/init/models/sir.py](src/laser/init/models/sir.py)
 - `main` (line 33)
+  - **Missing**: Raises section
+
+### [src/laser/init/models/seir.py](src/laser/init/models/seir.py)
+- `main` (line 33)
+  - **Missing**: Raises section
 
 ### [src/laser/init/models/plot.py](src/laser/init/models/plot.py)
-- `show_plots` (line 8)
+All plotting functions missing Raises sections:
 - `stacked_e_and_i` (line 31)
 - `r_effective_t` (line 84)
 - `choropleth_snapshots` (line 110)
@@ -91,73 +83,87 @@ Generated: 2026-03-11
 - `peak_timing_peak_size` (line 382)
 - `cumulative_incidence` (line 450)
 
-### [src/laser/init/models/seir.py](src/laser/init/models/seir.py)
-- `main` (line 33)
-
-### [src/laser/init/loaders/abm.py](src/laser/init/loaders/abm.py)
-- `AbmLoader.__init__` (line 28)
-- `AbmLoader.description` (line 32)
-- `AbmLoader.emit_script` (line 35)
-
-## 2. Functions with Incomplete Docstrings
-
-### [src/laser/init/utils.py](src/laser/init/utils.py)
-- `_normalize_string` (line 29)
-  - **Missing**: Return type documentation
-
-- `iso_from_country_string` (line 80)
-  - **Missing**: Parameter descriptions, return value details, examples of usage
-
-- `level_from_string` (line 118)
-  - **Missing**: Parameter descriptions, return value details, what happens on parse failure
-
-- `download_file` (line 146)
-  - **Missing**: The `cache_dir` parameter is used but not documented in the Args section
-
-- `update_cache_provenance` (line 203)
-  - **Missing**: Return value documentation (though it returns None)
-
 ### [src/laser/init/cli.py](src/laser/init/cli.py)
-- `transform_shape_and_raster_data` (line 225)
-  - **Missing**: The docstring doesn't mention what the function returns in case of error or exception handling
+Plotting functions missing Raises sections:
+- `plot_population_choropleth` (line 327)
+- `plot_cbr_and_cdr` (line 346)
+- `plot_age_distribution` (line 408)
+- `plot_life_expectancy` (line 469)
 
 ## 3. Functions with Incorrect Docstrings
 
-### [src/laser/init/openai_query.py](src/laser/init/openai_query.py)
-- `_maybe_prefilter_candidates` (line 59)
-  - **Issue**: Returns tuple description says "(iso3_subset, names_subset)" but the docstring body doesn't explain what these subsets contain or their purpose clearly enough
+### [src/laser/init/models/si.py](src/laser/init/models/si.py)
+- `main` (line 33)
+  - **Issue**: Model architecture mismatch - code shows SI model but implementation suggests proper SI with S->I transitions
 
-- `_build_response_schema` (line 126)
-  - **Issue**: The function name suggests it builds a "response schema" but actually builds a JSON schema for structured outputs. The docstring is verbose but could more clearly state what the return value structure is.
+### [src/laser/init/models/sir.py](src/laser/init/models/sir.py)
+- `main` (line 33)
+  - **Issue**: Code initializes `scenario["E"] = 0` at line 53 but SIR model shouldn't have an Exposed state. This suggests either:
+    - The model should be SEIR instead of SIR, OR
+    - Line 53 is copy-paste error from SEIR template
 
 ### [src/laser/init/models/seir.py](src/laser/init/models/seir.py)
 - `main` (line 33)
-  - **Issue**: Lines 43-45 use simulation parameters (EXPOSED_DURATION_SHAPE, EXPOSED_DURATION_SCALE) that are specific to SEIR but the model comment says they're for SI model at line 44 comment in sir.py (copy-paste error if these files were templated)
+  - **Issue**: Parameter naming inconsistency - uses `config["data_dir"]` (underscore) at line 36, but si.py and sir.py use `config["data-dir"]` (hyphen). The YAML template in abm.py uses hyphens, so seir.py is incorrect.
 
-### [src/laser/init/transformers/unocha.py](src/laser/init/transformers/unocha.py)
-- `UnochaTransformer.transform` (line 28)
-  - **Issue**: Line 75 assigns to `gdf["nodeid"]` but line 74 uses `country_gdf` for filtering. This appears to be a bug - should probably assign `country_gdf["nodeid"]` instead of `gdf["nodeid"]`
+### [src/laser/init/extractors/gadm.py](src/laser/init/extractors/gadm.py)
+- `extract` (line 25)
+  - **Issue**: Docstring says `year` parameter is "used for cache organization" but the parameter is never used in the implementation
+
+### [src/laser/init/extractors/geoboundaries.py](src/laser/init/extractors/geoboundaries.py)
+- `extract` (line 21)
+  - **Issue**: Docstring says `year` parameter is "used for cache organization" but the parameter is never used in the implementation
+
+### [src/laser/init/openai_query.py](src/laser/init/openai_query.py)
+- `suggest_country_fix` (line 205)
+  - **Issue**: Default `model` parameter is "gpt-5.2" which doesn't exist. Should be a valid OpenAI model name like "gpt-4" or "gpt-3.5-turbo"
 
 ### [src/laser/init/utils.py](src/laser/init/utils.py)
-- `download_file` (line 146)
-  - **Issue**: The docstring says "returns Path to the downloaded file" but doesn't mention that it also updates provenance as a side effect
+- `clip_quietly` (line 244)
+  - **Issue**: Docstring says function "suppresses stdout output" but doesn't mention that suppressed output is captured in `_output` variable (line 250) which is never used
 
 ### [src/laser/init/cli.py](src/laser/init/cli.py)
-- `transform_shape_and_raster_data` (line 225)
-  - **Issue**: The docstring mentions "KeyError: If the specified shape_source is not found" in Raises section, but the function doesn't have a try-except block for KeyError - it would propagate uncaught
+- `cli` (line 80)
+  - **Issue**: Docstring at line 92 duplicates the @click.command help text without adding value
+- `emit_model_script` (line 280)
+  - **Issue**: Comment at line 284 says "For now, just print the paths" but code actually generates model scripts and copies files
 
 ---
 
 ## Summary
 
-- **Total functions without docstrings**: 58
-- **Total functions with incomplete docstrings**: 7
-- **Total functions with incorrect/misleading docstrings**: 6
+- **Total functions without docstrings**: 1
+- **Total functions with incomplete docstrings**: 30+
+- **Total functions with incorrect/misleading docstrings**: 8
 
-## Recommendations
+## Recommendations (Priority Order)
 
-1. **Priority 1**: Add docstrings to all extractor, transformer, and loader class methods, as these form the core public API
-2. **Priority 2**: Add docstrings to CLI functions, especially those that perform complex validation or transformation logic
-3. **Priority 3**: Complete parameter and return value documentation for utility functions
-4. **Priority 4**: Fix the identified bugs in transformers/unocha.py (line 75) and clarify side effects in documentation
-5. **Priority 5**: Add examples to key public functions like `iso_from_country_string` and `level_from_string`
+1. **Priority 1 - Critical Issues**:
+   - Fix model inconsistency in [sir.py:53](src/laser/init/models/sir.py#L53) - remove `scenario["E"] = 0` line
+   - Fix parameter naming in [seir.py:36](src/laser/init/models/seir.py#L36) - change `config["data_dir"]` to `config["data-dir"]`
+   - Fix invalid OpenAI model name in [openai_query.py:211](src/laser/init/openai_query.py#L211)
+
+2. **Priority 2 - Missing Core Documentation**:
+   - Add complete docstring to `transform_stats_data` in [cli.py:265](src/laser/init/cli.py#L265)
+   - Add missing parameters to `MpmLoader.emit_script` in [loaders/mpm.py:15](src/laser/init/loaders/mpm.py#L15)
+
+3. **Priority 3 - Consistency Improvements**:
+   - Add Returns sections to all `__init__` methods (13 occurrences)
+   - Add Raises sections to functions that raise exceptions (20+ occurrences)
+
+4. **Priority 4 - Documentation Accuracy**:
+   - Remove or implement unused `year` parameter in GADM and GeoBoundaries extractors
+   - Update `clip_quietly` docstring to mention captured output handling
+   - Clean up misleading comments in `emit_model_script`
+
+## Recent Improvements (Completed)
+
+✅ Added comprehensive docstrings to all extractor classes (GADM, GeoBoundaries, UNOCHA, UNWPP, WorldPop)
+✅ Added comprehensive docstrings to all transformer classes (GADM, GeoBoundaries, UNOCHA, UNWPP)
+✅ Added comprehensive docstrings to all loader classes (ABM, MPM)
+✅ Added docstrings to all CLI helper and plotting functions
+✅ Added docstrings to all model script main functions (SI, SIR, SEIR)
+✅ Added docstrings to all plotting functions in models/plot.py
+✅ Completed parameter and return value documentation in utils.py
+✅ Fixed bug in transformers/unocha.py line 75 (gdf vs country_gdf)
+✅ Improved docstring clarity in openai_query.py functions
