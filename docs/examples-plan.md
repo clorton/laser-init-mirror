@@ -51,7 +51,7 @@ examples/
 
 laser-init NGA 2 2010 2020
 cd NGA/2010
-python seir.py
+python3 ./seir.py
 ```
 
 **Learning objectives**:
@@ -75,7 +75,7 @@ laser-init MWI 2 2015 2020 --shape-source gadm --output-dir MWI/gadm
 
 # Compare population maps
 echo "Comparing population distributions..."
-python compare_sources.py MWI/*/2015/*.gpkg
+python3 compare_sources.py MWI/*/2015/*.gpkg
 ```
 
 **Learning objectives**:
@@ -96,7 +96,7 @@ sed -i 's/r0: 2.5/r0: 4.0/' config.yaml
 sed -i 's/infectious-duration-mean: 7.0/infectious-duration-mean: 5.0/' config.yaml
 
 # Run with custom parameters
-python seir.py
+python3 ./seir.py
 
 echo "Simulation complete with R0=4.0, duration=5 days"
 ```
@@ -125,12 +125,12 @@ for country in "${countries[@]}"; do
 
     # Run model
     cd "west_africa/$country/$start_year"
-    python seir.py
+    python3 ./seir.py
     cd -
 done
 
 # Generate comparative report
-python generate_regional_report.py west_africa/
+python3 generate_regional_report.py west_africa/
 ```
 
 **Learning objectives**:
