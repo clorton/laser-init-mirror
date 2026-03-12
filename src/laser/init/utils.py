@@ -294,7 +294,7 @@ def update_local_provenance(output_dir, output_filename, *files):
     Returns:
         None
     """
-    cache_root = Path(config.get("cache_dir", Path.cwd()))
+    cache_root = Path(config.get("cache_dir", Path("~").expanduser() / ".laser" / "cache"))
     provenance_file = cache_root / "provenance.json"
     sources = json.loads(provenance_file.read_text())
     provenance_local = output_dir / "provenance.json"
