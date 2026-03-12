@@ -154,18 +154,18 @@ The simulation will run and generate output plots showing disease spread across 
 ```
 KEN/
 └── 2010/
-    └── KEN_admin2.gpkg          # Geospatial data (main input)
-    └── config.yaml              # Model configuration
-    └── seir.py                  # SEIR model script
-    └── plot.py                  # Plotting utilities
-    └── age_dist.csv             # Age distribution
-    └── cxr.csv                  # Crude birth/death rates
-    └── life_exp.csv             # Life expectancy curve
-    └── provenance.json          # Data source metadata
-    └── age_distribution.png     # Age pyramid plot
-    └── cbr_cdr.png              # Birth/death rates plot
-    └── choropleth.png           # Population map
-    └── life_expectancy.png      # Survival curve plot
+    ├── KEN_admin2.gpkg          # Geospatial data (main input)
+    ├── config.yaml              # Model configuration
+    ├── seir.py                  # SEIR model script
+    ├── plot.py                  # Plotting utilities
+    ├── age_dist.csv             # Age distribution
+    ├── cxr.csv                  # Crude birth/death rates
+    ├── life_exp.csv             # Life expectancy curve
+    ├── provenance.json          # Data source metadata
+    ├── age_distribution.png     # Age pyramid plot
+    ├── cbr_cdr.png              # Birth/death rates plot
+    ├── choropleth.png           # Population map
+    ├── life_expectancy.png      # Survival curve plot
     └── report.pdf               # Combined PDF report
 ```
 
