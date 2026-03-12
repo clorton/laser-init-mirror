@@ -30,7 +30,7 @@ Administrative boundaries define the spatial units (e.g., districts, provinces) 
 
 **Provider**: United Nations Office for the Coordination of Humanitarian Affairs (OCHA)
 
-**URL**: https://knowledge.base.unocha.org/wiki/spaces/imtoolbox/pages/2557378679/Administrative+Boundaries+COD-AB
+**URL**: [https://knowledge.base.unocha.org/wiki/spaces/imtoolbox/pages/2557378679/Administrative+Boundaries+COD-AB](https://knowledge.base.unocha.org/wiki/spaces/imtoolbox/pages/2557378679/Administrative+Boundaries+COD-AB)
 
 #### Characteristics
 
@@ -77,7 +77,7 @@ laser-init SSD 2 2015 2020 --shape-source unocha
 
 #### Data Attribution
 
-**Citation**: UNOCHA, Field Information Services Section (FISS), Common Operational Datasets (CODs), Administrative Boundaries. Available from: https://data.humdata.org/
+**Citation**: UNOCHA, Field Information Services Section (FISS), Common Operational Datasets (CODs), Administrative Boundaries. Available from: [https://data.humdata.org/](https://data.humdata.org/)
 
 ---
 
@@ -85,7 +85,7 @@ laser-init SSD 2 2015 2020 --shape-source unocha
 
 **Provider**: William & Mary geoLab
 
-**URL**: https://www.geoboundaries.org/
+**URL**: [https://www.geoboundaries.org/](https://www.geoboundaries.org/)
 
 #### Characteristics
 
@@ -130,7 +130,7 @@ laser-init BRA 3 2010 2020 --shape-source geoboundaries
 
 #### Data Attribution
 
-**Citation**: Runfola, D. et al. (2020) geoBoundaries: A global database of political administrative boundaries. PLoS ONE 15(4): e0231866. https://doi.org/10.1371/journal.pone.0231866
+**Citation**: Runfola, D. et al. (2020) geoBoundaries: A global database of political administrative boundaries. PLoS ONE 15(4): e0231866. [https://doi.org/10.1371/journal.pone.0231866](https://doi.org/10.1371/journal.pone.0231866)
 
 ---
 
@@ -138,7 +138,7 @@ laser-init BRA 3 2010 2020 --shape-source geoboundaries
 
 **Provider**: University of California, Berkeley / Global Administrative Areas
 
-**URL**: https://gadm.org/
+**URL**: [https://gadm.org/](https://gadm.org/)
 
 #### Characteristics
 
@@ -183,7 +183,7 @@ laser-init IND 3 2010 2020 --shape-source gadm
 
 #### Data Attribution
 
-**Citation**: GADM database of Global Administrative Areas, version 4.1 [year]. Available from: https://gadm.org/
+**Citation**: GADM database of Global Administrative Areas, version 4.1 [year]. Available from: [https://gadm.org/](https://gadm.org/)
 
 ---
 
@@ -195,7 +195,7 @@ Population rasters provide gridded population counts used to estimate population
 
 **Provider**: WorldPop Research Group, University of Southampton
 
-**URL**: https://www.worldpop.org/
+**URL**: [https://www.worldpop.org/](https://www.worldpop.org/)
 
 #### Characteristics
 
@@ -252,7 +252,7 @@ laser-init KEN 2 2010 2020 --raster-source worldpop
 
 #### Data Attribution
 
-**Citation**: WorldPop (www.worldpop.org - School of Geography and Environmental Science, University of Southampton). [Country] 100m Population. WorldPop, University of Southampton. https://doi.org/10.5258/SOTON/WP00647
+**Citation**: WorldPop (www.worldpop.org - School of Geography and Environmental Science, University of Southampton). [Country] 100m Population. WorldPop, University of Southampton. [https://doi.org/10.5258/SOTON/WP00647](https://doi.org/10.5258/SOTON/WP00647)
 
 ---
 
@@ -264,7 +264,7 @@ Demographic statistics provide birth rates, death rates, age distributions, and 
 
 **Provider**: United Nations Department of Economic and Social Affairs, Population Division
 
-**URL**: https://population.un.org/wpp/
+**URL**: [https://population.un.org/wpp/](https://population.un.org/wpp/)
 
 #### Characteristics
 
@@ -329,7 +329,7 @@ laser-init TZA 2 2010 2025 --stats-source unwpp
 
 #### Data Attribution
 
-**Citation**: United Nations, Department of Economic and Social Affairs, Population Division (2024). World Population Prospects 2024, Online Edition. Available from: https://population.un.org/wpp/
+**Citation**: United Nations, Department of Economic and Social Affairs, Population Division (2024). World Population Prospects 2024, Online Edition. Available from: [https://population.un.org/wpp/](https://population.un.org/wpp/)
 
 ---
 
