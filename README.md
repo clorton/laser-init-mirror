@@ -1,6 +1,6 @@
 # laser-init - a tool to bootstrap spatial modeling with LASER
 
-**laser-init** prepares geospatial, population, and demographic data for epidemiological modeling with [LASER](https://github.com/InstituteforDiseaseModeling/laser-core). It downloads administrative boundary shapefiles, population raster data, and demographic statistics, then generates a ready-to-run spatial disease model.
+**laser-init** prepares geospatial, population, and demographic data for epidemiological modeling with [LASER](https://github.com/laser-base/laser-generic). It downloads administrative boundary shapefiles, population raster data, and demographic statistics, then generates a ready-to-run spatial disease model.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@
 
 ```shell
 # Clone the repository
-git clone https://github.com/InstituteforDiseaseModeling/laser-init.git
+git clone https://github.com/laser-base/laser-init.git
 cd laser-init
 
 # Install with uv
@@ -26,7 +26,7 @@ uv sync
 
 ```shell
 # Clone the repository
-git clone https://github.com/InstituteforDiseaseModeling/laser-init.git
+git clone https://github.com/laser-base/laser-init.git
 cd laser-init
 
 # Install the package
@@ -116,10 +116,10 @@ total 12440
 - **`config.yaml`**: Configuration file referencing data files and model parameters
 
 - **`seir.py`**: Ready-to-run SEIR model script
-  - Run with: `python seir.py` or `python seir.py --config config.yaml`
+  - Run with: `python3 ./seir.py` or `python3 ./seir.py --config config.yaml`
   - Requires `laser.generic` package
 
-- **`plot.py`**: Script for generating simulation result plots
+- **`plot.py`**: Supporting script, called from `seir.py`, for generating simulation result plots
 
 - **Demographic data files**:
   - `age_dist.csv`: Population age distribution for the start year
@@ -216,7 +216,7 @@ Specify a custom output directory:
 laser-init NGA 2 2000 2025 --output-dir /path/to/output
 ```
 
-Default: `./ISOCODE/start_year` (e.g., `./NGA/2000`)
+Default: `./<ISOCODE>/<start_year>` (e.g., `./NGA/2000`)
 
 ## Configuration
 
@@ -254,7 +254,7 @@ After running `laser-init`, you'll have a complete model setup:
 
 ```shell
 cd NGA/2000
-python seir.py
+python3 ./seir.py
 ```
 
 The model will:
@@ -279,13 +279,19 @@ datafiles:
 simulation:
     nyears: 10                        # Simulation duration in years
     r0: 2.5                           # Basic reproduction number
-    exposed-duration-shape: 4.5       # Exposed period distribution shape (SEIR only)
-    exposed-duration-scale: 1.0       # Exposed period distribution scale (SEIR only)
+    exposed-duration-shape: 4.5       # Exposed period gamma distribution shape (SEIR only)
+    exposed-duration-scale: 1.0       # Exposed period gamma distribution scale (SEIR only)
     infectious-duration-mean: 7.0     # Mean infectious period in days
-    naive-population: true            # If false, initialize with (1-1/R0)S in R compartment
+    naive-population: true            # If false, initialize with (1-1/R0)×S in R compartment
+    gravity_k: 500                    # connection factor constant
+    gravity_a: 1                      # source population power
+    gravity_b: 1                      # destination population power
+    gravity_c: 2                      # distance power
 ```
 
-**Note**: Spatial connectivity is determined by a gravity model. Gravity model parameters are currently hard-coded in the model script but can be modified by editing the generated Python file.
+**Note**: Spatial connectivity is determined by a gravity model.
+
+$connection_{ij} = k \frac {P_{src}^a \times P_{dst}^b} {D_{ij}^c}$
 
 ## Troubleshooting
 
@@ -297,7 +303,7 @@ simulation:
 - Use the ISO-3 code instead (e.g., "PAK" instead of "Pakistan")
 - Check spelling and try common variants
 - Try the French name (e.g., "Chine" for China)
-- Configure OpenAI or Anthropic API key for enhanced matching
+- Configure OpenAI or Anthropic API key for enhanced matching (not currently implemented)
 
 ### No Data Available for Administrative Level
 
@@ -313,28 +319,24 @@ simulation:
 **Issue**: First run downloads large files (e.g., UNOCHA's 1-2GB global database)
 
 **Solutions**:
-- Files are cached locally in `~/.cache/laser-init/` for future use
+- Files are cached locally in `~/.laser/cache/` for future use
 - Subsequent runs will be much faster
 - Consider using `--shape-source geoboundaries` or `gadm` for smaller downloads
-
-### Memory Issues
-
-**Issue**: Processing fails with memory errors
-
-**Solutions**:
-- Use a lower administrative level (fewer polygons)
-- Close other applications
-- Try a different shape source with simpler geometries
 
 ### Missing Dependencies
 
 **Error**: "No module named 'laser.generic'" when running model
 
 **Solutions**:
+
+Run in the environment with `laser-init` installed (`laser-init` installs `laser.generic` as a dependency).
+
+Or, install `laser.generic` into the current environment:
+
 ```shell
-pip install laser.generic
-# or
 uv pip install laser.generic
+# or
+pip install laser.generic
 ```
 
 ## Advanced Usage
@@ -353,7 +355,7 @@ The generated model scripts are fully editable Python files. Common modification
 
 1. **Change initial seed locations**: Edit the seeding logic in `seir.py`
 2. **Modify transmission parameters**: Adjust `r0`, `beta`, or duration parameters
-3. **Add interventions**: Insert intervention logic into the model components
+3. **Add interventions**: Insert intervention logic into the model components (see [LASER documentation](https://laser.idmod.org/laser-generic))
 4. **Customize plots**: Modify `plot.py` or import it and call specific plot functions
 
 ### Using Output Data in Other Tools
@@ -387,4 +389,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Support
 
-For issues, questions, or contributions, please visit the [GitHub repository](https://github.com/InstituteforDiseaseModeling/laser-init).
+For issues, questions, or contributions, please visit the [GitHub repository](https://github.com/laser-base/laser-init).

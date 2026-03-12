@@ -4,7 +4,7 @@ This guide covers all configuration options for laser-init, including global set
 
 ## Table of Contents
 
-1. [Global Configuration](#global-configuration)
+1. [Global Configuration (laser_config)](#global-configuration)
 2. [Run Configuration (config.yaml)](#run-configuration)
 3. [Model Parameters Reference](#model-parameters-reference)
 4. [Data Source Selection](#data-source-selection)
@@ -26,6 +26,10 @@ The first file found is used. Command-line options override config file settings
 Create `~/.laser/laser_config.yaml`:
 
 ```yaml
+# General configuration
+cache_dir: "<cache_path>"
+log_dir: "<logs_path>"
+
 # Default data source preferences
 shape_source: unocha      # Options: unocha, geoboundaries, gadm
 raster_source: worldpop   # Options: worldpop (only option currently)
@@ -40,6 +44,8 @@ Or in JSON format (`~/.laser/laser_config.json`):
 
 ```json
 {
+  "cache_dir": "/Users/<username>/.laser/cache",
+  "logs_dir": "/Users/<username>/.laser/logs",
   "shape_source": "unocha",
   "raster_source": "worldpop",
   "stats_source": "unwpp",
@@ -52,6 +58,8 @@ Or in JSON format (`~/.laser/laser_config.json`):
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
+| `cache_dir` | string | None (uses "~/.laser/cache") | Location for caching downloaded data. |
+| `log_dir` | string | None (uses "~/.laser/logs") | Location for writing log files. |
 | `shape_source` | string | `"unocha"` | Default shapefile data source (unocha, geoboundaries, gadm) |
 | `raster_source` | string | `"worldpop"` | Default population raster source (worldpop only) |
 | `stats_source` | string | `"unwpp"` | Default demographic statistics source (unwpp only) |
@@ -79,21 +87,25 @@ Each time you run laser-init, it generates a `config.yaml` file in the output di
 ### Example config.yaml
 
 ```yaml
-data-dir: /Users/user/projects/NGA/2000
+data_dir: /Users/user/projects/NGA/2000
 
 datafiles:
-    shape-data: NGA_admin2.gpkg
-    cxr-data: cxr.csv
-    pop-data: age_dist.csv
-    exp-data: life_exp.csv
+    shape_data: NGA_admin2.gpkg
+    cxr_data: cxr.csv
+    pop_data: age_dist.csv
+    exp_data: life_exp.csv
 
 simulation:
     nyears: 10
     r0: 2.5
-    exposed-duration-shape: 4.5
-    exposed-duration-scale: 1.0
-    infectious-duration-mean: 7.0
-    naive-population: true
+    exposed_duration_shape: 4.5
+    exposed_duration_scale: 1.0
+    infectious_duration_mean: 7.0
+    gravity_k: 500
+    gravity_a: 1
+    gravity_b: 1
+    gravity_c: 2
+    naive_population: true
 ```
 
 ### Running with Custom Config
@@ -102,13 +114,13 @@ The generated model scripts accept a `--config` option:
 
 ```shell
 # Use default config.yaml in same directory
-python seir.py
+python3 ./seir.py
 
 # Use custom config file
-python seir.py --config /path/to/custom_config.yaml
+python3 ./seir.py --config /path/to/custom_config.yaml
 
 # Override data directory
-python seir.py --data-dir /path/to/data
+python3 ./seir.py --data-dir /path/to/data
 ```
 
 ## Model Parameters Reference
@@ -117,13 +129,13 @@ python seir.py --data-dir /path/to/data
 
 ```yaml
 datafiles:
-    shape-data: NGA_admin2.gpkg      # GeoPackage with boundaries and population
-    cxr-data: cxr.csv                # Crude birth/death rates time series
-    pop-data: age_dist.csv           # Population age distribution
-    exp-data: life_exp.csv           # Life expectancy/survival curve
+    shape_data: NGA_admin2.gpkg      # GeoPackage with boundaries and population
+    cxr_data: cxr.csv                # Crude birth/death rates time series
+    pop_data: age_dist.csv           # Population age distribution
+    exp_data: life_exp.csv           # Life expectancy/survival curve
 ```
 
-These file paths are relative to `data-dir`.
+These file paths are relative to `data_dir`.
 
 ### Simulation Parameters
 
@@ -133,15 +145,19 @@ These file paths are relative to `data-dir`.
 |-----------|------|---------|-------------|
 | `nyears` | integer | 10 | Simulation duration in years |
 | `r0` | float | 2.5 | Basic reproduction number (average secondary infections) |
-| `infectious-duration-mean` | float | 7.0 | Mean infectious period in days |
-| `naive-population` | boolean | true | If false, initialize with immune individuals based on R0 |
+| `infectious_duration_mean` | float | 7.0 | Mean infectious period in days |
+| `gravity_k` | float | 500 | connection factor constant |
+| `gravity_a` | float | 1 | source population power |
+| `gravity_b` | float | 1 | destination population power |
+| `gravity_c` | float | 2 | distance power |
+| `naive_population` | boolean | true | If false, initialize with immune individuals based on R0 |
 
 #### SEIR-Specific Parameters
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `exposed-duration-shape` | float | 4.5 | Shape parameter for gamma distribution of exposed period |
-| `exposed-duration-scale` | float | 1.0 | Scale parameter for gamma distribution of exposed period |
+| `exposed_duration_shape` | float | 4.5 | Shape parameter for gamma distribution of exposed period |
+| `exposed_duration_scale` | float | 1.0 | Scale parameter for gamma distribution of exposed period |
 
 The exposed period follows a gamma distribution with mean = shape × scale (4.5 days by default).
 
@@ -150,7 +166,7 @@ The exposed period follows a gamma distribution with mean = shape × scale (4.5 
 The model automatically calculates:
 
 - `nticks = nyears × 365` (simulation steps in days)
-- `beta = r0 / infectious-duration-mean` (transmission rate)
+- `beta = r0 / infectious_duration_mean` (transmission rate)
 
 ### Understanding R0 and Beta
 
@@ -166,13 +182,13 @@ The model automatically calculates:
 ### Naive Population Setting
 
 ```yaml
-naive-population: true   # All population starts susceptible (except initial seeds)
-naive-population: false  # Initialize (1-1/R0)×S individuals in R compartment
+naive_population: true   # All population starts susceptible (except initial seeds)
+naive_population: false  # Initialize (1-1/R0)×S individuals in R compartment
 ```
 
-When `naive-population: false`:
+When `naive_population: false`:
 - Simulates prior immunity or vaccination
-- For R0=2.5: 60% of population starts susceptible, 40% recovered
+- E.g., for R<sub>0</sub> = 2.5: 60% of population starts susceptible, 40% recovered
 - Useful for modeling endemic diseases or post-vaccination scenarios
 
 ## Data Source Selection
@@ -213,7 +229,7 @@ laser-init includes three levels of country name matching:
 
 1. **Exact match**: ISO-3 codes and official names (always enabled)
 2. **Fuzzy match**: Common misspellings and variants (always enabled)
-3. **LLM-enhanced match**: AI-powered resolution (requires API key)
+3. **LLM-enhanced match**: AI-powered resolution (requires API key) (not yet implemented)
 
 ### Why Use LLM-Enhanced Matching?
 
@@ -286,7 +302,7 @@ laser-init caches downloaded data to speed up subsequent runs:
 
 ### Cache Location
 
-- **Default**: `~/.cache/laser-init/`
+- **Default**: `~/.laser/cache/`
 - **Contents**:
   - Downloaded shapefiles
   - Population rasters
@@ -303,18 +319,18 @@ laser-init caches downloaded data to speed up subsequent runs:
 
 ```shell
 # Clear all cached data
-rm -rf ~/.cache/laser-init/
+rm -rf ~/.laser/cache/
 
 # Clear specific source
-rm -rf ~/.cache/laser-init/unocha/
-rm -rf ~/.cache/laser-init/worldpop/
-rm -rf ~/.cache/laser-init/unwpp/
+rm -rf ~/.laser/cache/unocha/
+rm -rf ~/.laser/cache/worldpop/
+rm -rf ~/.laser/cache/unwpp/
 ```
 
 ### Viewing Cache Contents
 
 ```shell
-ls -lh ~/.cache/laser-init/
+ls -lh ~/.laser/cache/
 ```
 
 ## Output Directory Structure
@@ -357,15 +373,16 @@ Generate multiple configurations for comparison:
 
 ```shell
 # Baseline scenario
-laser-init NGA 2 2000 2025 --output-dir ./scenarios/baseline
+laser-init NGA 2 2000 2025 --output-dir ./nigeria
+mv ./nigeria/config.yaml ./nigeria/baseline.yaml
 
 # High transmission
-laser-init NGA 2 2000 2025 --output-dir ./scenarios/high_r0
-# Then edit ./scenarios/high_r0/config.yaml to set r0: 4.0
+cp ./nigeria/baseline.yaml ./nigeria/high_tx.yaml
+# Then edit ./nigeria/high_tx.yaml to set r0: 4.0
 
 # With prior immunity
-laser-init NGA 2 2000 2025 --output-dir ./scenarios/immunity
-# Then edit ./scenarios/immunity/config.yaml to set naive-population: false
+cp ./nigera/baseline.yaml ./nigeria/immunity.yaml
+# Then edit ./nigeria/immunity.yaml to set naive_population: false
 ```
 
 ### Scripted Configuration Generation
@@ -402,12 +419,14 @@ for name, params in scenarios.items():
 
 **Solution**:
 ```shell
-# Check syntax
-python -c "import yaml; yaml.safe_load(open('laser_config.yaml'))"
-
 # Verify location
-ls -la ~/.laser/laser_config.yaml
-ls -la ./laser_config.yaml
+ls -la ~/.laser/laser_config.*
+ls -la ./laser_config.*
+
+# Check YAML syntax
+python3 -c "import yaml; yaml.safe_load(open('laser_config.yaml'))"
+# or JSON syntax
+python3 -c "import json; json.load(open('laser_config.json'))"
 ```
 
 ### Invalid Configuration Values
@@ -435,10 +454,10 @@ data-dir: /full/path/to/NGA/2000
 
 # Or run from the data directory
 cd NGA/2000
-python seir.py
+python3 ./seir.py
 
 # Or override data directory
-python seir.py --data-dir /full/path/to/NGA/2000
+python3 ./seir.py --data-dir /full/path/to/NGA/2000
 ```
 
 ## Next Steps

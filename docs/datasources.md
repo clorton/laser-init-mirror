@@ -249,7 +249,6 @@ laser-init KEN 2 2010 2020 --raster-source worldpop
 1. Downloads the 1km aggregated raster for the specified year
 2. Uses RasterToolkit to aggregate gridded population to administrative boundaries
 3. Assigns population counts to each administrative unit
-4. Validates against UN WPP national totals
 
 #### Data Attribution
 
@@ -349,43 +348,6 @@ laser-init TZA 2 2010 2025 --stats-source unwpp
 | **License** | Public domain | Open (attribution) | Non-commercial only |
 | **Best For** | Humanitarian | Research | General purpose |
 
-### When to Use Each Source
-
-```
-┌─────────────────────────────────────┐
-│ Is this a humanitarian crisis?      │
-│ (conflict, disaster, refugee)       │
-└─────────────┬───────────────────────┘
-              │
-          Yes │ No
-              │
-     ┌────────┴────────┐
-     │                 │
-     v                 v
-┌─────────┐      ┌──────────────────┐
-│ UNOCHA  │      │ Need level 3-5?  │
-└─────────┘      └────┬─────────────┘
-                      │
-                  Yes │ No
-                      │
-             ┌────────┴────────┐
-             │                 │
-             v                 v
-      ┌────────────┐    ┌───────────────┐
-      │ Commercial │    │ Academic or   │
-      │ use?       │    │ non-profit?   │
-      └──┬─────────┘    └───────────────┘
-         │
-     Yes │ No
-         │
-  ┌──────┴─────┐
-  │            │
-  v            v
-┌──────────┐ ┌────────┐
-│geoBound. │ │ GADM   │
-└──────────┘ └────────┘
-```
-
 ## Selecting the Right Source
 
 ### By Use Case
@@ -401,11 +363,6 @@ laser-init TZA 2 2010 2025 --stats-source unwpp
 #### General Disease Modeling
 - **Primary**: UNOCHA (good balance of quality and coverage)
 - **Alternative**: GADM (if more detail needed)
-
-#### Commercial Applications
-- **Primary**: UNOCHA (public domain)
-- **Alternative**: geoBoundaries (open license)
-- **Avoid**: GADM (non-commercial license)
 
 #### High-Resolution Spatial Analysis
 - **Primary**: GADM (deepest admin levels)
@@ -437,56 +394,12 @@ laser-init TZA 2 2010 2025 --stats-source unwpp
 
 ### Validation Steps
 
-laser-init performs several validation checks:
+1. **Visual validation**: Generates choropleth for manual inspection
+
+Possible future checks:
 
 1. **Population aggregation**: Compares aggregated population to UN WPP national totals
-2. **Geometry validation**: Checks for invalid polygons
-3. **Coverage checks**: Ensures all regions have non-zero population
-4. **Visual validation**: Generates choropleth for manual inspection
-
-### Common Data Issues
-
-#### Missing Administrative Units
-
-**Symptom**: Gaps in the map or missing regions
-
-**Causes**:
-- Data source doesn't have complete coverage for that level
-- Disputed territories excluded
-- Remote/unpopulated regions missing
-
-**Solutions**:
-- Try a different shape source
-- Use a lower administrative level
-- Check source documentation for known gaps
-
-#### Population Mismatches
-
-**Symptom**: Total population doesn't match expected values
-
-**Causes**:
-- WorldPop raster is from a different year than boundaries
-- UN-adjusted vs raw population estimates
-- Census timing differences
-
-**Solutions**:
-- Review provenance.json for data years
-- Compare to multiple sources (CIA Factbook, national statistics)
-- Document discrepancies in analysis
-
-#### Boundary Inconsistencies
-
-**Symptom**: Overlapping or disconnected polygons
-
-**Causes**:
-- Source data quality issues
-- Disputed territories
-- Coordinate system mismatches
-
-**Solutions**:
-- Try a different source
-- Use geometry repair tools (QGIS, GeoPandas)
-- Report issues to upstream data providers
+2. **Coverage checks**: Ensures all regions have non-zero population
 
 ### Reproducibility
 
@@ -504,7 +417,7 @@ Data sources update regularly. To get the latest data:
 
 ```shell
 # Clear cache to force re-download
-rm -rf ~/.cache/laser-init/
+rm -rf ~/.laser/cache/
 
 # Re-run laser-init
 laser-init KEN 2 2010 2020

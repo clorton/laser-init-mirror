@@ -18,14 +18,14 @@ laser-init follows an Extract-Transform-Load (ETL) pipeline architecture:
 ```
 Extract → Transform → Load
    ↓          ↓         ↓
- Raw      Processed  Model
- Data       Data     Scripts
+  Raw     Processed   Model
+  Data      Data      Scripts
 ```
 
 **Design Principles**:
 - **Modularity**: Extractors, transformers, and loaders are independent
 - **Extensibility**: Easy to add new data sources
-- **Cach human-readable output
+- Human-readable output
 - **Convention over configuration**: Sensible defaults, minimal required config
 
 ## Project Structure
@@ -90,7 +90,7 @@ class DataExtractor:
 
 **Responsibilities**:
 - Download from URL or API
-- Cache locally (usually in `~/.cache/laser-init/`)
+- Cache locally (usually in `~/.laser/cache/`)
 - Update provenance metadata
 - Return path to downloaded file
 
@@ -116,7 +116,7 @@ class DataTransformer:
         """Return human-readable description."""
         pass
 
-    def transform(self, iso_code: str, level: int, year: int, output_dir: Path) -> Dict[str, Path]:
+    def transform(self, iso_code: str, level: int, year: int, output_dir: Path) -> Tuple[Path]:
         """Transform data and write to output_dir, return paths to generated files."""
         pass
 ```
@@ -127,7 +127,7 @@ class DataTransformer:
 - Aggregate population (for shapefile transformers)
 - Extract demographics (for stats transformers)
 - Write output files (GeoPackage, CSV)
-- Return dict mapping output names to file paths
+- Return file path(s) of transformed data
 
 **Current Transformers**:
 - `GadmTransformer`: Processes GADM data + aggregates WorldPop
@@ -201,51 +201,51 @@ class ModelLoader:
 ### High-Level Flow
 
 ```
-┌─────────────┐
-│ CLI Input   │
-│ (country,   │
-│  level,     │
-│  years)     │
-└──────┬──────┘
-       │
-       v
-┌─────────────────┐
-│ Validate & Normalize
-│ - ISO code      │
-│ - Level number  │
-│ - Year range    │
-└──────┬──────────┘
-       │
-       v
-┌─────────────────┐
-│ Extract Phase   │
-│ - Shapefiles    │
-│ - Rasters       │
-│ - Demographics  │
-└──────┬──────────┘
-       │
-       v
-┌─────────────────┐
-│ Transform Phase │
-│ - Filter country│
-│ - Aggregate pop │
-│ - Extract stats │
-└──────┬──────────┘
-       │
-       v
-┌─────────────────┐
-│ Load Phase      │
-│ - Model script  │
-│ - Config file   │
-│ - Plot utils    │
-└──────┬──────────┘
-       │
-       v
-┌─────────────────┐
-│ Validation      │
-│ - Generate plots│
-│ - Create report │
-└─────────────────┘
+    ┌─────────────┐
+    │ CLI Input   │
+    │ (country,   │
+    │  level,     │
+    │  years)     │
+    └──────┬──────┘
+           │
+           v
+┌──────────────────────┐
+│ Validate & Normalize │
+│ - ISO code           │
+│ - Level number       │
+│ - Year range         │
+└──────────┬───────────┘
+           │
+           v
+  ┌─────────────────┐
+  │ Extract Phase   │
+  │ - Shapefiles    │
+  │ - Rasters       │
+  │ - Demographics  │
+  └───────┬─────────┘
+          │
+          v
+  ┌─────────────────┐
+  │ Transform Phase │
+  │ - Filter country│
+  │ - Aggregate pop │
+  │ - Extract stats │
+  └───────┬─────────┘
+          │
+          v
+  ┌─────────────────┐
+  │ Load Phase      │
+  │ - Model script  │
+  │ - Config file   │
+  │ - Plot utils    │
+  └───────┬─────────┘
+          │
+          v
+  ┌─────────────────┐
+  │ Validation      │
+  │ - Generate plots│
+  │ - Create report │
+  └─────────────────┘
 ```
 
 ### Detailed Pipeline
@@ -321,7 +321,7 @@ class NewSourceTransformer:
 
     def transform(self, iso_code, level, year, output_dir):
         # Load, filter, aggregate population
-        # Return dict of output files
+        # Return tuple of output files
         pass
 ```
 
@@ -330,12 +330,20 @@ class NewSourceTransformer:
 from laser.init.extractors import newsource as newsourceex
 from laser.init.transformers import newsource as newsourcetx
 
-SHAPE_SOURCES = {
-    "unocha": (unochaex.UnochaExtractor, unochatx.UnochaTransformer),
-    "geoboundaries": (geoboundariesex.GeoBoundariesExtractor, geoboundariestx.GeoBoundariesTransformer),
-    "gadm": (gadmex.GadmExtractor, gadmtx.GadmTransformer),
-    "newsource": (newsourceex.NewSourceExtractor, newsourcetx.NewSourceTransformer),  # Add this
-}
+        shape_extractor = {
+            "unocha": unochaex.UnochaExtractor,
+            "geoboundaries": geoboundariesex.GeoBoundariesExtractor,
+            "gadm": gadmex.GadmExtractor,
+            "newsource": newsourceex.NewSourceExtractor, # Add this
+        }[shape_source]()
+
+    shape_transformer = {
+        "unocha": unochatx.UnochaTransformer,
+        "geoboundaries": geoboundariestx.GeoBoundariesTransformer,
+        "gadm": gadmtx.GadmTransformer,
+        "newsource", newsourceex.NewSourceTransformer, # Add this
+    }[shape_source]()
+
 ```
 
 4. Update CLI option:
@@ -351,15 +359,7 @@ SHAPE_SOURCES = {
 
 1. Create `src/laser/init/models/newmodel.py` based on existing templates
 
-2. Update loader to include new model type:
-```python
-# In loaders/abm.py
-def emit_script(self, output_dir, config):
-    if self.model_type == "NEWMODEL":
-        shutil.copy(MODELS_DIR / "newmodel.py", output_dir / "newmodel.py")
-```
-
-3. Update CLI option:
+2. Update CLI option:
 ```python
 @click.option(
     "--model",
@@ -376,7 +376,7 @@ Following the guidelines in [CLAUDE.md](../CLAUDE.md):
 - Always update CHANGELOG.md for accepted changes
 - Use double quotes for strings
 - Use `pathlib.Path` instead of `os.path`
-- Import logger from `.logging` and use INFO level for internal actions
+- Import `inform` and `error` `utils` and use `inform()` for internal actions
 
 ### Documentation
 - Google-style docstrings formatted for Markdown
@@ -387,7 +387,7 @@ Following the guidelines in [CLAUDE.md](../CLAUDE.md):
 - Given-when-then style tests
 - Add docstrings explaining test purpose and failure implications
 - Comment on inconsistencies or ambiguities
-- Run tests before considering implementation complete
+- Run _and pass all tests_ before considering implementation complete
 
 ### Style
 - Follow PEP 8 (enforced by ruff)
@@ -398,7 +398,7 @@ Following the guidelines in [CLAUDE.md](../CLAUDE.md):
 
 1. **Setup**:
 ```shell
-git clone https://github.com/InstituteforDiseaseModeling/laser-init.git
+git clone https://github.com/laser-base/laser-init.git
 cd laser-init
 uv sync  # or pip install -e .
 ```
@@ -461,7 +461,7 @@ laser-init **does** use existing tools (GeoPandas, RasterToolkit), but provides:
 
 ### Caching Strategy
 
-- Downloads cached in `~/.cache/laser-init/`
+- Downloads cached in `~/.laser/cache/`
 - Cache hits avoid expensive network I/O
 - First run slow (downloads), subsequent runs fast
 
@@ -471,12 +471,6 @@ laser-init **does** use existing tools (GeoPandas, RasterToolkit), but provides:
 - Large countries (USA, Brazil) can use >2GB RAM
 - Consider processing lower admin levels for memory-constrained systems
 
-### Computation Time
-
-- Raster aggregation is the bottleneck (~1-5 minutes for level 2)
-- Parallelization possible but not implemented
-- Future: Use Dask for large rasters
-
 ## Future Architecture
 
 Potential improvements:
@@ -484,7 +478,6 @@ Potential improvements:
 - **Plugin system**: Dynamic extractor/transformer registration
 - **Async downloads**: Parallel data fetching
 - **Streaming processing**: Handle larger-than-memory datasets
-- **Database backend**: Optional PostgreSQL/PostGIS support
 - **Web API**: REST API for programmatic access
 - **Docker images**: Containerized distribution
 
@@ -492,7 +485,7 @@ Potential improvements:
 
 - [Contributing Guide](contributing.md)
 - [User Guide](userguide.md)
-- [LASER Core](https://github.com/InstituteforDiseaseModeling/laser-core)
+- [laser.generic](https://github.com/laser-base/laser-generic)
 - [RasterToolkit](https://github.com/InstituteforDiseaseModeling/RasterToolkit)
 
 ---

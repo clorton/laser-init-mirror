@@ -40,7 +40,7 @@ cd laser-init
 uv sync
 
 # Or using pip
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
 ```
@@ -139,7 +139,7 @@ Commit message guidelines:
 ### 8. Push and Create Pull Request
 
 ```shell
-git push origin feature/your-feature-name
+git push --set-upstream origin <your-branch>
 ```
 
 Then create a pull request on GitHub.
@@ -152,7 +152,7 @@ laser-init follows the conventions in [CLAUDE.md](../CLAUDE.md).
 
 - **Use double quotes** for strings (unless inside a quoted string)
 - **Use pathlib.Path** instead of `os.path`
-- **Import logger** from `.logging`, use INFO level for internal actions
+- **Import inform and error** from `.utils`, use `inform()` for internal actions
 - **Update CHANGELOG.md** for all changes
 
 ### Python Style
@@ -174,7 +174,7 @@ laser-init follows the conventions in [CLAUDE.md](../CLAUDE.md).
 ```python
 from pathlib import Path
 
-from laser.init.logger import logger
+from laser.init.utils import inform
 
 def download_shapefile(iso_code: str, level: int, cache_dir: Path) -> Path:
     """Download shapefile for specified country and admin level.
@@ -194,7 +194,7 @@ def download_shapefile(iso_code: str, level: int, cache_dir: Path) -> Path:
         ValueError: If iso_code is invalid or level is out of range
         requests.HTTPError: If download fails
     """
-    logger.info(f"Downloading shapefile for {iso_code}, level {level}")
+    inform(f"Downloading shapefile for {iso_code}, level {level}")
 
     # Implementation
     url = f"https://example.com/data/{iso_code}_adm{level}.shp"

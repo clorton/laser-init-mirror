@@ -17,7 +17,7 @@ Comprehensive guide to the epidemiological models supported by laser-init.
 
 ## Overview
 
-laser-init generates ready-to-run spatial disease models using the [LASER](https://github.com/InstituteforDiseaseModeling/laser-core) framework. The tool supports three classic compartmental model types:
+laser-init generates ready-to-run spatial disease models using the [LASER](https://github.com/laser-base/laser-generic) framework. The tool supports three classic compartmental model types:
 
 - **SI** (Susceptible-Infectious)
 - **SIR** (Susceptible-Infectious-Recovered)
@@ -43,7 +43,8 @@ All models are:
 | Vector-borne (e.g., malaria) | Custom extension** |
 
 \* SEIRS requires manual modification (see [Extending Models](#extending-models))
-\** Requires custom LASER components
+
+\*\* Requires custom LASER components
 
 ### Detailed Comparison
 
@@ -52,7 +53,7 @@ All models are:
 | **Compartments** | 2 (S, I) | 3 (S, I, R) | 4 (S, E, I, R) |
 | **Immunity** | None | Permanent | Permanent |
 | **Incubation Period** | No | No | Yes |
-| **Parameters** | 2 (R0, duration) | 2 (R0, duration) | 3 (R0, exposed duration, infectious duration) |
+| **Parameters** | 2 (R<sub>0</sub>, duration) | 2 (R<sub>0</sub>, duration) | 3 (R<sub>0</sub>, exposed duration, infectious duration) |
 | **Computational Cost** | Lowest | Low | Medium |
 | **Best For** | Chronic infections | Acute immunizing diseases | Diseases with latent period |
 
@@ -65,7 +66,7 @@ The simplest epidemic model. Individuals are either Susceptible (S) or Infectiou
 ### Compartments
 
 ```
-S ──β──> I
+S ── β ──> I
 ```
 
 - **S (Susceptible)**: Can be infected
@@ -76,7 +77,7 @@ S ──β──> I
 1. **Infection**: S → I (rate = β × I / N)
 
 where:
-- β = transmission rate (R0 / infectious_duration)
+- β = transmission rate (R<sub>0</sub> / infectious_duration)
 - I = number of infectious individuals
 - N = total population
 
@@ -108,7 +109,7 @@ Classic epidemic model with recovery. Individuals move from Susceptible to Infec
 ### Compartments
 
 ```
-S ──β──> I ──γ──> R
+S ── β ──> I ── γ ──> R
 ```
 
 - **S (Susceptible)**: Can be infected
@@ -122,13 +123,13 @@ S ──β──> I ──γ──> R
 
 ### Threshold Dynamics
 
-**Basic Reproduction Number (R0)**: Average secondary infections from one case
+**Basic Reproduction Number (R<sub>0</sub>)**: Average secondary infections from one case
 
-- R0 > 1: Epidemic occurs
-- R0 = 1: Endemic equilibrium
-- R0 < 1: Disease dies out
+- R<sub>0</sub> > 1: Epidemic occurs
+- R<sub>0</sub> = 1: Endemic equilibrium
+- R<sub>0</sub> < 1: Disease dies out
 
-**Epidemic threshold**: Requires S0 > N/R0 to start epidemic
+**Epidemic threshold**: Requires S0 > N/R<sub>0</sub> to start epidemic
 
 ### Use Cases
 
@@ -142,7 +143,7 @@ S ──β──> I ──γ──> R
 
 - Endemic equilibrium possible with births/deaths
 - Final size < 100% (some susceptibles remain)
-- Herd immunity threshold: 1 - 1/R0
+- Herd immunity threshold: 1 - 1/R<sub>0</sub>
 
 ### Generating an SIR Model
 
@@ -159,7 +160,7 @@ Extended SIR model with exposed (latent) compartment. Individuals go through an 
 ### Compartments
 
 ```
-S ──β──> E ──σ──> I ──γ──> R
+S ── β ──> E ── σ ──> I ── γ ──> R
 ```
 
 - **S (Susceptible)**: Can be infected
@@ -175,7 +176,7 @@ S ──β──> E ──σ──> I ──γ──> R
 
 ### Latent Period Distribution
 
-laser-init uses a **gamma distribution** for the exposed period:
+laser-init uses a **gamma distribution** for the exposed period (this is easily changed by editing the model script and using one of the [supported distributions](https://laser.idmod.org/laser-generic/reference/laser/core/distributions/)):
 
 ```python
 exposed_duration ~ Gamma(shape, scale)
@@ -199,7 +200,7 @@ Default parameters:
 ### Equilibrium Behavior
 
 - Similar to SIR but delayed by latent period
-- Peak occurs later than SIR with same R0
+- Peak occurs later than SIR with same R<sub>0</sub>
 - Final size approximately same as SIR
 
 ### Generating an SEIR Model
@@ -216,7 +217,7 @@ All models share these common parameters:
 
 | Parameter | Symbol | Unit | Description | Typical Range |
 |-----------|--------|------|-------------|---------------|
-| **Basic Reproduction Number** | R0 | dimensionless | Average secondary infections | 1.5 - 20+ |
+| **Basic Reproduction Number** | R<sub>0</sub> | dimensionless | Average secondary infections | 1.5 - 20+ |
 | **Infectious Duration** | 1/γ | days | Mean time infectious | 1 - 30 days |
 | **Simulation Duration** | T | years | Length of simulation | 1 - 50 years |
 
@@ -231,7 +232,7 @@ All models share these common parameters:
 
 Automatically calculated:
 
-- **Transmission rate**: β = R0 / infectious_duration
+- **Transmission rate**: β = R<sub>0</sub> / infectious_duration
 - **Recovery rate**: γ = 1 / infectious_duration
 - **Progression rate**: σ ~ Gamma(shape, scale)
 - **Total ticks**: nticks = nyears × 365
@@ -241,22 +242,22 @@ Automatically calculated:
 Examples for common diseases:
 
 #### Influenza
-- R0: 1.5 - 2.5
+- R<sub>0</sub>: 1.5 - 2.5
 - Exposed period: 1-4 days (shape=3, scale=0.7)
 - Infectious period: 5-7 days
 
 #### COVID-19 (Original)
-- R0: 2.5 - 3.5
+- R<sub>0</sub>: 2.5 - 3.5
 - Exposed period: 3-5 days (shape=4.5, scale=1.0)
 - Infectious period: 7-10 days
 
 #### Measles
-- R0: 12 - 18
+- R<sub>0</sub>: 12 - 18
 - Exposed period: 10-12 days
 - Infectious period: 8 days
 
 #### Ebola
-- R0: 1.5 - 2.5
+- R<sub>0</sub>: 1.5 - 2.5
 - Exposed period: 8-10 days
 - Infectious period: 10 days
 
@@ -370,19 +371,19 @@ With vital dynamics:
 
 ```shell
 cd KEN/2010
-python seir.py
+python3 ./seir.py
 ```
 
 ### With Custom Config
 
 ```shell
-python seir.py --config custom_config.yaml
+python3 ./seir.py --config custom_config.yaml
 ```
 
 ### With Custom Data Directory
 
 ```shell
-python seir.py --data-dir /path/to/data
+python3 ./seir.py --data-dir /path/to/data
 ```
 
 ### Output
@@ -486,29 +487,27 @@ for age in age_groups:
 
 ## Mathematical Background
 
-### Basic Reproduction Number (R0)
+### Basic Reproduction Number (R<sub>0</sub>)
 
 Definition: Average number of secondary infections from one infectious individual in a fully susceptible population.
 
 **Interpretation**:
-- R0 = 2: Each case infects 2 others on average
-- R0 > 1: Epidemic growth
-- R0 = 1: Endemic equilibrium
-- R0 < 1: Disease extinction
+- R<sub>0</sub> = 2: Each case infects 2 others on average
+- R<sub>0</sub> > 1: Epidemic growth
+- R<sub>0</sub> = 1: Endemic equilibrium
+- R<sub>0</sub> < 1: Disease extinction
 
-**Calculation**: R0 = β / γ = β × infectious_duration
+**Calculation**: R<sub>0</sub> = β / γ = β × infectious_duration
 
-**Herd immunity threshold**: H = 1 - 1/R0
+**Herd immunity threshold**: $H = 1 - 1/R_0$
 
 ### Effective Reproduction Number (Rt)
 
 Time-varying reproduction number accounting for depletion of susceptibles:
 
-```
-Rt = R0 × (S(t) / N)
-```
+$R_t = R_0 \times (S(t) / N)$
 
-When Rt < 1, epidemic is declining.
+When R<sub>t</sub> < 1, epidemic is declining.
 
 ### Attack Rate
 
@@ -522,7 +521,7 @@ Attack Rate = (R_final - R_initial) / N
 
 ### Calibration Approaches
 
-1. **Literature values**: Use published R0 and duration parameters
+1. **Literature values**: Use published R<sub>0</sub> and duration parameters
 2. **Historical fit**: Calibrate to past outbreak data
 3. **Expert elicitation**: Consult epidemiologists for parameter ranges
 4. **Sensitivity analysis**: Test parameter uncertainty
@@ -547,15 +546,16 @@ Attack Rate = (R_final - R_initial) / N
 - Balcan et al. (2009). Multiscale mobility networks and the spatial spreading of infectious diseases. *PNAS*, 106(51), 21484-21489.
 
 ### LASER Framework
-- [LASER Core Documentation](https://github.com/InstituteforDiseaseModeling/laser-core)
-- [LASER Generic Models](https://github.com/InstituteforDiseaseModeling/laser-generic)
+- [laser-core](https://github.com/laser-base/laser-core)
+- [laser-generic](https://github.com/laser-base/laser-generic)
+- [LASER documentation](https://laser.idmod.org/laser-generic/)
 
 ## Support
 
 For model questions:
 - [User Guide](userguide.md) - Comprehensive workflows
 - [Configuration Guide](configuration.md) - Parameter reference
-- [GitHub Issues](https://github.com/InstituteforDiseaseModeling/laser-init/issues) - Technical support
+- [GitHub Issues](https://github.com/laser-base/laser-init/issues) - Technical support
 
 ---
 
