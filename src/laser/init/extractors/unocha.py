@@ -12,7 +12,11 @@ from ..utils import download_file, error, inform
 
 class UnochaExtractor:
     def __init__(self) -> None:
-        """Initialize the UNOCHA extractor."""
+        """Initialize the UNOCHA extractor.
+
+        Returns:
+            None
+        """
         pass
 
     @staticmethod

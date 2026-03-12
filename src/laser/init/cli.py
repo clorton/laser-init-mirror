@@ -319,7 +319,27 @@ def transform_shape_and_raster_data(
 
 
 def transform_stats_data(stats_source, stats_data, iso_code, start_year, end_year, output_dir):
+    """Transform demographic statistics data using the specified stats transformer.
 
+    Selects and instantiates the appropriate demographic statistics transformer
+    based on the provided stats_source, then uses it to filter and transform
+    the input data for the specified country and year range.
+
+    Args:
+        stats_source: The source of demographic stats (e.g., "unwpp"). If not provided,
+            defaults to the value from config. Case-insensitive.
+        stats_data: Tuple of Paths to demographic data files.
+        iso_code: ISO 3166-1 alpha-3 country code for filtering.
+        start_year: Start year for the data range.
+        end_year: End year for the data range.
+        output_dir: Path to the output directory where transformed CSV files will be saved.
+
+    Returns:
+        Tuple of Paths: (cxr_filename, pop_filename, life_exp_filename).
+
+    Raises:
+        KeyError: If the specified stats_source is not found in the available transformers.
+    """
     stats_source = (stats_source or config.get("stats_source", "unwpp")).lower()
     stats_transformer = {
         "unwpp": unwpptx.UnwppTransformer,

@@ -18,6 +18,9 @@ class GadmExtractor:
         Args:
             prefer_gpkg: If True, prefer downloading GeoPackage format over shapefile format.
                 Defaults to False (prefers shapefile).
+
+        Returns:
+            None
         """
         self.prefer_gpkg = prefer_gpkg
 
@@ -42,7 +45,7 @@ class GadmExtractor:
         Args:
             country: ISO 3166-1 alpha-3 country code (e.g., "NGA" for Nigeria).
             level: Administrative level (0=country, 1=regions, 2=districts, etc.).
-            year: Year for the data (used for cache organization, but GADM data is not yearly).
+            year: Year parameter (currently unused - GADM provides latest version only).
 
         Returns:
             Path to the downloaded file (zip or gpkg), or None if download failed.

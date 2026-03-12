@@ -30,7 +30,11 @@ from ..utils import download_file, error, inform
 
 class WorldPopExtractor:
     def __init__(self) -> None:
-        """Initialize the WorldPop extractor."""
+        """Initialize the WorldPop extractor.
+
+        Returns:
+            None
+        """
         pass
 
     @staticmethod

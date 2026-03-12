@@ -10,7 +10,11 @@ from ..utils import inform, update_local_provenance
 
 class UnwppTransformer:
     def __init__(self):
-        """Initialize the UNWPP transformer."""
+        """Initialize the UNWPP transformer.
+
+        Returns:
+            None
+        """
         pass
 
     @staticmethod

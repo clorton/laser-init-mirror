@@ -14,7 +14,11 @@ class GeoBoundariesExtractor:
     """Extracts data from GeoBoundaries at https://www.github.com/wmgeolab/geoBoundaries"""
 
     def __init__(self):
-        """Initialize the GeoBoundaries extractor."""
+        """Initialize the GeoBoundaries extractor.
+
+        Returns:
+            None
+        """
         pass
 
     @staticmethod
@@ -36,7 +40,7 @@ class GeoBoundariesExtractor:
         Args:
             country: ISO 3166-1 alpha-3 country code (e.g., "MCO" for Monaco).
             level: Administrative level (0=country, 1=first-level subdivisions, etc.).
-            year: Year for the data (used for cache organization, but data version is fixed).
+            year: Year parameter (currently unused - GeoBoundaries uses fixed version 6.0.0).
 
         Returns:
             Path to the downloaded zip file, or None if download failed.

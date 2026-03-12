@@ -19,7 +19,11 @@ from ..utils import clip_quietly, error, inform, update_local_provenance
 
 class UnochaTransformer:
     def __init__(self):
-        """Initialize the UNOCHA transformer."""
+        """Initialize the UNOCHA transformer.
+
+        Returns:
+            None
+        """
         pass
 
     @staticmethod

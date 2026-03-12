@@ -228,7 +228,7 @@ def suggest_country_fix(
     allowed_names: list[str],
     *,
     api_key: str,
-    model: str = "gpt-5.2",
+    model: str = "gpt-4o",
     prefilter_top_k: int | None = 80,
 ) -> dict[str, Any]:
     """

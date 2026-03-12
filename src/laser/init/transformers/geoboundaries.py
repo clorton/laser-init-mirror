@@ -11,7 +11,11 @@ from ..utils import clip_quietly, inform, update_local_provenance
 
 class GeoBoundariesTransformer:
     def __init__(self):
-        """Initialize the GeoBoundaries transformer."""
+        """Initialize the GeoBoundaries transformer.
+
+        Returns:
+            None
+        """
         pass
 
     @staticmethod

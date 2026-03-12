@@ -1,6 +1,10 @@
 class MpmLoader:
     def __init__(self):
-        """Initialize the MPM (Metapopulation Model) loader."""
+        """Initialize the MPM (Metapopulation Model) loader.
+
+        Returns:
+            None
+        """
         pass
 
     @staticmethod

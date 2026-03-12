@@ -11,7 +11,11 @@ from ..utils import clip_quietly, error, inform, update_local_provenance
 
 class GadmTransformer:
     def __init__(self):
-        """Initialize the GADM transformer."""
+        """Initialize the GADM transformer.
+
+        Returns:
+            None
+        """
         pass
 
     @staticmethod

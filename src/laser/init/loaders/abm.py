@@ -26,7 +26,11 @@ simulation:
 
 class AbmLoader:
     def __init__(self) -> None:
-        """Initialize the ABM (Agent-Based Model) loader."""
+        """Initialize the ABM (Agent-Based Model) loader.
+
+        Returns:
+            None
+        """
         pass
 
     @staticmethod

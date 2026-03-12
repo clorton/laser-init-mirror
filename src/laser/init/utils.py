@@ -212,6 +212,10 @@ def download_file(
     Returns:
         Path to the downloaded file.
 
+    Raises:
+        requests.exceptions.HTTPError: If the HTTP request fails.
+        requests.exceptions.RequestException: For other network-related errors.
+
     Side Effects:
         Updates provenance.json in cache_dir with download metadata (URL, timestamp).
     """

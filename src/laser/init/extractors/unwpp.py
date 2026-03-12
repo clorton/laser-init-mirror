@@ -33,7 +33,11 @@ from ..utils import download_file, error, inform
 
 class UnwppExtractor:
     def __init__(self) -> None:
-        """Initialize the UNWPP extractor."""
+        """Initialize the UNWPP extractor.
+
+        Returns:
+            None
+        """
         pass
 
     @staticmethod

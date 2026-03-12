@@ -41,6 +41,11 @@ def main(config_file, data_dir):
 
     Returns:
         None
+
+    Raises:
+        click.exceptions.ClickException: If config_file or data_dir paths are invalid.
+        KeyError: If required configuration keys are missing.
+        FileNotFoundError: If data files specified in config cannot be found.
     """
     config = yaml.safe_load(config_file.read_text())
 
