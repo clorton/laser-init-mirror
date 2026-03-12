@@ -4,13 +4,15 @@ We will filter the data by country and administrative level, and ensure that it 
 format for loading into our database.
 """
 
+from pathlib import Path
+
 import geopandas as gpd
 
 from ..utils import clip_quietly, error, inform, update_local_provenance
 
 
 class GadmTransformer:
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the GADM transformer.
 
         Returns:
@@ -19,7 +21,7 @@ class GadmTransformer:
         pass
 
     @staticmethod
-    def description():
+    def description() -> str:
         """Return a brief description of this transformer.
 
         Returns:
@@ -27,7 +29,9 @@ class GadmTransformer:
         """
         return "Transform GADM shape data by filtering for country and administrative level."
 
-    def transform(self, shape_file, iso_code, adm_level, raster_file, output_dir):
+    def transform(
+        self, shape_file: Path, iso_code: str, adm_level: int, raster_file: Path, output_dir: Path
+    ) -> Path:
         """Transform GADM administrative boundaries and combine with population data.
 
         Loads GADM shape data, filters by administrative level, clips population

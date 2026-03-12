@@ -46,7 +46,7 @@ class WorldPopExtractor:
         """
         return "Extracts data from WorldPop at https://www.worldpop.org"
 
-    def extract(self, country, year) -> Path | None:
+    def extract(self, country: str, year: int) -> Path | None:
         """Extract WorldPop population raster data for a country and year.
 
         Downloads gridded population data at 1km resolution. Automatically

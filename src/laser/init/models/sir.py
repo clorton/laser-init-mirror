@@ -30,7 +30,7 @@ from plot import show_plots
     default=None,
     help="Path to the data directory.",
 )
-def main(config_file, data_dir):
+def main(config_file: Path, data_dir: Path) -> None:
     """Run an SIR (Susceptible-Infectious-Recovered) epidemiological model.
 
     Loads configuration and data files, sets up the model with vital dynamics

@@ -93,8 +93,11 @@ plugins:
       type: date
   - include-markdown
   - mkdocstrings:
+      default_handler: python
       handlers:
         python:
+          import:
+            - https://docs.python.org/3/objects.inv
           options:
             docstring_style: google
             show_source: true
@@ -111,6 +114,10 @@ plugins:
             inherited_members: false
             filters:
               - "!^_"  # Exclude private members
+            # Suppress warnings about missing type annotations
+            # Types are documented in Google-style docstrings
+            show_signature_annotations: false
+      enable_inventory: true
 
 # Markdown extensions
 markdown_extensions:

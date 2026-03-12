@@ -12,7 +12,7 @@ from ..utils import download_file, error, inform
 
 
 class GadmExtractor:
-    def __init__(self, prefer_gpkg: bool = False):
+    def __init__(self, prefer_gpkg: bool = False) -> None:
         """Initialize the GADM extractor.
 
         Args:
@@ -27,7 +27,7 @@ class GadmExtractor:
         return
 
     @staticmethod
-    def description():
+    def description() -> str:
         """Return a brief description of this extractor.
 
         Returns:
@@ -35,7 +35,7 @@ class GadmExtractor:
         """
         return "Extracts data from the Global Administrative Areas (GADM) at https://geodata.ucdavis.edu/gadm"
 
-    def extract(self, country, level, year):
+    def extract(self, country: str, level: int, year: int) -> Path | None:
         """Extract GADM administrative boundary data for a country.
 
         Downloads either shapefile (zip) or geopackage format administrative boundary

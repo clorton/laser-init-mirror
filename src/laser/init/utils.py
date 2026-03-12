@@ -280,7 +280,7 @@ def update_cache_provenance(cache_root: Path, file_path: Path, source_url: str) 
     return
 
 
-def update_local_provenance(output_dir, output_filename, *files):
+def update_local_provenance(output_dir: Path, output_filename: Path, *files: list[Path]) -> None:
     """Update local provenance for transformed files.
 
     Tracks which cached source files were used to create each transformed output file
@@ -311,7 +311,7 @@ def update_local_provenance(output_dir, output_filename, *files):
     return
 
 
-def clip_quietly(raster_file, shapefile, shape_attr):
+def clip_quietly(raster_file: Path, shapefile: Path, shape_attr: str) -> dict[str, float]:
     """Clip a raster file using a shapefile while suppressing stdout output.
 
     Uses rastertoolkit.raster_clip to extract population values for each shape
@@ -351,7 +351,7 @@ def inform(msg: str) -> None:
     return
 
 
-def error(msg: str, exception=RuntimeError) -> None:
+def error(msg: str, exception: Exception = RuntimeError) -> None:
     """Display an error message, log it, and raise an exception.
 
     Args:

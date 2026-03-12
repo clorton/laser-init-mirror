@@ -146,7 +146,7 @@ Then create a pull request on GitHub.
 
 ## Code Style
 
-laser-init follows the conventions in [CLAUDE.md](../CLAUDE.md).
+laser-init follows the conventions in [CLAUDE.md](https://github.com/laser-base/laser-init/blob/main/CLAUDE.md).
 
 ### General Conventions
 
@@ -489,7 +489,7 @@ pytest -s tests/test_file.py
 
 ## Getting Help
 
-- **Documentation**: Check [docs/](../) directory first
+- **Documentation**: Check the [documentation](index.md) first
 - **GitHub Issues**: Search existing issues
 - **Discussions**: Use GitHub Discussions for questions
 - **Architecture**: See [architecture.md](architecture.md)

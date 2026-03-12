@@ -78,17 +78,17 @@ E.g., laser-init NGA ADM2 2010 2025
     help="Select the demographic stats source (default: laser_config value or 'UNWPP')",
 )
 def cli(
-    country,
-    level,
-    start_year,
-    end_year,
-    output_dir,
-    mode,
-    model,
-    shape_source,
-    raster_source,
-    stats_source,
-):
+    country: str,
+    level: str,
+    start_year: int,
+    end_year: int,
+    output_dir: Path | None,
+    mode: str,
+    model: str,
+    shape_source: str | None,
+    raster_source: str | None,
+    stats_source: str | None,
+) -> None:
     """Download spatial data for modeling diseases across populations and prepare for use with a LASER model."""
     inform("Starting laser-init CLI")
     inform(
@@ -122,7 +122,9 @@ def cli(
     return
 
 
-def validate_arguments(country, level, start_year, end_year, output_dir):
+def validate_arguments(
+    country: str, level: str, start_year: int, end_year: int, output_dir: Path | None
+) -> tuple[str, int, Path]:
     """Validate and normalize command-line arguments.
 
     Args:
@@ -180,7 +182,7 @@ def validate_arguments(country, level, start_year, end_year, output_dir):
     return iso_code, adm_level, output_dir
 
 
-def download_shape_data(iso_code, adm_level, start_year, shape_source):
+def download_shape_data(iso_code: str, adm_level: int, start_year: int, shape_source: str) -> Path:
     """Download administrative boundary shape data.
 
     Args:
@@ -214,7 +216,7 @@ def download_shape_data(iso_code, adm_level, start_year, shape_source):
     return shape_extractor.extract(iso_code, adm_level, start_year)
 
 
-def download_raster_data(iso_code, start_year, raster_source):
+def download_raster_data(iso_code: str, start_year: int, raster_source: str) -> Path:
     """Download population raster data.
 
     Args:
@@ -245,7 +247,9 @@ def download_raster_data(iso_code, start_year, raster_source):
     return raster_extractor.extract(iso_code, start_year)
 
 
-def download_demographic_stats(iso_code, start_year, end_year, stats_source):
+def download_demographic_stats(
+    iso_code: str, start_year: int, end_year: int, stats_source: str
+) -> tuple[Path, ...]:
     """Download demographic statistics data.
 
     Args:
@@ -285,7 +289,7 @@ def transform_shape_and_raster_data(
     adm_level: int,
     raster_data: Path,
     output_dir: Path,
-):
+) -> Path:
     """Transform shape and raster data using the specified shape transformer.
     This function selects and instantiates the appropriate shape transformer based on
     the provided shape_source, then uses it to transform the input shape and raster data.
@@ -318,7 +322,14 @@ def transform_shape_and_raster_data(
     return shape_transformer.transform(shape_data, iso_code, adm_level, raster_data, output_dir)
 
 
-def transform_stats_data(stats_source, stats_data, iso_code, start_year, end_year, output_dir):
+def transform_stats_data(
+    stats_source: str,
+    stats_data: tuple[Path, ...],
+    iso_code: str,
+    start_year: int,
+    end_year: int,
+    output_dir: Path,
+) -> tuple[Path, Path, Path]:
     """Transform demographic statistics data using the specified stats transformer.
 
     Selects and instantiates the appropriate demographic statistics transformer
@@ -354,8 +365,14 @@ def transform_stats_data(stats_source, stats_data, iso_code, start_year, end_yea
 
 
 def emit_model_script(
-    mode, model, shapes_filename, cxr_filename, pop_filename, exp_filename, output_dir
-):
+    mode: str,
+    model: str,
+    shapes_filename: Path,
+    cxr_filename: Path,
+    pop_filename: Path,
+    exp_filename: Path,
+    output_dir: Path,
+) -> None:
     """Generate model script and configuration files.
 
     Args:
@@ -394,7 +411,13 @@ def emit_model_script(
     return
 
 
-def write_plots(shapes_filename, cxr_filename, pop_filename, exp_filename, output_dir):
+def write_plots(
+    shapes_filename: Path,
+    cxr_filename: Path,
+    pop_filename: Path,
+    exp_filename: Path,
+    output_dir: Path,
+) -> None:
     """Generate visualization plots and combine into a PDF report.
 
     Creates individual plots for population choropleth, birth/death rates,
@@ -432,7 +455,7 @@ def write_plots(shapes_filename, cxr_filename, pop_filename, exp_filename, outpu
     return
 
 
-def plot_population_choropleth(shapes_filename, output_dir):
+def plot_population_choropleth(shapes_filename: Path, output_dir: Path) -> plt.Figure:
     """Generate a population choropleth map.
 
     Args:
@@ -463,7 +486,7 @@ def plot_population_choropleth(shapes_filename, output_dir):
     return fig
 
 
-def plot_cbr_and_cdr(cxr_filename, output_dir):
+def plot_cbr_and_cdr(cxr_filename: Path, output_dir: Path) -> plt.Figure:
     """Generate crude birth and death rate time series plot.
 
     Args:
@@ -537,7 +560,7 @@ def plot_cbr_and_cdr(cxr_filename, output_dir):
     return fig
 
 
-def plot_age_distribution(pop_filename, output_dir):
+def plot_age_distribution(pop_filename: Path, output_dir: Path) -> plt.Figure:
     """Generate population pyramid plot showing age distribution.
 
     Args:
@@ -610,7 +633,7 @@ def plot_age_distribution(pop_filename, output_dir):
     return fig
 
 
-def plot_life_expectancy(exp_filename, output_dir):
+def plot_life_expectancy(exp_filename: Path, output_dir: Path) -> plt.Figure:
     """Generate Kaplan-Meier survival curve plot.
 
     Args:

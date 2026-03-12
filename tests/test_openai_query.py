@@ -46,7 +46,7 @@ class TestOpenAIQuery(unittest.TestCase):
                 self.output_text = output_text
 
         class FakeResponses:
-            def __init__(self):
+            def __init__(self) -> None:
                 self.last_kwargs = None
 
             def create(self, **kwargs):
@@ -73,7 +73,7 @@ class TestOpenAIQuery(unittest.TestCase):
                 )
 
         class FakeClient:
-            def __init__(self):
+            def __init__(self) -> None:
                 self.responses = FakeResponses()
 
         class FakeOpenAI:

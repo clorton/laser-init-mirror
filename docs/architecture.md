@@ -370,7 +370,7 @@ from laser.init.transformers import newsource as newsourcetx
 
 ## Code Conventions
 
-Following the guidelines in [CLAUDE.md](../CLAUDE.md):
+Following the guidelines in [CLAUDE.md](https://github.com/laser-base/laser-init/blob/main/CLAUDE.md):
 
 ### General
 - Always update CHANGELOG.md for accepted changes

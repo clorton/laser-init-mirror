@@ -16,7 +16,7 @@ A comprehensive guide to using laser-init to bootstrap spatial epidemiological m
 
 ### Installation
 
-See the [README](../README.md#installation) for installation instructions.
+See the [Installation Guide](installation.md) for installation instructions.
 
 ### Your First Model
 

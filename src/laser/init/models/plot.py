@@ -2,10 +2,11 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+from laser.generic.model import Model
 from matplotlib.backends.backend_pdf import PdfPages
 
 
-def show_plots(model, output_dir: Path | None, name: str = "model") -> Path:
+def show_plots(model: Model, output_dir: Path | None, name: str = "model") -> Path:
     """Generate all visualization plots for model output.
 
     Creates a comprehensive set of plots for analyzing epidemic model results,
@@ -43,7 +44,7 @@ def show_plots(model, output_dir: Path | None, name: str = "model") -> Path:
     return pdf_path
 
 
-def stacked_e_and_i(model, output_dir: Path | None):
+def stacked_e_and_i(model: Model, output_dir: Path | None) -> plt.Figure:
     """Plot stacked infectious individuals over time for top locations.
 
     Args:
@@ -105,7 +106,7 @@ def stacked_e_and_i(model, output_dir: Path | None):
     return fig
 
 
-def r_effective_t(model, output_dir: Path | None):
+def r_effective_t(model: Model, output_dir: Path | None) -> plt.Figure:
     """Plot effective reproduction number (R_t) over time.
 
     Args:
@@ -140,7 +141,7 @@ def r_effective_t(model, output_dir: Path | None):
     return fig
 
 
-def choropleth_snapshots(model, output_dir: Path | None):
+def choropleth_snapshots(model: Model, output_dir: Path | None) -> plt.Figure:
     """Plot choropleth maps showing spatial spread over time.
 
     Args:
@@ -226,7 +227,7 @@ def choropleth_snapshots(model, output_dir: Path | None):
     return fig
 
 
-def arrival_time_choropleth(model, output_dir: Path | None):
+def arrival_time_choropleth(model: Model, output_dir: Path | None) -> plt.Figure:
     """Plot time to first infection for each location.
 
     Args:
@@ -299,7 +300,7 @@ def arrival_time_choropleth(model, output_dir: Path | None):
     return fig
 
 
-def individual_incidence(model, output_dir: Path | None):
+def individual_incidence(model: Model, output_dir: Path | None) -> plt.Figure:
     """Plot incidence curves for top locations (log scale).
 
     Args:
@@ -356,7 +357,7 @@ def individual_incidence(model, output_dir: Path | None):
     return fig
 
 
-def import_pressure(model, output_dir: Path | None):
+def import_pressure(model: Model, output_dir: Path | None) -> plt.Figure:
     """Plot import pressure from top source locations.
 
     Args:
@@ -451,7 +452,7 @@ def import_pressure(model, output_dir: Path | None):
     return fig
 
 
-def peak_timing_peak_size(model, output_dir: Path | None):
+def peak_timing_peak_size(model: Model, output_dir: Path | None) -> plt.Figure:
     """Plot peak timing versus peak size scatter plot.
 
     Args:
@@ -528,7 +529,7 @@ def peak_timing_peak_size(model, output_dir: Path | None):
     return fig
 
 
-def cumulative_incidence(model, output_dir: Path | None):
+def cumulative_incidence(model: Model, output_dir: Path | None) -> plt.Figure:
     """Plot ranked cumulative incidence distribution across locations.
 
     Args:

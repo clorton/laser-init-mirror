@@ -18,7 +18,7 @@ from ..utils import clip_quietly, error, inform, update_local_provenance
 
 
 class UnochaTransformer:
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the UNOCHA transformer.
 
         Returns:
@@ -27,7 +27,7 @@ class UnochaTransformer:
         pass
 
     @staticmethod
-    def description():
+    def description() -> str:
         """Return a brief description of this transformer.
 
         Returns:
@@ -35,7 +35,9 @@ class UnochaTransformer:
         """
         return "Transform UNOCHA shape data to GeoPackage format, filtered by country and administrative level."
 
-    def transform(self, shape_file, iso_code, adm_level, raster_file, output_dir):
+    def transform(
+        self, shape_file: Path, iso_code: str, adm_level: int, raster_file: Path, output_dir: Path
+    ) -> Path:
         """Transform UNOCHA global administrative boundaries and combine with population data.
 
         Extracts geodatabase from zip file, loads global administrative boundary data,
@@ -137,7 +139,7 @@ class UnochaTransformer:
         return output_filename
 
 
-def read_gdb_quietly(gdb_path, layer_name):
+def read_gdb_quietly(gdb_path: Path, layer_name: str) -> gpd.GeoDataFrame:
     """Read a geodatabase layer while suppressing polygon processing warnings.
 
     Args:

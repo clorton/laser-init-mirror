@@ -28,7 +28,7 @@ class UnochaExtractor:
         """
         return "Extracts data from the United Nations Office for the Coordination of Humanitarian Affairs (UNOCHA) at https://data.humdata.org"
 
-    def extract(self, country, level, year) -> Path | None:
+    def extract(self, country: str, level: int, year: int) -> Path | None:
         """Extract UNOCHA global administrative boundaries data.
 
         Downloads the global administrative boundaries dataset from UNOCHA's

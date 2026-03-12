@@ -49,7 +49,7 @@ class UnwppExtractor:
         """
         return "Extracts data from the UN World Population Prospects (UNWPP) at https://population.un.org/wpp/"
 
-    def extract(self, country, start_year, end_year) -> Path | None:
+    def extract(self, country: str, start_year: int, end_year: int) -> Path | None:
         """Extract UN World Population Prospects demographic data.
 
         Downloads global demographic data files from UNWPP including:

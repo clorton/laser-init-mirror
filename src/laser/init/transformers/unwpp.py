@@ -2,6 +2,8 @@
 Transform UNWPP demographic data to a usable format, filtered by country and year range.
 """
 
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 
@@ -9,7 +11,7 @@ from ..utils import inform, update_local_provenance
 
 
 class UnwppTransformer:
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the UNWPP transformer.
 
         Returns:
@@ -18,7 +20,7 @@ class UnwppTransformer:
         pass
 
     @staticmethod
-    def description():
+    def description() -> str:
         """Return a brief description of this transformer.
 
         Returns:
@@ -26,7 +28,14 @@ class UnwppTransformer:
         """
         return "Transform UNWPP demographic data to a usable format, filtered by country and year range."
 
-    def transform(self, stats_data, iso_code, start_year, end_year, output_dir):
+    def transform(
+        self,
+        stats_data: tuple[Path, Path, Path, Path],
+        iso_code: str,
+        start_year: int,
+        end_year: int,
+        output_dir: Path,
+    ) -> tuple[Path, Path, Path]:
         """Transform UNWPP demographic data into model-ready CSV files.
 
         Extracts and filters UN World Population Prospects data for a specific country

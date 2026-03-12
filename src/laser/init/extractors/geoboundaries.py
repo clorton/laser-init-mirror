@@ -13,7 +13,7 @@ from ..utils import download_file, error, inform
 class GeoBoundariesExtractor:
     """Extracts data from GeoBoundaries at https://www.github.com/wmgeolab/geoBoundaries"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the GeoBoundaries extractor.
 
         Returns:
@@ -22,7 +22,7 @@ class GeoBoundariesExtractor:
         pass
 
     @staticmethod
-    def description():
+    def description() -> str:
         """Return a brief description of this extractor.
 
         Returns:
@@ -30,7 +30,7 @@ class GeoBoundariesExtractor:
         """
         return "Extracts data from GeoBoundaries at https://www.github.com/wmgeolab/geoBoundaries"
 
-    def extract(self, country, level, year):
+    def extract(self, country: str, level: int, year: int) -> Path | None:
         """Extract GeoBoundaries administrative boundary data for a country.
 
         Downloads administrative boundary data from the GeoBoundaries repository

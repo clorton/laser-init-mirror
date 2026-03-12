@@ -180,6 +180,18 @@ mkdocs serve
 
 This will start a development server at http://127.0.0.1:8000. Open this in your browser to see the documentation site with the Material theme.
 
+**Note:** You may see griffe warnings about missing type annotations. These are informational only and don't affect the documentation output. To suppress them, use:
+
+```shell
+PYTHONWARNINGS="ignore" mkdocs serve
+```
+
+Or to suppress only griffe warnings:
+
+```shell
+mkdocs serve 2>&1 | grep -v "griffe:"
+```
+
 4. Check for configuration errors:
 
 ```shell
