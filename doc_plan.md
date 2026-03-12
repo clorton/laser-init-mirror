@@ -158,27 +158,68 @@ Phase 4 item 7: Test locally with mkdocs serve
 
 ----
 
+## Verifcation
+
+1. Check that all dependencies are installed:
+
+```shell
+uv sync
+```
+
+2. Test the MkDocs configuration:
+
+```shell
+mkdocs --version
+```
+
+3. Preview the documentation locally:
+
+```shell
+mkdocs serve
+```
+
+This will start a development server at http://127.0.0.1:8000. Open this in your browser to see the documentation site with the Material theme.
+
+4. Check for configuration errors:
+
+```shell
+mkdocs build --strict
+```
+
+This will build the site and report any warnings as errors. Note: This will show warnings about missing pages (like installation.md, quickstart.md, etc.) which is expected - we'll create those in Phase 2.
+
+### What You Should See:
+
+- When running `mkdocs serve`, you should see the Material theme with indigo colors
+- Light/dark mode toggle in the header
+- Navigation tabs for different sections
+- Search functionality
+- The existing docs (`index.md`, `userguide.md`, etc.) rendered with the new theme
+- The build will warn about missing API reference pages, which is expected - those - will be created in later phases.
+
+----
+
 ## Task Checklist
 
 ### Phase 1: Configuration & Setup
 
 #### 1. Update mkdocs.yml configuration
-- [ ] Set proper site name, description, and repository URL
-- [ ] Configure navigation structure to organize all existing docs
-- [ ] Add theme configuration (Material for MkDocs)
-- [ ] Configure markdown extensions for code highlighting
-- [ ] Configure markdown extensions for admonitions
-- [ ] Configure markdown extensions for tables
-- [ ] Set up search functionality
-- [ ] Configure site metadata (author, copyright, etc.)
+- [x] Set proper site name, description, and repository URL
+- [x] Configure navigation structure to organize all existing docs
+- [x] Add theme configuration (Material for MkDocs)
+- [x] Configure markdown extensions for code highlighting
+- [x] Configure markdown extensions for admonitions
+- [x] Configure markdown extensions for tables
+- [x] Set up search functionality
+- [x] Configure site metadata (author, copyright, etc.)
 
 #### 2. Install additional MkDocs plugins
-- [ ] Add mkdocs-material to pyproject.toml [dev] section
-- [ ] Add mkdocstrings[python] to pyproject.toml [dev] section
-- [ ] Add mkdocs-git-revision-date-localized-plugin to pyproject.toml [dev] section
-- [ ] Add mkdocs-include-markdown-plugin to pyproject.toml [dev] section
+- [x] Add mkdocs-material to pyproject.toml [dev] section
+- [x] Add mkdocstrings[python] to pyproject.toml [dev] section
+- [x] Add mkdocs-git-revision-date-localized-plugin to pyproject.toml [dev] section
+- [x] Add mkdocs-include-markdown-plugin to pyproject.toml [dev] section
 - [ ] (Optional) Add mkdocs-awesome-pages-plugin to pyproject.toml [dev] section
-- [ ] Run `uv sync` to install new dependencies
+- [x] Run `uv sync` to install new dependencies
 
 ### Phase 2: Content Organization
 
