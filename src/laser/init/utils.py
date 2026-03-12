@@ -358,11 +358,8 @@ def error(msg: str, exception: Exception = RuntimeError) -> None:
         msg: The error message to display and log.
         exception: Exception class or instance to raise (default: RuntimeError).
 
-    Returns:
-        None (function raises an exception before returning).
-
     Raises:
-        The exception type specified in the exception parameter.
+        Exception: The exception type specified in the exception parameter.
     """
     click.echo(click.style(msg, fg="red"))
     logger.error(msg)
