@@ -1,3 +1,4 @@
+import importlib.util
 from pathlib import Path
 
 import click
@@ -11,7 +12,10 @@ from laser.core.demographics import AliasedDistribution, KaplanMeierEstimator
 from laser.generic import SEIR, Model
 from laser.generic.utils import ValuesMap
 from laser.generic.vitaldynamics import BirthsByCBR, MortalityByEstimator
-from plot import show_plots
+
+spec = importlib.util.spec_from_file_location("module_name", Path(__file__).parent / "plot.py")
+plot = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(plot)
 
 
 @click.command()
@@ -100,7 +104,7 @@ def main(config_file: Path, data_dir: Path) -> None:
 
     model.run()
 
-    show_plots(model, output_dir=Path(__file__).parent, name="seir")
+    plot.show_plots(model, output_dir=Path(__file__).parent, name="seir")
 
     return
 
