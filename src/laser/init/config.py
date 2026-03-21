@@ -5,10 +5,11 @@ the current working directory or the user's home directory. Configuration values
 can be used to set default data sources, API keys, and other preferences.
 
 Configuration File Locations (in order of precedence):
-    1. ./laser_config.yaml (current directory)
-    2. ./laser_config.json (current directory)
-    3. ~/.laser/laser_config.yaml (user home directory)
-    4. ~/.laser/laser_config.json (user home directory)
+
+  1. ./laser_config.yaml (current directory)
+  2. ./laser_config.json (current directory)
+  3. ~/.laser/laser_config.yaml (user home directory)
+  4. ~/.laser/laser_config.json (user home directory)
 
 The first file found is loaded and subsequent files are ignored.
 
@@ -38,17 +39,19 @@ Configuration File Format:
         ```
 
 Supported Configuration Keys:
-    shape_source (str): Default shapefile data source (unocha, geoboundaries, gadm)
-    raster_source (str): Default population raster source (worldpop)
-    stats_source (str): Default demographic statistics source (unwpp)
-    openai_api_key (str): OpenAI API key for enhanced country name matching
-    anthropic_api_key (str): Anthropic API key for enhanced country name matching
-    cache_dir (str): Directory for caching downloaded data
-    log_dir (str): Directory for writing log files
+
+  - `shape_source` (str): Default shapefile data source (unocha, geoboundaries, gadm)
+  - `raster_source` (str): Default population raster source (worldpop)
+  - `stats_source` (str): Default demographic statistics source (unwpp)
+  - `openai_api_key` (str): OpenAI API key for enhanced country name matching
+  - `anthropic_api_key` (str): Anthropic API key for enhanced country name matching
+  - `cache_dir` (str): Directory for caching downloaded data
+  - `log_dir` (str): Directory for writing log files
 
 Module Attributes:
-    VERSION (str): The version string of the laser-init package.
-    configuration (dict): Dictionary containing the loaded configuration values.
+
+  - `VERSION` (str): The version string of the laser-init package.
+  - `configuration` (dict): Dictionary containing the loaded configuration values.
         Empty dict if no configuration file is found or if parsing fails.
 
 Usage:
