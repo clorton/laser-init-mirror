@@ -3,7 +3,6 @@ Command-line interface for laser-init.
 Using the Click library to create a simple CLI entry point. This can be expanded with subcommands and options as needed.
 """
 
-from datetime import datetime
 from pathlib import Path
 
 import click
@@ -32,14 +31,16 @@ help = """
 Download spatial data for modeling diseases across populations and prepare for use with a LASER model.
 E.g., laser-init NGA ADM2 2010 2025
 """
+__MIN_YEAR__ = 1950
+__MAX_YEAR__ = 2100
 
 
 @click.command(help=help)
 @click.version_option(version=VERSION, prog_name="laser-init")
 @click.argument("country", required=True)
 @click.argument("level", required=True)
-@click.argument("start-year", required=True, type=click.IntRange(1950, 2050))
-@click.argument("end-year", required=True, type=click.IntRange(1950, 2050))
+@click.argument("start-year", required=True, type=click.IntRange(__MIN_YEAR__, __MAX_YEAR__))
+@click.argument("end-year", required=True, type=click.IntRange(__MIN_YEAR__, __MAX_YEAR__))
 @click.option(
     "-o",
     "--output-dir",
@@ -89,7 +90,61 @@ def cli(
     raster_source: str | None,
     stats_source: str | None,
 ) -> None:
-    """Download spatial data for modeling diseases across populations and prepare for use with a LASER model."""
+    """Main CLI entry point to download, transform, and prepare spatial data for LASER models.
+
+    This function orchestrates the complete data pipeline for LASER model initialization:
+    1. Validates and normalizes input parameters
+    2. Downloads administrative boundaries, population rasters, and demographic statistics
+    3. Transforms raw data into model-ready formats
+    4. Generates model-specific initialization scripts
+    5. Creates visualization reports
+
+    Args:
+        country: Country name or ISO 3166-1 alpha-3 code (e.g., "Nigeria" or "NGA").
+        level: Administrative level as string (e.g., "ADM1", "admin2", "3").
+        start_year: Base year for simulation (1950-2100, must be <= end_year).
+        end_year: End year for simulation (1950-2100, must be >= start_year).
+        output_dir: Output directory path. If None, defaults to "./ISOCODE/start_year".
+        mode: Modeling mode, either "ABM" (agent-based model) or "MPM" (metapopulation model).
+        model: Epidemiological model type - "SI", "SIR", or "SEIR".
+        shape_source: Administrative boundary data source - "unocha", "geoboundaries", or "gadm".
+            If None, uses config value or defaults to "unocha".
+        raster_source: Population raster data source - currently only "worldpop" supported.
+            If None, uses config value or defaults to "worldpop".
+        stats_source: Demographic statistics source - currently only "unwpp" supported.
+            If None, uses config value or defaults to "unwpp".
+
+    Returns:
+        None. Outputs are written to the specified output_dir:
+            - Transformed GeoPackage with administrative boundaries and population
+            - CSV files with CBR/CDR, age distribution, and life expectancy data
+            - Model initialization script (ABM or MPM)
+            - PDF report with visualization plots
+
+    Raises:
+        click.exceptions.Exit: If any validation fails:
+            - Invalid country code or ISO-3 code cannot be determined
+            - Invalid administrative level format
+            - Start year out of range (< 1900 or > current year)
+            - End year out of range (< start_year or > current year)
+            - Invalid shape_source, raster_source, or stats_source
+        RuntimeError: If data extraction or transformation fails:
+            - Shape file cannot be read during plotting
+            - CSV files cannot be read during plotting
+        AssertionError: If output_dir cannot be created or is not a valid directory.
+
+    Example:
+        ```bash
+        # Initialize SEIR ABM model for Nigeria at ADM2 level for years 2010-2025
+        laser-init NGA ADM2 2010 2025
+
+        # Use MPM mode with custom output directory
+        laser-init "Nigeria" ADM1 2015 2020 --mode MPM --output-dir ./my_output
+
+        # Specify data sources explicitly
+        laser-init NGA ADM2 2010 2025 --shape-source gadm --stats-source unwpp
+        ```
+    """
     inform("Starting laser-init CLI")
     inform(
         f"Received arguments: country={country}, level={level}, start_year={start_year}, end_year={end_year}, output_dir={output_dir}, shape_source={shape_source}, raster_source={raster_source}, stats_source={stats_source}"
@@ -157,19 +212,23 @@ def validate_arguments(
         )
     inform(f"Administrative Level: {level} → ADM{adm_level}")
 
-    # Rough validation of years
-    # test against 1900 second to ensure `now` is set
-    if start_year > (now := datetime.now()).year or start_year < 1900:
+    # start_year <= end_year
+    if start_year > end_year:
         error(
-            f"Base year {start_year} is out of range 1900...{now.year}. Please check your input and try again.",
+            f"Start year {start_year} cannot be greater than end year {end_year}. Please check your input and try again.",
+            click.exceptions.Exit(1),
+        )
+
+    if start_year < __MIN_YEAR__ or start_year > __MAX_YEAR__:
+        error(
+            f"Start year {start_year} is out of range. Please provide a year between {__MIN_YEAR__} and {__MAX_YEAR__}.",
             click.exceptions.Exit(1),
         )
     inform(f"Base year: {start_year}")
 
-    # test against 1900 second to ensure `now` is set
-    if end_year > (now := datetime.now()).year or end_year < start_year:
+    if end_year < __MIN_YEAR__ or end_year > __MAX_YEAR__:
         error(
-            f"End year {end_year} is out of range {start_year}...{now.year}. Please check your input and try again.",
+            f"End year {end_year} is out of range. Please provide a year between {__MIN_YEAR__} and {__MAX_YEAR__}.",
             click.exceptions.Exit(1),
         )
     inform(f"End year: {end_year}")

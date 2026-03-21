@@ -101,7 +101,4 @@ class WorldPopExtractor:
             except Exception as e:
                 error(f"Failed to download WorldPop data: {e}.", RuntimeError)
 
-        else:
-            error(f"Year {year} is out of range for WorldPop data (2000-2030).", RuntimeError)
-
         return local_path

@@ -96,3 +96,26 @@ python_version = "3.10"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
+
+[tool.coverage.run]
+source = ["laser.init"]
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+    "*/__pycache__/*",
+    "*/site-packages/*",
+    "**/anthropic_query.py",
+    "**/openai_query.py",
+    "**/models/plot.py",
+    "**/models/si.py",
+    "**/models/sir.py",
+    "**/models/seir.py",
+]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+
+[tool.coverage.html]
+directory = "htmlcov"

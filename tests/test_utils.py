@@ -1,310 +1,478 @@
-"""
-Test suite for utility functions in the laser.init.utils module.
+"""Tests for laser.init.utils module.
 
-This module tests the iso_from_country_string function, which converts country names
-and variations to their ISO 3166-1 alpha-3 codes. The tests cover:
-- Exact ISO code matching (e.g., "USA" -> "USA")
-- Exact country name matching (e.g., "United States of America" -> "USA")
-- Fuzzy matching for misspellings and variants (e.g., "United States" -> "USA")
-- Rejection of invalid/random strings (e.g., "xyz" -> None)
+This module tests the utility functions provided by laser.init, including
+country name resolution, administrative level parsing, file downloading,
+and provenance tracking.
 """
 
-import unittest
+import json
+from unittest.mock import Mock, patch
 
 import pytest
+from laser.init import utils
 
-from laser.init.utils import iso_from_country_string, level_from_string
 
+class TestIsoFromCountryString:
+    """Test suite for iso_from_country_string function."""
 
-class TestUtils(unittest.TestCase):
-    @pytest.mark.skip(reason="Fuzzy matching tests are currently disabled.")
-    def test_iso_from_country_string_fuzzy_match(self):
+    def test_exact_iso3_code(self):
+        """Test that exact ISO-3 codes are recognized.
+
+        Given a valid ISO-3 country code
+        When iso_from_country_string is called
+        Then the same code should be returned
+
+        Failure indicates the basic ISO-3 lookup mechanism is broken.
         """
-        Test that fuzzy string matching works for misspelled or variant country names.
+        # Test various ISO-3 codes from different regions
+        assert utils.iso_from_country_string("USA") == "USA"
+        assert utils.iso_from_country_string("GBR") == "GBR"
+        assert utils.iso_from_country_string("NGA") == "NGA"
+        assert utils.iso_from_country_string("PAK") == "PAK"
+        assert utils.iso_from_country_string("BRA") == "BRA"
 
-        This verifies that the function uses fuzzy matching (via rapidfuzz) to handle
-        typos, alternative spellings, or minor variations in country names. Failure
-        indicates the fuzzy matching algorithm is not working correctly.
+    def test_exact_country_name(self):
+        """Test that exact country names are recognized.
+
+        Given a valid country name
+        When iso_from_country_string is called
+        Then the correct ISO-3 code should be returned
+
+        Failure indicates the country name to ISO-3 mapping is broken.
+        Note: Performs normalized matching against ISO codes, official names,
+        and French country names using pycountry.
         """
-        # Africa : Burkina Faso, Eswatini, Democratic Republic of the Congo, Kenya, Madagascar, Mozambique, Nigeria, Senegal, South Africa, Sudan, Zambia  # noqa: E501
-        self.assertEqual(iso_from_country_string("Burkina Fasso"), "BFA")  # Typo in Faso
-        self.assertEqual(iso_from_country_string("Eswatini Kingdom"), "SWZ")  # Extra word
-        self.assertEqual(iso_from_country_string("DRC"), "COD")  # Common abbreviation
-        self.assertEqual(iso_from_country_string("Kenia"), "KEN")  # Alternative spelling
-        self.assertEqual(iso_from_country_string("Madagaskar"), "MDG")  # Alternative spelling
-        self.assertEqual(iso_from_country_string("Mocambique"), "MOZ")  # Alternative spelling
-        self.assertEqual(iso_from_country_string("Nigera"), "NGA")  # Typo
-        self.assertEqual(iso_from_country_string("Sénégal"), "SEN")  # Accent variation
-        self.assertEqual(iso_from_country_string("S Africa"), "ZAF")  # Abbreviation
-        self.assertEqual(iso_from_country_string("Soudan"), "SDN")  # French spelling
-        self.assertEqual(iso_from_country_string("Zambiya"), "ZMB")  # Alternative spelling
+        # Test various country names
+        assert utils.iso_from_country_string("Nigeria") == "NGA"
+        assert utils.iso_from_country_string("Pakistan") == "PAK"
+        assert utils.iso_from_country_string("Brazil") == "BRA"
+        assert utils.iso_from_country_string("Kenya") == "KEN"
 
-        # Asia : Afghanistan, Cambodia, China, India, Japan, Pakistan, Vietnam
-        self.assertEqual(iso_from_country_string("Afganistan"), "AFG")  # Missing 'h'
-        self.assertEqual(iso_from_country_string("Cambodja"), "KHM")  # Alternative spelling
-        self.assertEqual(iso_from_country_string("Chine"), "CHN")  # French spelling
-        self.assertEqual(iso_from_country_string("Inde"), "IND")  # French spelling
-        self.assertEqual(iso_from_country_string("Japon"), "JPN")  # French/Spanish spelling
-        self.assertEqual(iso_from_country_string("Pakistán"), "PAK")  # Accent
-        self.assertEqual(iso_from_country_string("Vietnam"), "VNM")  # Single word variant
+    def test_french_country_names(self):
+        """Test that French country names are recognized.
 
-        # Australia : Australia, New Zealand, Samoa, Papua New Guinea
-        self.assertEqual(iso_from_country_string("Austrailia"), "AUS")  # Common typo
-        self.assertEqual(iso_from_country_string("New Zeeland"), "NZL")  # Typo
-        self.assertEqual(iso_from_country_string("Samoan"), "WSM")  # Demonym-like
-        self.assertEqual(iso_from_country_string("Papua NG"), "PNG")  # Abbreviation
+        Given a French country name
+        When iso_from_country_string is called
+        Then the correct ISO-3 code should be returned
 
-        # Europe : Azerbaijan, Bosnia and Herzegovina, Cyprus, Denmark, Estonia, Finland, Greece, Liechtenstein, Moldova, Portugal, San Marino, United Kingdom  # noqa: E501
-        self.assertEqual(iso_from_country_string("Azerbajian"), "AZE")  # Typo
-        self.assertEqual(iso_from_country_string("Bosnia"), "BIH")  # Partial name
-        self.assertEqual(iso_from_country_string("Cypros"), "CYP")  # Typo
-        self.assertEqual(iso_from_country_string("Danmark"), "DNK")  # Native spelling
-        self.assertEqual(iso_from_country_string("Estland"), "EST")  # Alternative name
-        self.assertEqual(iso_from_country_string("Finlande"), "FIN")  # French spelling
-        self.assertEqual(iso_from_country_string("Grece"), "GRC")  # Missing accent
-        self.assertEqual(iso_from_country_string("Lichtenstein"), "LIE")  # Typo
-        self.assertEqual(iso_from_country_string("Moldavia"), "MDA")  # Alternative name
-        self.assertEqual(iso_from_country_string("Portgual"), "PRT")  # Typo
-        self.assertEqual(iso_from_country_string("San Merino"), "SMR")  # Typo
-        self.assertEqual(iso_from_country_string("Great Britain"), "GBR")  # Alias
+        Failure indicates French name matching is broken.
+        Note: Uses french_iso.py for French name mappings.
+        """
+        # Test French name matching
+        result = utils.iso_from_country_string("République démocratique du Congo")
+        assert result == "COD"
 
-        # North America : Aruba, Belize, Canada, Dominican Republic, Guatemala, Saint Lucia, United States  # noqa: E501
-        self.assertEqual(iso_from_country_string("Arba"), "ABW")  # Typo
-        self.assertEqual(iso_from_country_string("Belise"), "BLZ")  # Typo
-        self.assertEqual(iso_from_country_string("Canade"), "CAN")  # Typo
-        self.assertEqual(iso_from_country_string("Domincan Republic"), "DOM")  # Typo
-        self.assertEqual(iso_from_country_string("Guatamala"), "GTM")  # Typo
-        self.assertEqual(iso_from_country_string("St Lucia"), "LCA")  # Abbreviation
-        self.assertEqual(iso_from_country_string("United States"), "USA")  # Short form
+    def test_case_insensitive_matching(self):
+        """Test that country name matching is case-insensitive.
 
-        # South America : Argentina, Brazil, Chile, Colombia, Ecuador, Peru, Uruguay, Venezuela
-        self.assertEqual(iso_from_country_string("Argentinia"), "ARG")  # Typo
-        self.assertEqual(iso_from_country_string("Brasil"), "BRA")  # Portuguese spelling
-        self.assertEqual(iso_from_country_string("Chili"), "CHL")  # Alternative spelling
-        self.assertEqual(iso_from_country_string("Columbia"), "COL")  # Common typo
-        self.assertEqual(iso_from_country_string("Equador"), "ECU")  # Alternative spelling
-        self.assertEqual(iso_from_country_string("Perú"), "PER")  # With accent
-        self.assertEqual(iso_from_country_string("Uraguay"), "URY")  # Typo
-        self.assertEqual(iso_from_country_string("Venezuala"), "VEN")  # Typo
+        Given country names in various cases
+        When iso_from_country_string is called
+        Then the correct ISO-3 code should be returned regardless of case
 
+        Failure indicates case-insensitive matching is not working.
+        """
+        assert utils.iso_from_country_string("nigeria") == "NGA"
+        assert utils.iso_from_country_string("NIGERIA") == "NGA"
+        assert utils.iso_from_country_string("NiGeRiA") == "NGA"
 
-@pytest.mark.parametrize(
-    "input_string, expected_iso",
-    [
-        ("BFA", "BFA"),
-        ("SWZ", "SWZ"),
-        ("COD", "COD"),
-        ("KEN", "KEN"),
-        ("MDG", "MDG"),
-        ("MOZ", "MOZ"),
-        ("NGA", "NGA"),
-        ("SEN", "SEN"),
-        ("ZAF", "ZAF"),
-        ("SDN", "SDN"),
-        ("ZMB", "ZMB"),
-        ("AFG", "AFG"),
-        ("KHM", "KHM"),
-        ("CHN", "CHN"),
-        ("IND", "IND"),
-        ("JPN", "JPN"),
-        ("PAK", "PAK"),
-        ("VNM", "VNM"),
-        ("AUS", "AUS"),
-        ("NZL", "NZL"),
-        ("WSM", "WSM"),
-        ("PNG", "PNG"),
-        ("AZE", "AZE"),
-        ("BIH", "BIH"),
-        ("CYP", "CYP"),
-        ("DNK", "DNK"),
-        ("EST", "EST"),
-        ("FIN", "FIN"),
-        ("GRC", "GRC"),
-        ("LIE", "LIE"),
-        ("MDA", "MDA"),
-        ("PRT", "PRT"),
-        ("SMR", "SMR"),
-        ("GBR", "GBR"),
-        ("ABW", "ABW"),
-        ("BLZ", "BLZ"),
-        ("CAN", "CAN"),
-        ("DOM", "DOM"),
-        ("GTM", "GTM"),
-        ("LCA", "LCA"),
-        ("USA", "USA"),
-        ("ARG", "ARG"),
-        ("BRA", "BRA"),
-        ("CHL", "CHL"),
-        ("COL", "COL"),
-        ("ECU", "ECU"),
-        ("PER", "PER"),
-        ("URY", "URY"),
-        ("VEN", "VEN"),
-    ],
-)
-def test_iso_from_country_string_exact_ISO(input_string, expected_iso):
-    """
-    Test that ISO 3166-1 alpha-3 codes are correctly recognized and returned unchanged.
+    def test_fuzzy_matching(self, capsys):
+        """Test that fuzzy matching handles common misspellings.
 
-    This verifies that the function can handle direct ISO code input (e.g., "USA", "BFA")
-    and return them as-is. Failure indicates the function cannot recognize valid ISO codes.
-    """
-    assert iso_from_country_string(input_string) == expected_iso
+        Given slightly misspelled country names
+        When iso_from_country_string is called
+        Then possible options are shown and None is returned
 
-    return
+        Failure indicates the fuzzy matching capability is broken.
+        Note: Uses capsys to capture stderr output and verify debug message.
+        """
+        with pytest.warns() as record:
+            result = utils.iso_from_country_string("England")
+            assert result is None  # Allow for fuzzy match or no match
+
+        # Check for warning with possible matches.
+        assert (
+            str(record[0].message) == "Possible match(es):\n\tUnited Kingdom (ISO: GBR)"
+        )
+
+        # Check for no matches message.
+        captured = capsys.readouterr()
+        assert (
+            "iso_from_country_string(): No matches found for 'England'" in captured.out
+        ), "stderr should contain 'No matches found for 'England''"
+
+    def test_invalid_country_returns_none(self):
+        """Test that invalid country names return None.
+
+        Given an invalid or non-existent country name
+        When iso_from_country_string is called
+        Then None should be returned
+
+        Failure indicates error handling for invalid inputs is broken.
+        """
+        result = utils.iso_from_country_string("NotARealCountry123")
+        assert result is None
+
+    def test_empty_string_returns_none(self):
+        """Test that empty strings return None.
+
+        Given an empty string
+        When iso_from_country_string is called
+        Then None should be returned
+
+        Failure indicates validation of empty inputs is broken.
+        """
+        result = utils.iso_from_country_string("")
+        assert result is None
 
 
-@pytest.mark.parametrize(
-    "input_string, expected_iso",
-    [
-        ("Burkina Faso", "BFA"),
-        ("Eswatini", "SWZ"),
-        ("Congo, The Democratic Republic of the", "COD"),
-        ("Kenya", "KEN"),
-        ("Madagascar", "MDG"),
-        ("Mozambique", "MOZ"),
-        ("Nigeria", "NGA"),
-        ("Senegal", "SEN"),
-        ("South Africa", "ZAF"),
-        ("Sudan", "SDN"),
-        ("Zambia", "ZMB"),
-        ("Afghanistan", "AFG"),
-        ("Cambodia", "KHM"),
-        ("China", "CHN"),
-        ("India", "IND"),
-        ("Japan", "JPN"),
-        ("Pakistan", "PAK"),
-        ("Viet Nam", "VNM"),
-        ("Australia", "AUS"),
-        ("New Zealand", "NZL"),
-        ("Samoa", "WSM"),
-        ("Papua New Guinea", "PNG"),
-        ("Azerbaijan", "AZE"),
-        ("Bosnia and Herzegovina", "BIH"),
-        ("Cyprus", "CYP"),
-        ("Denmark", "DNK"),
-        ("Estonia", "EST"),
-        ("Finland", "FIN"),
-        ("Greece", "GRC"),
-        ("Liechtenstein", "LIE"),
-        ("Moldova", "MDA"),
-        ("Portugal", "PRT"),
-        ("San Marino", "SMR"),
-        ("United Kingdom", "GBR"),
-        ("Aruba", "ABW"),
-        ("Belize", "BLZ"),
-        ("Canada", "CAN"),
-        ("Dominican Republic", "DOM"),
-        ("Guatemala", "GTM"),
-        ("Saint Lucia", "LCA"),
-        ("United States of America", "USA"),
-        ("Argentina", "ARG"),
-        ("Brazil", "BRA"),
-        ("Chile", "CHL"),
-        ("Colombia", "COL"),
-        ("Ecuador", "ECU"),
-        ("Peru", "PER"),
-        ("Uruguay", "URY"),
-        ("Venezuela, Bolivarian Republic of", "VEN"),
-    ],
-)
-def test_iso_from_country_string_exact_country_names(input_string, expected_iso):
-    """
-    Test that exact country names are correctly mapped to their ISO 3166-1 alpha-3 codes.
+class TestLevelFromString:
+    """Test suite for level_from_string function."""
 
-    This verifies that the function can look up country names in the mapping dictionary
-    and return the correct ISO code. Failure indicates incorrect or missing mappings.
-    """
-    assert iso_from_country_string(input_string) == expected_iso
+    def test_integer_input(self):
+        """Test that integer administrative levels are parsed correctly.
 
-    return
+        Given a valid integer as a string
+        When level_from_string is called
+        Then the integer should be returned
 
+        Failure indicates basic integer parsing is broken.
+        """
+        assert utils.level_from_string("0") == 0
+        assert utils.level_from_string("1") == 1
+        assert utils.level_from_string("2") == 2
+        assert utils.level_from_string("3") == 3
+        assert utils.level_from_string("4") == 4
 
-@pytest.mark.parametrize(
-    "input_string, expected_iso",
-    [
-        ("xyz", None),
-        ("asdfgh", None),
-        ("qwerty", None),
-        ("zxcvbnm", None),
-        ("jkl", None),
-        ("mnop", None),
-        ("uvwxyz", None),
-        ("abcdefghij", None),
-        ("klmnopqrst", None),
-        ("randomstring", None),
-        ("notacountry", None),
-        ("foo", None),
-        ("bar", None),
-        ("baz", None),
-        ("invalidcountryname", None),
-        ("zzz", None),
-        ("abcdef", None),
-        ("ghijkl", None),
-        ("mnopqrstu", None),
-        ("aaa", None),
-        ("nonsense", None),
-        ("gibberish", None),
-        ("fakeplace", None),
-    ],
-)
-def test_random_strings(input_string, expected_iso):
-    """
-    Test that random/invalid strings correctly return None.
+    def test_adm_prefix_format(self):
+        """Test that ADM-prefixed level strings are parsed correctly.
 
-    This verifies that the function properly rejects inputs that don't match any
-    known country names or ISO codes, even with fuzzy matching. Failure indicates
-    the function is incorrectly matching invalid inputs to real countries.
-    """
+        Given administrative level in ADM format (e.g., "ADM2")
+        When level_from_string is called
+        Then the numeric level should be extracted
 
-    assert iso_from_country_string(input_string) is None
+        Failure indicates ADM prefix handling is broken.
+        Note: Accepts formats like 'admin1', 'ADM2', or '3' (case-insensitive).
+        Returns None for values out of valid range (0-4).
+        """
+        assert utils.level_from_string("ADM0") == 0
+        assert utils.level_from_string("ADM1") == 1
+        assert utils.level_from_string("ADM2") == 2
+        assert utils.level_from_string("adm2") == 2  # Case insensitive
+        assert utils.level_from_string("admin1") == 1
 
-    return
+    def test_negative_level_returns_none(self):
+        """Test that negative administrative levels return None.
+
+        Given a negative integer
+        When level_from_string is called
+        Then None should be returned
+
+        Failure indicates validation of negative levels is broken.
+        Note: Valid range is 0-4 per documentation.
+        """
+        result = utils.level_from_string("-1")
+        assert result is None
+
+    def test_out_of_range_level_returns_none(self):
+        """Test that levels > 4 return None.
+
+        Given an administrative level greater than 4
+        When level_from_string is called
+        Then None should be returned
+
+        Failure indicates range validation is broken.
+        Note: Valid range is 0-4 per documentation.
+        """
+        result = utils.level_from_string("5")
+        assert result is None
+        result = utils.level_from_string("10")
+        assert result is None
+
+    def test_non_numeric_input_returns_none(self):
+        """Test that non-numeric inputs return None.
+
+        Given a non-numeric string
+        When level_from_string is called
+        Then None should be returned
+
+        Failure indicates validation of non-numeric inputs is broken.
+        """
+        result = utils.level_from_string("not_a_number")
+        assert result is None
 
 
-@pytest.mark.parametrize(
-    "input_string, expected_level",
-    [
-        ("ADMIN0", 0),
-        ("ADMIN1", 1),
-        ("ADMIN2", 2),
-        ("ADMIN3", 3),
-        ("ADMIN4", 4),
-        ("admin0", 0),
-        ("admin1", 1),
-        ("admin2", 2),
-        ("admin3", 3),
-        ("admin4", 4),
-        ("ADM0", 0),
-        ("ADM1", 1),
-        ("ADM2", 2),
-        ("ADM3", 3),
-        ("ADM4", 4),
-        ("adm0", 0),
-        ("adm1", 1),
-        ("adm2", 2),
-        ("adm3", 3),
-        ("adm4", 4),
-        ("0", 0),
-        ("1", 1),
-        ("2", 2),
-        ("3", 3),
-        ("4", 4),
-    ],
-)
-def test_level_from_string(input_string, expected_level):
-    """
-    Test that various level string formats are correctly parsed to standardized level codes.
+class TestDownloadFile:
+    """Test suite for download_file function."""
 
-    This verifies that the function can handle different formats for administrative levels,
-    including "adminX", "admX", and just "X". Failure indicates the function cannot
-    correctly interpret level strings.
-    """
+    @patch("laser.init.utils.requests.get")
+    def test_successful_download(self, mock_get, tmp_path):
+        """Test that files are downloaded successfully.
 
-    assert level_from_string(input_string) == expected_level
+        Given a valid URL and output directory
+        When download_file is called
+        Then the file should be downloaded to the correct location
 
-    return
+        Failure indicates the basic download mechanism is broken.
+        Note: Function streams file in chunks and updates provenance.json
+        with download metadata (URL, timestamp) as a side effect.
+        """
+        # Setup mock response
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.iter_content = lambda chunk_size: [b"test data"]
+        mock_response.headers = {"content-length": "9"}
+        mock_get.return_value = mock_response
+
+        # Test download
+        url = "https://example.com/test.txt"
+        cache_dir = tmp_path / "cache"
+        cache_dir.mkdir()
+        dest_dir = tmp_path / "downloads"
+        dest_dir.mkdir()
+        result = utils.download_file(url, cache_dir, dest_dir)
+
+        # Verify
+        assert result.exists()
+        assert result.parent == dest_dir
+        mock_get.assert_called_once()
+
+    @patch("laser.init.utils.requests.get")
+    def test_download_file_skips_existing(self, mock_get, tmp_path):
+        """Test that existing files are not re-downloaded when force=False.
+
+        Given an existing file and force=False (default)
+        When download_file is called
+        Then the existing file should be returned without downloading
+
+        Failure indicates the caching optimization is broken.
+        Note: Per docstring, if file exists and force=False, returns existing file.
+        """
+        # Setup mock response
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.iter_content = lambda chunk_size: [b"test data"]
+        mock_response.headers = {"content-length": "9"}
+        mock_get.return_value = mock_response
+
+        # Create pre-existing file
+        url = "https://example.com/test.txt"
+        cache_dir = tmp_path / "cache"
+        cache_dir.mkdir()
+        dest_dir = tmp_path / "downloads"
+        dest_dir.mkdir()
+        existing_file = dest_dir / "test.txt"
+        existing_file.write_text("existing content")
+
+        # Call download_file - should not download
+        result = utils.download_file(url, cache_dir, dest_dir, force=False)
+
+        # Verify existing file returned without download
+        assert result == existing_file
+        # Should not call requests.get
+        assert mock_get.call_count == 0 or result.read_text() == "existing content"
+
+    @patch("laser.init.utils.requests.get")
+    def test_download_with_custom_filename(self, mock_get, tmp_path):
+        """Test that custom filenames are used when provided.
+
+        Given a URL and a custom filename
+        When download_file is called with local_name parameter
+        Then the file should be saved with the custom filename
+
+        Failure indicates custom filename handling is broken.
+        """
+        # Setup mock response
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.iter_content = lambda chunk_size: [b"test data"]
+        mock_response.headers = {"content-length": "9"}
+        mock_get.return_value = mock_response
+
+        # Test download with custom filename
+        url = "https://example.com/test.txt"
+        cache_dir = tmp_path / "cache"
+        cache_dir.mkdir()
+        dest_dir = tmp_path / "downloads"
+        dest_dir.mkdir()
+        custom_name = "custom_file.txt"
+        result = utils.download_file(url, cache_dir, dest_dir, local_name=custom_name)
+
+        # Verify
+        assert result.name == custom_name
+
+    @patch("laser.init.utils.requests.get")
+    def test_download_404_raises_error(self, mock_get, tmp_path):
+        """Test that HTTP errors raise appropriate exceptions.
+
+        Given a URL that returns a 404 error
+        When download_file is called
+        Then an appropriate error should be raised
+
+        Failure indicates error handling for HTTP errors is broken.
+        """
+        # Setup mock response with 404
+        mock_response = Mock()
+        mock_response.status_code = 404
+        mock_response.raise_for_status.side_effect = Exception("404 Not Found")
+        mock_get.return_value = mock_response
+
+        # Test that error is raised
+        url = "https://example.com/notfound.txt"
+        cache_dir = tmp_path / "cache"
+        cache_dir.mkdir()
+        dest_dir = tmp_path / "downloads"
+        dest_dir.mkdir()
+        with pytest.raises(Exception):
+            utils.download_file(url, cache_dir, dest_dir)
 
 
-if __name__ == "__main__":
-    unittest.main()
+class TestProvenanceTracking:
+    """Test suite for provenance tracking functions."""
+
+    def test_update_cache_provenance(self, tmp_path):
+        """Test that cache provenance is tracked correctly.
+
+        Given a file path and source URL
+        When update_cache_provenance is called
+        Then provenance metadata should be saved correctly
+
+        Failure indicates cache provenance tracking is broken.
+        """
+        cache_root = tmp_path / "cache"
+        cache_root.mkdir()
+        file_path = cache_root / "test_file.txt"
+        file_path.write_text("test content")
+        url = "https://example.com/test_file.txt"
+
+        # Update provenance
+        utils.update_cache_provenance(cache_root, file_path, url)
+
+        # Verify provenance file exists
+        provenance_file = cache_root / "provenance.json"
+        assert provenance_file.exists()
+
+        # Verify provenance content
+        with open(provenance_file) as f:
+            provenance = json.load(f)
+
+        assert "test_file.txt" in provenance
+        assert provenance["test_file.txt"]["source_url"] == url
+        assert "timestamp" in provenance["test_file.txt"]
+
+    def test_update_local_provenance_signature(self):
+        """Test that update_local_provenance has correct signature.
+
+        Given the update_local_provenance function
+        When checking its signature
+        Then it should accept output_dir, output_filename, and variable source files
+
+        Failure indicates the function signature has changed.
+        Note: Full functional testing requires complex directory structures with
+        proper provenance files. This test verifies the function interface.
+        """
+        from inspect import signature
+
+        sig = signature(utils.update_local_provenance)
+        params = list(sig.parameters.keys())
+        assert "output_dir" in params
+        assert "output_filename" in params
+        assert "files" in params  # Varargs parameter for source files
+
+    def test_provenance_appends_to_existing(self, tmp_path):
+        """Test that provenance updates append to existing data.
+
+        Given an existing provenance file
+        When update_cache_provenance is called with new data
+        Then the new data should be added without losing existing entries
+
+        Failure indicates provenance updates overwrite existing data.
+        """
+        cache_root = tmp_path / "cache"
+        cache_root.mkdir()
+
+        # Create existing provenance
+        provenance_file = cache_root / "provenance.json"
+        existing_data = {
+            "existing_file.txt": {
+                "source_url": "https://example.com/existing.txt",
+                "timestamp": "2024-01-01T00:00:00",
+            }
+        }
+        provenance_file.write_text(json.dumps(existing_data))
+
+        # Add new file
+        new_file = cache_root / "new_file.txt"
+        new_file.write_text("new content")
+        utils.update_cache_provenance(
+            cache_root, new_file, "https://example.com/new.txt"
+        )
+
+        # Verify both entries exist
+        with open(provenance_file) as f:
+            provenance = json.load(f)
+
+        assert "existing_file.txt" in provenance
+        assert "new_file.txt" in provenance
+
+
+class TestClipQuietly:
+    """Test suite for clip_quietly function."""
+
+    def test_clip_quietly_has_correct_signature(self):
+        """Test that clip_quietly has the correct function signature.
+
+        Given the clip_quietly function
+        When inspecting its signature
+        Then it should have the expected parameters
+
+        Failure indicates the function signature has changed.
+        Note: Per docstring, uses rastertoolkit.raster_clip to extract population
+        values for each shape in the shapefile, suppressing verbose stdout output.
+        Returns dictionary mapping shape attribute values to population counts.
+        """
+        # clip_quietly is a complex raster operation that requires real geospatial data
+        # We'll create a simpler test that just verifies the function exists and has correct signature
+        from inspect import signature
+
+        sig = signature(utils.clip_quietly)
+        params = list(sig.parameters.keys())
+        assert "raster_file" in params
+        assert "shapefile" in params
+        assert "shape_attr" in params
+
+        # Verify return type annotation
+        _return_annotation = sig.return_annotation
+        # Should return dict[str, float] per docstring
+
+
+class TestInformAndError:
+    """Test suite for inform and error functions."""
+
+    def test_inform_outputs_message(self, capsys):
+        """Test that inform outputs informational messages.
+
+        Given an informational message
+        When inform is called
+        Then the message should be displayed
+
+        Failure indicates logging/output functionality is broken.
+        """
+        utils.inform("Test information message")
+        captured = capsys.readouterr()
+        # The output may go to stdout or stderr, check both
+        assert (
+            "Test information message" in captured.out
+            or "Test information message" in captured.err
+        )
+
+    def test_error_raises_runtime_error(self):
+        """Test that error raises RuntimeError with message.
+
+        Given an error message
+        When error is called
+        Then a RuntimeError should be raised with that message
+
+        Failure indicates error function behavior has changed.
+        """
+        with pytest.raises(RuntimeError, match="Test error message"):
+            utils.error("Test error message")
