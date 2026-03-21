@@ -1,6 +1,6 @@
 # Epidemiological Models Documentation
 
-Comprehensive guide to the epidemiological models supported by laser-init.
+Comprehensive guide to the epidemiological models supported by `laser-init`.
 
 ## Table of Contents
 
@@ -17,13 +17,14 @@ Comprehensive guide to the epidemiological models supported by laser-init.
 
 ## Overview
 
-laser-init generates ready-to-run spatial disease models using the [LASER](https://github.com/laser-base/laser-generic) framework. The tool supports three classic compartmental model types:
+`laser-init` generates ready-to-run spatial disease models using the [LASER](https://github.com/laser-base/laser-generic) framework. The tool supports three classic compartmental model types:
 
 - **SI** (Susceptible-Infectious)
 - **SIR** (Susceptible-Infectious-Recovered)
 - **SEIR** (Susceptible-Exposed-Infectious-Recovered)
 
 All models are:
+
 - **Spatial**: Disease spreads across administrative regions via gravity model
 - **Stochastic**: Individual-level Monte Carlo simulation
 - **Demographic**: Includes births and deaths based on vital statistics
@@ -176,7 +177,7 @@ S ── β ──> E ── σ ──> I ── γ ──> R
 
 ### Latent Period Distribution
 
-laser-init uses a **gamma distribution** for the exposed period (this is easily changed by editing the model script and using one of the [supported distributions](https://laser.idmod.org/laser-generic/reference/laser/core/distributions/)):
+`laser-init` uses a **gamma distribution** for the exposed period (this is easily changed by editing the model script and using one of the [supported distributions](https://laser.idmod.org/laser-generic/reference/laser/core/distributions/)):
 
 ```python
 exposed_duration ~ Gamma(shape, scale)
@@ -269,19 +270,21 @@ All models include spatial coupling via a **gravity model**.
 
 Movement rate between regions i and j:
 
-```
-M(i,j) = κ × (P_i × P_j) / d(i,j)^α
-```
+$M_{i,j} = \kappa \times \frac {(P^a_i \times P^b_j)} {d_{i,j}^c}$
 
 where:
+
 - κ = scaling constant
-- P_i, P_j = populations of regions i and j
+- P<sub>i</sub>, P<sub>j</sub> = populations of regions i and j
 - d(i,j) = distance between regions
-- α = distance exponent (typically 1-2)
+- a = source population, P<sub>i</sub>, exponent (typically 1)
+- b = destination population, P<sub>j</sub>, exponent (typically 1)
+- c = distance exponent (typically 1-2)
 
 ### Spatial Transmission
 
 Infections can occur:
+
 1. **Locally**: Within the same administrative region (most common)
 2. **Via mobility**: Through movement between regions (gravity model)
 
@@ -360,6 +363,7 @@ model.components.append(mortality)
 ### Demographic Effects
 
 With vital dynamics:
+
 - **Population growth**: Can increase or decrease over simulation
 - **Age structure**: Maintained via age-specific births/deaths
 - **Endemic equilibrium**: Disease can persist via birth of new susceptibles
@@ -492,6 +496,7 @@ for age in age_groups:
 Definition: Average number of secondary infections from one infectious individual in a fully susceptible population.
 
 **Interpretation**:
+
 - R<sub>0</sub> = 2: Each case infects 2 others on average
 - R<sub>0</sub> > 1: Epidemic growth
 - R<sub>0</sub> = 1: Endemic equilibrium
@@ -546,6 +551,7 @@ Attack Rate = (R_final - R_initial) / N
 - Balcan et al. (2009). Multiscale mobility networks and the spatial spreading of infectious diseases. *PNAS*, 106(51), 21484-21489.
 
 ### LASER Framework
+
 - [laser-core](https://github.com/laser-base/laser-core)
 - [laser-generic](https://github.com/laser-base/laser-generic)
 - [LASER documentation](https://laser.idmod.org/laser-generic/)
@@ -553,6 +559,7 @@ Attack Rate = (R_final - R_initial) / N
 ## Support
 
 For model questions:
+
 - [User Guide](userguide.md) - Comprehensive workflows
 - [Configuration Guide](configuration.md) - Parameter reference
 - [GitHub Issues](https://github.com/laser-base/laser-init/issues) - Technical support

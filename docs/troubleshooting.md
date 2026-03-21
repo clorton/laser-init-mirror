@@ -1,6 +1,6 @@
 # Troubleshooting Guide
 
-Common issues and solutions when using laser-init.
+Common issues and solutions when using `laser-init`.
 
 ## Table of Contents
 
@@ -15,7 +15,7 @@ Common issues and solutions when using laser-init.
 
 ## Installation Issues
 
-### Command not found: laser-init
+### Command not found: `laser-init`
 
 **Problem**: After installation, running `laser-init` returns "command not found"
 
@@ -47,7 +47,7 @@ Common issues and solutions when using laser-init.
 
 ### ImportError: No module named 'laser.init'
 
-**Problem**: Python cannot find the laser-init module
+**Problem**: Python cannot find the `laser-init` module
 
 **Solutions**:
 
@@ -178,7 +178,7 @@ Common issues and solutions when using laser-init.
    rm -rf ~/.laser/cache/UNOCHA/*.partial
    ```
 
-2. **Retry the command**: laser-init will resume or restart the download
+2. **Retry the command**: `laser-init` will resume or restart the download
 
 3. **Check internet connection**:
    ```shell
@@ -455,7 +455,7 @@ Common issues and solutions when using laser-init.
 
 ### Config File Not Found
 
-**Problem**: laser-init doesn't find your configuration file
+**Problem**: `laser-init` doesn't find your configuration file
 
 **Solutions**:
 

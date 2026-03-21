@@ -1,10 +1,10 @@
 # Installation
 
-This guide covers different ways to install laser-init on your system.
+This guide covers different ways to install `laser-init` on your system.
 
 ## Prerequisites
 
-Before installing laser-init, ensure you have:
+Before installing `laser-init`, ensure you have:
 
 - **Python 3.10 or higher** - Check your version with `python3 --version`
 - **Internet connection** - Required for downloading data sources
@@ -28,7 +28,7 @@ If you don't have uv installed:
     powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
     ```
 
-### Install laser-init with uv
+### Install `laser-init` with uv
 
 ```shell
 # Clone the repository
@@ -47,7 +47,7 @@ source .venv/bin/activate  # macOS/Linux
 The `uv sync` command automatically:
 
 - Creates a virtual environment in `.venv/`
-- Installs laser-init and all dependencies
+- Installs `laser-init` and all dependencies
 - Locks dependencies for reproducibility
 
 ## Alternative Installation (pip)
@@ -71,7 +71,7 @@ pip install -e .
 
 ## Verify Installation
 
-After installation, verify that laser-init is working:
+After installation, verify that `laser-init` is working:
 
 ```shell
 # Check that the command is available
@@ -85,7 +85,7 @@ You should see the help message with available commands and options.
 
 ## Development Installation
 
-If you plan to contribute to laser-init or modify the code:
+If you plan to contribute to `laser-init` or modify the code:
 
 ```shell
 # Clone the repository
@@ -103,7 +103,7 @@ uv sync --group dev
 
 ## System Dependencies
 
-laser-init uses several Python packages that may require system-level dependencies:
+`laser-init` uses several Python packages that may require system-level dependencies:
 
 ### GDAL/Geospatial Libraries
 
@@ -132,7 +132,7 @@ If you encounter this error after installation:
 1. Ensure you're in the correct virtual environment
 2. Try reinstalling: `uv sync --refresh` or `pip install -e . --force-reinstall`
 
-### Command not found: laser-init
+### Command not found: `laser-init`
 
 If the command isn't found after installation:
 
@@ -176,7 +176,7 @@ To upgrade to the latest version:
 
 ## Uninstalling
 
-To uninstall laser-init:
+To uninstall `laser-init`:
 
 ```shell
 # If installed with pip

@@ -1,6 +1,6 @@
 # Data Sources Documentation
 
-This guide provides detailed information about the data sources supported by laser-init, including their characteristics, coverage, quality, and appropriate use cases.
+This guide provides detailed information about the data sources supported by `laser-init`, including their characteristics, coverage, quality, and appropriate use cases.
 
 ## Table of Contents
 
@@ -14,7 +14,7 @@ This guide provides detailed information about the data sources supported by las
 
 ## Overview
 
-laser-init integrates data from multiple authoritative sources to build comprehensive spatial disease models. The tool supports:
+`laser-init` integrates data from multiple authoritative sources to build comprehensive spatial disease models. The tool supports:
 
 - **3 shapefile sources** for administrative boundaries
 - **1 population raster source** (with potential for expansion)
@@ -65,7 +65,7 @@ Administrative boundaries define the spatial units (e.g., districts, provinces) 
 - Studies requiring UN-vetted boundaries
 - Multi-country analyses (single consistent source)
 
-#### Usage in laser-init
+#### Usage in `laser-init`
 
 ```shell
 # Default source (no flag needed)
@@ -122,10 +122,10 @@ laser-init SSD 2 2015 2020 --shape-source unocha
 - Smaller download footprint needed
 - API-based workflows
 
-#### Usage in laser-init
+#### Usage in `laser-init`
 
 ```shell
-laser-init BRA 3 2010 2020 --shape-source geoboundaries
+laser-init BRA 2 2010 2020 --shape-source geoboundaries
 ```
 
 #### Data Attribution
@@ -175,7 +175,7 @@ laser-init BRA 3 2010 2020 --shape-source geoboundaries
 - Fine-scale spatial resolution
 - Non-commercial academic research
 
-#### Usage in laser-init
+#### Usage in `laser-init`
 
 ```shell
 laser-init IND 3 2010 2020 --shape-source gadm
@@ -234,7 +234,7 @@ Population rasters provide gridded population counts used to estimate population
 - Fine-scale spatial resolution
 - Time series population analysis
 
-#### Usage in laser-init
+#### Usage in `laser-init`
 
 ```shell
 # Default and only option (no flag needed)
@@ -244,7 +244,7 @@ laser-init KEN 2 2010 2020
 laser-init KEN 2 2010 2020 --raster-source worldpop
 ```
 
-#### How laser-init Uses WorldPop
+#### How `laser-init` Uses WorldPop
 
 1. Downloads the 1km aggregated raster for the specified year
 2. Uses RasterToolkit to aggregate gridded population to administrative boundaries
@@ -280,7 +280,7 @@ Demographic statistics provide birth rates, death rates, age distributions, and 
 
 #### Indicators Available
 
-laser-init extracts:
+`laser-init` extracts:
 
 1. **Crude Birth Rate (CBR)**: Births per 1,000 population per year
 2. **Crude Death Rate (CDR)**: Deaths per 1,000 population per year
@@ -309,7 +309,7 @@ laser-init extracts:
 - Cross-country comparisons
 - Standardized vital dynamics
 
-#### Usage in laser-init
+#### Usage in `laser-init`
 
 ```shell
 # Default and only option (no flag needed)
@@ -319,7 +319,7 @@ laser-init TZA 2 2010 2025
 laser-init TZA 2 2010 2025 --stats-source unwpp
 ```
 
-#### How laser-init Uses UN WPP
+#### How `laser-init` Uses UN WPP
 
 1. Downloads relevant CSV files from UN WPP 2024
 2. Extracts CBR/CDR time series for the specified year range
@@ -419,7 +419,7 @@ Data sources update regularly. To get the latest data:
 # Clear cache to force re-download
 rm -rf ~/.laser/cache/
 
-# Re-run laser-init
+# Re-run `laser-init`
 laser-init KEN 2 2010 2020
 ```
 
@@ -466,16 +466,17 @@ Potential future data source additions:
 
 - [QGIS](https://qgis.org/) - GIS software for viewing/editing spatial data
 - [GeoPandas](https://geopandas.org/) - Python library for geospatial analysis
-- [RasterToolkit](https://github.com/InstituteforDiseaseModeling/RasterToolkit) - Population aggregation tool used by laser-init
+- [RasterToolkit](https://github.com/InstituteforDiseaseModeling/RasterToolkit) - Population aggregation tool used by `laser-init`
 
 ## Getting Help
 
 For data source questions:
 - Check original source documentation
-- Post in GitHub Issues for laser-init-specific questions
+- Post in GitHub Issues for `laser-init`-specific questions
 - Contact data providers directly for data quality issues
 
 ---
 
 **Last Updated**: March 2026
-**Data Source Versions**: UNOCHA (latest), geoBoundaries v5.0, GADM v4.1, WorldPop 2020, UN WPP 2024
+
+**Data Source Versions**: UNOCHA (latest), geoBoundaries v6.0, GADM v4.1, WorldPop 2025A, UN WPP 2024

@@ -1,6 +1,6 @@
 # Configuration Guide
 
-This guide covers all configuration options for laser-init, including global settings, run-time options, and model parameters.
+This guide covers all configuration options for `laser-init`, including global settings, run-time options, and model parameters.
 
 ## Table of Contents
 
@@ -12,7 +12,7 @@ This guide covers all configuration options for laser-init, including global set
 
 ## Global Configuration
 
-laser-init looks for a global configuration file in the following locations (in order):
+`laser-init` looks for a global configuration file in the following locations (in order):
 
 1. `./laser_config.yaml` (current working directory)
 2. `./laser_config.json` (current working directory)
@@ -75,11 +75,11 @@ export OPENAI_API_KEY="sk-your-key-here"
 export ANTHROPIC_API_KEY="sk-ant-your-key-here"
 ```
 
-laser-init will use these environment variables if no config file is found.
+`laser-init` will use these environment variables if no config file is found.
 
 ## Run Configuration
 
-Each time you run laser-init, it generates a `config.yaml` file in the output directory. This file contains:
+Each time you run `laser-init`, it generates a `config.yaml` file in the output directory. This file contains:
 
 1. References to the generated data files
 2. Model parameters for the simulation
@@ -170,14 +170,14 @@ The model automatically calculates:
 
 ### Understanding R0 and Beta
 
-- **R0 (Basic Reproduction Number)**: Average number of secondary infections caused by one infectious individual in a fully susceptible population
-  - R0 < 1: Outbreak dies out
-  - R0 = 1: Endemic equilibrium
-  - R0 > 1: Epidemic growth
+- **R<sub>0</sub> (Basic Reproduction Number)**: Average number of secondary infections caused by one infectious individual in a fully susceptible population
+  - R<sub>0</sub> < 1: Outbreak dies out
+  - R<sub>0</sub> = 1: Endemic equilibrium
+  - R<sub>0</sub> > 1: Epidemic growth
 
 - **Beta (Transmission Rate)**: Per-contact probability of infection
   - Automatically calculated: `beta = r0 / infectious_duration_mean`
-  - Example: R0=2.5, duration=7 days → beta ≈ 0.357
+  - Example: R<sub>0</sub> = 2.5, duration = 7 days → beta ≈ 0.357
 
 ### Naive Population Setting
 
@@ -225,11 +225,11 @@ See [datasources.md](datasources.md) for detailed comparison.
 
 ## API Keys for Country Name Resolution
 
-laser-init includes three levels of country name matching:
+`laser-init` includes three levels of country name matching:
 
 1. **Exact match**: ISO-3 codes and official names (always enabled)
 2. **Fuzzy match**: Common misspellings and variants (always enabled)
-3. **LLM-enhanced match**: AI-powered resolution (requires API key) (not yet implemented)
+3. **LLM-enhanced match**: AI-powered resolution (requires API key) **_(not yet implemented)_**
 
 ### Why Use LLM-Enhanced Matching?
 
@@ -268,20 +268,21 @@ export ANTHROPIC_API_KEY="sk-ant-your-key-here"
 ### LLM Behavior
 
 - **Precedence**: If both keys are provided, OpenAI is tried first, then Anthropic
-- **Fallback**: If no API key works, laser-init falls back to exact/fuzzy matching
+- **Fallback**: If no API key works, `laser-init` falls back to exact/fuzzy matching
 - **Privacy**: Country query is sent to the API; no other data is transmitted
 - **Performance**: Adds ~1-3 seconds to the initial country lookup
 
 ### When LLM Matching is NOT Used
 
 LLM matching is skipped if:
+
 1. Exact match found (ISO-3 code or official name)
 2. Fuzzy match has high confidence (>90% similarity)
 3. No API keys configured
 
 ### Testing Country Name Resolution
 
-You can test country name matching without running a full laser-init command:
+You can test country name matching without running a full `laser-init` command:
 
 ```python
 from laser.init.utils import iso_from_country_string
@@ -298,7 +299,7 @@ print(iso_from_country_string("Land of the Rising Sun"))  # Output: JPN (with LL
 
 ## Cache Management
 
-laser-init caches downloaded data to speed up subsequent runs:
+`laser-init` caches downloaded data to speed up subsequent runs:
 
 ### Cache Location
 
@@ -410,9 +411,10 @@ for name, params in scenarios.items():
 
 ### Config File Not Found
 
-**Error**: laser-init ignores config file
+**Error**: `laser-init` ignores config file
 
 **Causes**:
+
 - Wrong file location
 - Syntax errors in YAML/JSON
 - Wrong file extension
@@ -434,6 +436,7 @@ python3 -c "import json; json.load(open('laser_config.json'))"
 **Error**: Validation errors when loading config
 
 **Solutions**:
+
 - Check spelling of data source names (case-insensitive but must match)
 - Ensure API keys are valid strings
 - Verify YAML/JSON syntax
@@ -443,6 +446,7 @@ python3 -c "import json; json.load(open('laser_config.json'))"
 **Error**: FileNotFoundError when running model
 
 **Causes**:
+
 - Relative paths in config.yaml
 - Moved data files
 - Wrong data-dir setting

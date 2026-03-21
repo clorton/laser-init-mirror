@@ -1,10 +1,10 @@
-# laser-init
+# `laser-init`
 
 **laser-init** prepares geospatial, population, and demographic data for epidemiological modeling with [LASER](https://github.com/laser-base/laser-generic). It downloads administrative boundary shapefiles, population raster data, and demographic statistics, then generates a ready-to-run spatial disease model.
 
 ## Overview
 
-laser-init is a command-line tool that bootstraps spatial epidemiological modeling by automating the process of:
+`laser-init` is a command-line tool that bootstraps spatial epidemiological modeling by automating the process of:
 
 1. Downloading administrative boundary shapefiles from multiple sources
 2. Acquiring population raster data
@@ -46,9 +46,9 @@ This creates a complete modeling environment in `NGA/2000/` with:
 
 ## Getting Started
 
-New to laser-init? Follow these guides:
+New to `laser-init`? Follow these guides:
 
-- [Installation](installation.md) - Install laser-init on your system
+- [Installation](installation.md) - Install `laser-init` on your system
 - [Quick Start](quickstart.md) - Run your first model in minutes
 - [User Guide](userguide.md) - Comprehensive usage tutorial
 
@@ -64,7 +64,7 @@ New to laser-init? Follow these guides:
 
 ## Use Cases
 
-laser-init is ideal for:
+`laser-init` is ideal for:
 
 - **Rapid prototyping**: Quickly set up spatial disease models for any country
 - **Scenario analysis**: Generate models for different administrative levels and time periods

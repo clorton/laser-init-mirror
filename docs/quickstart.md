@@ -1,12 +1,12 @@
 # Quick Start
 
-Get started with laser-init in minutes. This guide walks you through generating your first spatial disease model.
+Get started with `laser-init` in minutes. This guide walks you through generating your first spatial disease model.
 
 ## Your First Model
 
 Let's create a model for Nigeria at administrative level 2 for years 2000-2025.
 
-### Step 1: Run laser-init
+### Step 1: Run `laser-init`
 
 ```shell
 laser-init NGA 2 2000 2025
@@ -21,7 +21,7 @@ This command:
 
 ### Step 2: Wait for Data Download
 
-laser-init will:
+`laser-init` will:
 
 1. Download administrative boundaries from UNOCHA
 2. Download population raster data from WorldPop
@@ -239,7 +239,7 @@ If processing fails with memory errors:
 
 If `python3 ./seir.py` fails:
 
-- Ensure you're in the environment where laser-init is installed
+- Ensure you're in the environment where `laser-init` is installed
 - Check that `laser.generic` is installed: `pip list | grep laser`
 - Try: `uv pip install laser.generic`
 

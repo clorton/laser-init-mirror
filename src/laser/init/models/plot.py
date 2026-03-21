@@ -320,6 +320,8 @@ def individual_incidence(model: Model, output_dir: Path | None) -> plt.Figure:
 
     # Get the indices of the top N nodes
     top_nodes = np.argsort(total_incidence)[-top_n:]
+    # Reverse node indices so that the node with the highest cases is plotted first
+    top_nodes = top_nodes[::-1]
 
     # Create the plot
     fig, ax = plt.subplots(figsize=(12, 8))

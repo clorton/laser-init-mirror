@@ -1,6 +1,6 @@
 # CLI Module
 
-Command-line interface for laser-init.
+Command-line interface for `laser-init`.
 
 ::: laser.init.cli
     options:

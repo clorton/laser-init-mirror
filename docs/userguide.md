@@ -1,6 +1,6 @@
-# laser-init User Guide
+# `laser-init` User Guide
 
-A comprehensive guide to using laser-init to bootstrap spatial epidemiological modeling with LASER.
+A comprehensive guide to using `laser-init` to bootstrap spatial epidemiological modeling with LASER.
 
 ## Table of Contents
 
@@ -27,6 +27,7 @@ laser-init KEN 2 2010 2020
 ```
 
 This command will:
+
 1. Download administrative boundary shapefiles for Kenya
 2. Download population raster data for 2010
 3. Aggregate population to district boundaries
@@ -38,7 +39,7 @@ This command will:
 
 ### What You'll See
 
-During execution, laser-init displays progress information:
+During execution, `laser-init` displays progress information:
 
 ```text
 Starting laser-init CLI
@@ -81,7 +82,7 @@ PDF report written to <user>/KEN/2000/report.pdf
 
 ### Running Your First Simulation
 
-After laser-init completes:
+After `laser-init` completes:
 
 ```shell
 cd KEN/2010
@@ -92,7 +93,7 @@ The simulation will run and generate output plots showing disease spread across 
 
 ## Understanding the Workflow
 
-### The laser-init Pipeline
+### The `laser-init` Pipeline
 
 ```
 ┌─────────────────┐
@@ -187,6 +188,7 @@ print(f"Columns: {gdf.columns.tolist()}")
 ```
 
 **Expected columns**:
+
 - `nodeid`: Unique integer identifier for each administrative unit (0, 1, 2, ...)
 - `name`: Name of the administrative unit
 - `population`: Population count for the administrative unit
@@ -199,7 +201,7 @@ print(f"Columns: {gdf.columns.tolist()}")
 Population by age group for the start year:
 
 ```csv
-AgeGroupStart,PopTotal
+AgeGrpStart,PopTotal
 0,9313.250
 5,7315.490
 ...
@@ -397,7 +399,7 @@ echo "Parameter sweep complete!"
 
 ### Workflow 6: Integration with Custom Analysis
 
-Use laser-init data in custom scripts:
+Use `laser-init` data in custom scripts:
 
 ```python
 import geopandas as gpd
@@ -405,13 +407,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from pathlib import Path
 
-# Load laser-init outputs
+# Load `laser-init` outputs
 data_dir = Path("KEN/2010")
 gdf = gpd.read_file(data_dir / "KEN_admin2.gpkg")
 cbr_cdr = pd.read_csv(data_dir / "cxr.csv")
 
 # Custom analysis: Calculate population density
-gdf["area_km2"] = gdf.geometry.area / 1e6  # Convert to km�
+gdf["area_km2"] = gdf.geometry.area / 1e6  # Convert to km^2
 gdf["density"] = gdf.population / gdf.area_km2
 
 # Custom visualization
@@ -653,8 +655,8 @@ plt.savefig("custom_attack_rate.png", dpi=300, bbox_inches="tight")
 - [Configuration Guide](configuration.md) - Detailed configuration options
 - [Data Sources](datasources.md) - In-depth data source comparison
 - [Models](models.md) - Epidemiological model theory and implementation
-- [Architecture](architecture.md) - Developer documentation for extending laser-init
-- [Contributing](contributing.md) - Contribute improvements to laser-init
+- [Architecture](architecture.md) - Developer documentation for extending `laser-init`
+- [Contributing](contributing.md) - Contribute improvements to `laser-init`
 
 ## Additional Resources
 

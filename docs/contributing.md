@@ -1,6 +1,6 @@
-# Contributing to laser-init
+# Contributing to `laser-init`
 
-Thank you for your interest in contributing to laser-init! This guide will help you get started.
+Thank you for your interest in contributing to `laser-init`! This guide will help you get started.
 
 ## Table of Contents
 
@@ -146,7 +146,7 @@ Then create a pull request on GitHub.
 
 ## Code Style
 
-laser-init follows the conventions in [CLAUDE.md](https://github.com/laser-base/laser-init/blob/main/CLAUDE.md).
+`laser-init` follows the conventions in [CLAUDE.md](https://github.com/laser-base/laser-init/blob/main/CLAUDE.md).
 
 ### General Conventions
 
@@ -241,7 +241,7 @@ def test_iso_from_country_string_exact_match():
 
 ### Test Coverage
 
-Aim for >80% code coverage. Check with:
+Aim for >90% code coverage. Check with:
 
 ```shell
 pytest --cov=laser.init --cov-report=term-missing
@@ -497,11 +497,12 @@ pytest -s tests/test_file.py
 ## Recognition
 
 Contributors will be recognized in:
+
 - CHANGELOG.md (per contribution)
 - README.md contributors section (after multiple contributions)
 - GitHub contributors page
 
-Thank you for contributing to laser-init!
+Thank you for contributing to `laser-init`!
 
 ---
 

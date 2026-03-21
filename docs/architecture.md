@@ -1,6 +1,6 @@
 # Architecture Documentation
 
-Developer documentation for the laser-init codebase.
+Developer documentation for the `laser-init` codebase.
 
 ## Table of Contents
 
@@ -13,7 +13,7 @@ Developer documentation for the laser-init codebase.
 
 ## Overview
 
-laser-init follows an Extract-Transform-Load (ETL) pipeline architecture:
+`laser-init` follows an Extract-Transform-Load (ETL) pipeline architecture:
 
 ```
 Extract → Transform → Load
@@ -23,6 +23,7 @@ Extract → Transform → Load
 ```
 
 **Design Principles**:
+
 - **Modularity**: Extractors, transformers, and loaders are independent
 - **Extensibility**: Easy to add new data sources
 - Human-readable output
@@ -89,12 +90,14 @@ class DataExtractor:
 ```
 
 **Responsibilities**:
+
 - Download from URL or API
 - Cache locally (usually in `~/.laser/cache/`)
 - Update provenance metadata
 - Return path to downloaded file
 
 **Current Extractors**:
+
 - `GadmExtractor`: Downloads GADM GeoPackage files
 - `GeoBoundariesExtractor`: Downloads geoBoundaries shapefiles
 - `UnochaExtractor`: Downloads UNOCHA global geodatabase
@@ -122,6 +125,7 @@ class DataTransformer:
 ```
 
 **Responsibilities**:
+
 - Load extracted data
 - Filter/subset for specified country and level
 - Aggregate population (for shapefile transformers)
@@ -130,6 +134,7 @@ class DataTransformer:
 - Return file path(s) of transformed data
 
 **Current Transformers**:
+
 - `GadmTransformer`: Processes GADM data + aggregates WorldPop
 - `GeoBoundariesTransformer`: Processes geoBoundaries + aggregates WorldPop
 - `UnochaTransformer`: Processes UNOCHA + aggregates WorldPop
@@ -156,11 +161,13 @@ class ModelLoader:
 ```
 
 **Responsibilities**:
+
 - Copy model template to output directory
 - Generate `config.yaml` with paths and parameters
 - Copy `plot.py` utilities
 
 **Current Loaders**:
+
 - `AbmLoader`: Generates agent-based model scripts (SI/SIR/SEIR)
 - `MpmLoader`: Generates metapopulation model scripts (future feature)
 
@@ -169,6 +176,7 @@ class ModelLoader:
 **File**: `cli.py`
 
 **Responsibilities**:
+
 - Parse command-line arguments
 - Validate inputs (country codes, levels, years)
 - Orchestrate pipeline: Extract → Transform → Load
@@ -176,6 +184,7 @@ class ModelLoader:
 - Create PDF report
 
 **Key Functions**:
+
 - `cli()`: Main entry point (Click command)
 - `validate_arguments()`: Input validation
 - `download_shape_data()`: Coordinate shapefile extraction
@@ -190,6 +199,7 @@ class ModelLoader:
 **File**: `utils.py`
 
 **Key Functions**:
+
 - `iso_from_country_string()`: Convert country name to ISO-3 code (exact, fuzzy, or LLM-based)
 - `level_from_string()`: Parse administrative level
 - `download_file()`: HTTP download with caching and provenance
@@ -250,46 +260,53 @@ class ModelLoader:
 
 ### Detailed Pipeline
 
-1. **Input Validation** (`cli.py:validate_arguments`)
-   - Convert country string to ISO-3 code
-   - Parse level to integer
-   - Validate year range
-   - Determine output directory
+#### **Input Validation** (`cli.py:validate_arguments`)
 
-2. **Shape Data Extraction** (`cli.py:download_shape_data`)
-   - Select extractor based on `--shape-source`
-   - Call `extractor.extract(iso_code, level, year)`
-   - Returns path to cached shapefile
+- Convert country string to ISO-3 code
+- Parse level to integer
+- Validate year range
+- Determine output directory
 
-3. **Raster Data Extraction** (`cli.py:download_raster_data`)
-   - Select extractor based on `--raster-source`
-   - Call `extractor.extract(iso_code, level, year)`
-   - Returns path to cached raster
+#### **Shape Data Extraction** (`cli.py:download_shape_data`)
 
-4. **Demographics Extraction** (`cli.py:download_demographic_stats`)
-   - Select extractor based on `--stats-source`
-   - Call `extractor.extract(iso_code, start_year, end_year)`
-   - Returns paths to cached CSV files
+- Select extractor based on `--shape-source`
+- Call `extractor.extract(iso_code, level, year)`
+- Returns path to cached shapefile
 
-5. **Transformation** (`cli.py:transform_shape_and_raster_data`)
-   - Load shapefile and raster
-   - Filter to specified country and level
-   - Aggregate population using RasterToolkit
-   - Transform demographics
-   - Write GeoPackage and CSV files to output directory
+#### **Raster Data Extraction** (`cli.py:download_raster_data`)
 
-6. **Model Generation** (`cli.py:emit_model_script`)
-   - Select loader based on `--mode` and `--model`
-   - Generate model script (si.py, sir.py, or seir.py)
-   - Generate config.yaml
-   - Copy plot.py
+- Select extractor based on `--raster-source`
+- Call `extractor.extract(iso_code, level, year)`
+- Returns path to cached raster
 
-7. **Validation** (`cli.py:write_plots`)
-   - Generate choropleth map
-   - Plot age distribution
-   - Plot birth/death rates
-   - Plot life expectancy
-   - Combine into PDF report
+#### **Demographics Extraction** (`cli.py:download_demographic_stats`)
+
+- Select extractor based on `--stats-source`
+- Call `extractor.extract(iso_code, start_year, end_year)`
+- Returns paths to cached CSV files
+
+#### **Transformation** (`cli.py:transform_shape_and_raster_data`)
+
+- Load shapefile and raster
+- Filter to specified country and level
+- Aggregate population using RasterToolkit
+- Transform demographics
+- Write GeoPackage and CSV files to output directory
+
+#### **Model Generation** (`cli.py:emit_model_script`)
+
+- Select loader based on `--mode` and `--model`
+- Generate model script (si.py, sir.py, or seir.py)
+- Generate config.yaml
+- Copy plot.py
+
+#### **Validation** (`cli.py:write_plots`)
+
+- Generate choropleth map
+- Plot age distribution
+- Plot birth/death rates
+- Plot life expectancy
+- Combine into PDF report
 
 ## Extension Points
 
@@ -437,7 +454,7 @@ See [Contributing Guide](contributing.md) for detailed workflow.
 
 ### Why Not Use Existing GIS Tools?
 
-laser-init **does** use existing tools (GeoPandas, RasterToolkit), but provides:
+`laser-init` **does** use existing tools (GeoPandas, RasterToolkit), but provides:
 - Disease modeling focus (not general GIS)
 - Opinionated workflow for epidemiologists
 - Integrated demographics (not just spatial data)
