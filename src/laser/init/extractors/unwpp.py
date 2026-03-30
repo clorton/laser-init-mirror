@@ -28,6 +28,7 @@ Standard Projections (Estimates and Projection scenarios) / CSV format : https:/
 from pathlib import Path
 
 from ..config import configuration as config
+from ..config import default_cache_directory
 from ..utils import download_file, error, inform
 
 
@@ -84,7 +85,7 @@ class UnwppExtractor:
         # UNWPP data is provided as large CSV files covering all countries, so we download the relevant
         # files and then filter them locally (in the transformer) for the specified country and year range.
 
-        cache_root = Path(config.get("cache_dir", Path.cwd()))
+        cache_root = Path(config.get("cache_dir", default_cache_directory))
         unwpp_path = Path("UNWPP")
         (cache_root / unwpp_path).mkdir(parents=True, exist_ok=True)
 

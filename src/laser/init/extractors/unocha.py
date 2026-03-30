@@ -7,6 +7,7 @@ https://data.humdata.org/dataset/70f1cb54-a30c-43b2-a751-44e77d8f5ade/resource/7
 from pathlib import Path
 
 from ..config import configuration as config
+from ..config import default_cache_directory
 from ..utils import download_file, error, inform
 
 
@@ -47,7 +48,7 @@ class UnochaExtractor:
             RuntimeError: If the download fails.
         """
 
-        cache_root = Path(config.get("cache_dir", Path.cwd()))
+        cache_root = Path(config.get("cache_dir", default_cache_directory))
         unocha_path: Path = Path("UNOCHA")
         (cache_root / unocha_path).mkdir(parents=True, exist_ok=True)
 

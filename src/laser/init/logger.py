@@ -95,6 +95,7 @@ from datetime import datetime
 from pathlib import Path
 
 from .config import configuration as config
+from .config import default_log_directory
 
 __all__ = ["logger"]
 
@@ -109,7 +110,7 @@ console_handler.setFormatter(console_format)
 logger.addHandler(console_handler)
 
 # File handler (all logs, timestamped file)
-log_dir = Path(config.get("log_dir", Path("~").expanduser() / ".laser" / "logs"))
+log_dir = Path(config.get("log_dir", default_log_directory))
 log_dir.mkdir(parents=True, exist_ok=True)
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 log_file = log_dir / f"laser-init_{timestamp}.log"
