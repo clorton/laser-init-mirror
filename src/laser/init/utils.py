@@ -22,6 +22,7 @@ import requests
 from tqdm import tqdm
 
 from .config import configuration as config
+from .config import default_cache_directory
 from .french_iso import french_mapping as __french_mapping__
 from .logger import logger
 
@@ -294,7 +295,7 @@ def update_local_provenance(output_dir: Path, output_filename: Path, *files: lis
     Returns:
         None
     """
-    cache_root = Path(config.get("cache_dir", Path("~").expanduser() / ".laser" / "cache"))
+    cache_root = Path(config.get("cache_dir", default_cache_directory))
     provenance_file = cache_root / "provenance.json"
     sources = json.loads(provenance_file.read_text())
     provenance_local = output_dir / "provenance.json"

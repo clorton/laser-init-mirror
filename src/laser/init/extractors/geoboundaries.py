@@ -7,6 +7,7 @@ E.g., https://github.com/wmgeolab/geoBoundaries/raw/refs/heads/main/releaseData/
 from pathlib import Path
 
 from ..config import configuration as config
+from ..config import default_cache_directory
 from ..utils import download_file, error, inform
 
 
@@ -51,7 +52,7 @@ class GeoBoundariesExtractor:
 
         # Sample: https://github.com/wmgeolab/geoBoundaries/raw/refs/tags/v6.0.0/releaseData/gbOpen/MCO/ADM1/geoBoundaries-MCO-ADM1-all.zip
 
-        cache_root = Path(config.get("cache_dir", Path.cwd()))
+        cache_root = Path(config.get("cache_dir", default_cache_directory))
         geoboundaries_path = Path("geoBoundaries") / country
         (cache_root / geoboundaries_path).mkdir(parents=True, exist_ok=True)
 

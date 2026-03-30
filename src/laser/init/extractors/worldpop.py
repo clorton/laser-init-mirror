@@ -25,6 +25,7 @@ Nigeria 2010: https://data.worldpop.org/GIS/Population/Global_2000_2020_1km_UNad
 from pathlib import Path
 
 from ..config import configuration as config
+from ..config import default_cache_directory
 from ..utils import download_file, error, inform
 
 
@@ -71,7 +72,7 @@ class WorldPopExtractor:
 
         local_path = None
 
-        cache_root = Path(config.get("cache_dir", Path.cwd()))
+        cache_root = Path(config.get("cache_dir", default_cache_directory))
         worldpop_path: Path = Path("WorldPop")
         (cache_root / worldpop_path).mkdir(parents=True, exist_ok=True)
 

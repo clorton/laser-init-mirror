@@ -105,21 +105,41 @@ import yaml
 
 from laser.init import __version__
 
-__all__ = ["VERSION", "configuration"]
+__all__ = ["VERSION", "configuration", "default_cache_directory", "default_log_directory"]
 
 VERSION = __version__
 
+default_cache_directory = Path.home() / ".laser" / "cache"
+default_log_directory = Path.home() / ".laser" / "logs"
+
 configuration = {}
 
-# look for laser_config.[yaml,json]
-# prefer the current working directory
-# then look in the user's home directory / .laser
-for path in [
+candidates = [
     Path.cwd() / "laser_config.yaml",
     Path.cwd() / "laser_config.json",
     Path.home() / ".laser" / "laser_config.yaml",
     Path.home() / ".laser" / "laser_config.json",
-]:
+]
+
+# set some defaults:
+if not any(path.is_file() for path in candidates):
+    default_config = Path.home() / ".laser" / "laser_config.yaml"
+    warnings.warn(f"Did not find a laser configuration file. Writing defaults to '{default_config}'.", stacklevel=2)
+    default_config.parent.mkdir(exist_ok=True, parents=True)
+    default_config.write_text(yaml.dump({
+        "cache_dir": str(default_cache_directory),
+        "log_dir": str(default_log_directory),
+        "shape_source": "unocha",
+        "raster_source": "worldpop",
+        "stats_source": "unwpp",
+        # "openai_api_key": "sk-your-key-here",
+        # "anthropic_api_key": "sk-ant-your-key-here",
+    }))
+
+# look for laser_config.[yaml,json]
+# prefer the current working directory
+# then look in the user's home directory / .laser
+for path in candidates:
     if path.is_file():
         if path.suffix.lower() == ".yaml":
             try:
