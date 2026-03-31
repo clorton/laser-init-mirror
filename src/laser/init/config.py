@@ -122,11 +122,29 @@ candidates = [
 ]
 
 # set some defaults:
-if not any(path.is_file() for path in candidates):
-    default_config = Path.home() / ".laser" / "laser_config.yaml"
-    warnings.warn(f"Did not find a laser configuration file. Writing defaults to '{default_config}'.", stacklevel=2)
-    default_config.parent.mkdir(exist_ok=True, parents=True)
-    default_config.write_text(yaml.dump({
+if any(path.is_file() for path in candidates):
+    # look for laser_config.[yaml,json]
+    # prefer the current working directory
+    # then look in the user's home directory / .laser
+    for path in candidates:
+        if path.is_file():
+            if path.suffix.lower() == ".yaml":
+                try:
+                    configuration = yaml.safe_load(path.read_text())
+                except yaml.YAMLError as e:
+                    warnings.warn(f"Error parsing YAML configuration file {path}: {e}", stacklevel=2)
+                    configuration = {}
+                break
+            elif path.suffix.lower() == ".json":
+                try:
+                    configuration = json.loads(path.read_text())
+                except json.JSONDecodeError as e:
+                    warnings.warn(f"Error parsing JSON configuration file {path}: {e}", stacklevel=2)
+                    configuration = {}
+                break
+else:
+    warnings.warn("Did not find a laser configuration file. Using default.", stacklevel=2)
+    configuration = {
         "cache_dir": str(default_cache_directory),
         "log_dir": str(default_log_directory),
         "shape_source": "unocha",
@@ -134,24 +152,4 @@ if not any(path.is_file() for path in candidates):
         "stats_source": "unwpp",
         # "openai_api_key": "sk-your-key-here",
         # "anthropic_api_key": "sk-ant-your-key-here",
-    }))
-
-# look for laser_config.[yaml,json]
-# prefer the current working directory
-# then look in the user's home directory / .laser
-for path in candidates:
-    if path.is_file():
-        if path.suffix.lower() == ".yaml":
-            try:
-                configuration = yaml.safe_load(path.read_text())
-            except yaml.YAMLError as e:
-                warnings.warn(f"Error parsing YAML configuration file {path}: {e}", stacklevel=2)
-                configuration = {}
-            break
-        elif path.suffix.lower() == ".json":
-            try:
-                configuration = json.loads(path.read_text())
-            except json.JSONDecodeError as e:
-                warnings.warn(f"Error parsing JSON configuration file {path}: {e}", stacklevel=2)
-                configuration = {}
-            break
+    }
